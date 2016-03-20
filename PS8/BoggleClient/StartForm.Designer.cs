@@ -33,13 +33,14 @@
             this.playerNameLabel = new System.Windows.Forms.Label();
             this.durationLabel = new System.Windows.Forms.Label();
             this.playerNameBox = new System.Windows.Forms.TextBox();
-            this.durationBox = new System.Windows.Forms.TextBox();
             this.startOkButton = new System.Windows.Forms.Button();
             this.startCancelButton = new System.Windows.Forms.Button();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuStrip1.SuspendLayout();
+            this.durationUpDown = new System.Windows.Forms.NumericUpDown();
+            this.menuStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.durationUpDown)).BeginInit();
             this.SuspendLayout();
             // 
             // urlLabel
@@ -87,13 +88,6 @@
             this.playerNameBox.Size = new System.Drawing.Size(100, 20);
             this.playerNameBox.TabIndex = 2;
             // 
-            // durationBox
-            // 
-            this.durationBox.Location = new System.Drawing.Point(148, 71);
-            this.durationBox.Name = "durationBox";
-            this.durationBox.Size = new System.Drawing.Size(44, 20);
-            this.durationBox.TabIndex = 3;
-            // 
             // startOkButton
             // 
             this.startOkButton.Location = new System.Drawing.Point(374, 99);
@@ -102,6 +96,7 @@
             this.startOkButton.TabIndex = 4;
             this.startOkButton.Text = "OK";
             this.startOkButton.UseVisualStyleBackColor = true;
+            this.startOkButton.Click += new System.EventHandler(this.startOkButton_Click);
             // 
             // startCancelButton
             // 
@@ -111,16 +106,16 @@
             this.startCancelButton.TabIndex = 5;
             this.startCancelButton.Text = "Cancel";
             this.startCancelButton.UseVisualStyleBackColor = true;
+            this.startCancelButton.Click += new System.EventHandler(this.startCancelButton_Click);
             // 
-            // menuStrip1
+            // menuStrip
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.helpToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(542, 24);
-            this.menuStrip1.TabIndex = 8;
-            this.menuStrip1.Text = "menuStrip1";
+            this.menuStrip.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip.Name = "menuStrip";
+            this.menuStrip.Size = new System.Drawing.Size(542, 24);
+            this.menuStrip.TabIndex = 8;
             // 
             // helpToolStripMenuItem
             // 
@@ -136,25 +131,48 @@
             this.contentsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.contentsToolStripMenuItem.Text = "Contents";
             // 
+            // durationUpDown
+            // 
+            this.durationUpDown.Location = new System.Drawing.Point(148, 71);
+            this.durationUpDown.Maximum = new decimal(new int[] {
+            999,
+            0,
+            0,
+            0});
+            this.durationUpDown.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.durationUpDown.Name = "durationUpDown";
+            this.durationUpDown.Size = new System.Drawing.Size(41, 20);
+            this.durationUpDown.TabIndex = 9;
+            this.durationUpDown.Value = new decimal(new int[] {
+            60,
+            0,
+            0,
+            0});
+            // 
             // StartForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(542, 134);
+            this.Controls.Add(this.durationUpDown);
             this.Controls.Add(this.startCancelButton);
             this.Controls.Add(this.startOkButton);
-            this.Controls.Add(this.durationBox);
             this.Controls.Add(this.playerNameBox);
             this.Controls.Add(this.durationLabel);
             this.Controls.Add(this.playerNameLabel);
             this.Controls.Add(this.serverUrlBox);
             this.Controls.Add(this.urlLabel);
-            this.Controls.Add(this.menuStrip1);
-            this.MainMenuStrip = this.menuStrip1;
+            this.Controls.Add(this.menuStrip);
+            this.MainMenuStrip = this.menuStrip;
             this.Name = "StartForm";
             this.Text = "Start Game";
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
+            this.menuStrip.ResumeLayout(false);
+            this.menuStrip.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.durationUpDown)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -167,11 +185,11 @@
         private System.Windows.Forms.Label playerNameLabel;
         private System.Windows.Forms.Label durationLabel;
         private System.Windows.Forms.TextBox playerNameBox;
-        private System.Windows.Forms.TextBox durationBox;
         private System.Windows.Forms.Button startOkButton;
         private System.Windows.Forms.Button startCancelButton;
-        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem contentsToolStripMenuItem;
+        private System.Windows.Forms.NumericUpDown durationUpDown;
     }
 }

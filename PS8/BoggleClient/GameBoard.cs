@@ -16,5 +16,15 @@ namespace BoggleClient
         {
             InitializeComponent();
         }
+
+        private void gameEnterButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void gameExitButton_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -247,18 +247,20 @@
             this.gameEnterButton.Location = new System.Drawing.Point(302, 232);
             this.gameEnterButton.Name = "gameEnterButton";
             this.gameEnterButton.Size = new System.Drawing.Size(75, 23);
-            this.gameEnterButton.TabIndex = 17;
+            this.gameEnterButton.TabIndex = 1;
             this.gameEnterButton.Text = "Enter";
             this.gameEnterButton.UseVisualStyleBackColor = true;
+            this.gameEnterButton.Click += new System.EventHandler(this.gameEnterButton_Click);
             // 
             // gameExitButton
             // 
             this.gameExitButton.Location = new System.Drawing.Point(502, 232);
             this.gameExitButton.Name = "gameExitButton";
             this.gameExitButton.Size = new System.Drawing.Size(75, 23);
-            this.gameExitButton.TabIndex = 18;
+            this.gameExitButton.TabIndex = 2;
             this.gameExitButton.Text = "Exit Game";
             this.gameExitButton.UseVisualStyleBackColor = true;
+            this.gameExitButton.Click += new System.EventHandler(this.gameExitButton_Click);
             // 
             // label15
             // 

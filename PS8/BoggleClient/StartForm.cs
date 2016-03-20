@@ -16,5 +16,15 @@ namespace BoggleClient
         {
             InitializeComponent();
         }
+
+        private void startOkButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void startCancelButton_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
