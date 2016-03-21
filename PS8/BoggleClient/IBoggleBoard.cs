@@ -8,14 +8,20 @@ namespace BoggleClient
 {
     interface IBoggleBoard
     {
-        // Event is fired when enter button is pressed.
+        /// <summary>
+        /// Event is fired when enter button is pressed.
+        /// </summary>
         event Action<string> PlayWordEvent;
 
-        // Event is fired if the exit game button is pressed.
+        /// <summary>
+        /// Event is fired if the exit game button is pressed.
+        /// </summary>
         event Action ExitGameEvent;
 
-        // Event is fired when we start a new game.
-        event Action<string, string, string> JoinGameEvent;
+        /// <summary>
+        /// Event is fired when we start a new game.
+        /// </summary>
+        event Action<string, string, int> JoinGameEvent;
 
         string BoggleServerURL { get; set;}
 
@@ -37,7 +43,7 @@ namespace BoggleClient
         /// <summary>
         /// Represents player 2's score. Associated with Player2Score text label on the GameBoard.
         /// </summary>
-        string Player2Score { get; }       
+        string Player2Score { get; set; }       
 
     } 
 }
