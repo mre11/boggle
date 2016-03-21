@@ -58,6 +58,15 @@ namespace BoggleClient
         }
 
         /// <summary>
+        /// Displays an error message if we could not connect to the boggle server or 
+        /// the url was incorrect. 
+        /// </summary>
+        public void DisplayErrorMessage()
+        {
+            MessageBox.Show("Invalid Boggle server url.", "Error" ,MessageBoxButtons.OKCancel);
+        }
+
+        /// <summary>
         /// Fired when the OK button is clicked.
         /// </summary>
         private void startOkButton_Click(object sender, EventArgs e)

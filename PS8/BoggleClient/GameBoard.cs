@@ -77,6 +77,14 @@ namespace BoggleClient
         }
 
         /// <summary>
+        /// Opens the GameBoard UI.
+        /// </summary>
+        public void OpenWindow()
+        {
+            this.Show();
+        }
+
+        /// <summary>
         /// When the enter button is clicked, the wordBox text value is sent
         /// through a delegate to the controller. The controller will then handle 
         /// the event accordingly.

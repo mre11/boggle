@@ -53,12 +53,22 @@ namespace BoggleClient
             serverUrl = startWindow.ServerUrl;
             playerName = startWindow.PlayerName;
             requestedDuration = startWindow.RequestedDuration;
+
+            // Try connecting to the boggle server.
+
+            // TODO: If successful, close start form and open gameboard window.
+            startWindow.Close();
+
+            // TODO: need to figure out why gameWindow is not displaying.
+            gameWindow.OpenWindow();
+            // Else, Display msgbox telling the user they've entered the wrong Boggle Server.
+            startWindow.DisplayErrorMessage();
         }
 
         private void CancelGameSearch()
         {
-            int u = 7;
-            throw new NotImplementedException();
+            // TODO: I think we need to some how implement this Asyn.
+            startWindow.Close();
         }
 
         private void PlayWord(string word)

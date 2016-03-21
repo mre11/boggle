@@ -44,5 +44,10 @@ namespace BoggleClient
         /// Closes this IBoggleBoard window.
         /// </summary>
         void CloseWindow();
+
+        /// <summary>
+        /// Opens the GameBoard UI.
+        /// </summary>
+        void OpenWindow();
     } 
 }
