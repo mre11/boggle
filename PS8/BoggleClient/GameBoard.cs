@@ -14,6 +14,13 @@ namespace BoggleClient
     {
         public GameBoard()
         {
+
+            StartForm h = new StartForm();
+
+            h.Select();
+
+            h.SendGameInfo += JoinGameEvent;
+
             InitializeComponent();
         }
 
@@ -108,6 +115,11 @@ namespace BoggleClient
         /// Event is fired when enter button is pressed.
         /// </summary>
         public event Action<string> PlayWordEvent;
+
+        private void JoinGame(string url, string name, int timeLeft)
+        {
+            JoinGameEvent(url, name, timeLeft);
+        }
 
         /// <summary>
         /// When the enter button is clicked, the wordBox text value is sent

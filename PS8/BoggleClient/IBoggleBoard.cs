@@ -1,4 +1,6 @@
-﻿using System;
+﻿/// Morgan Empy (U0634576), Braden Klunker (U0725294)
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BoggleClient
 {
-    interface IBoggleBoard
+    public interface IBoggleBoard
     {
         /// <summary>
         /// Event is fired when enter button is pressed.

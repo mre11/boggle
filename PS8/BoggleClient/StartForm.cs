@@ -16,7 +16,8 @@ namespace BoggleClient
 
         public StartForm()
         {
-            InitializeComponent();       
+            InitializeComponent();
+            startOkButton.Click += new EventHandler      
         }
 
         private void startOkButton_Click(object sender, EventArgs e)
@@ -29,6 +30,7 @@ namespace BoggleClient
 
         private void startCancelButton_Click(object sender, EventArgs e)
         {
+            Close();
         }
     }
 }
