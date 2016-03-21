@@ -237,14 +237,14 @@
             // 
             // wordBox
             // 
-            this.wordBox.Location = new System.Drawing.Point(18, 235);
+            this.wordBox.Location = new System.Drawing.Point(18, 246);
             this.wordBox.Name = "wordBox";
             this.wordBox.Size = new System.Drawing.Size(278, 20);
             this.wordBox.TabIndex = 16;
             // 
             // gameEnterButton
             // 
-            this.gameEnterButton.Location = new System.Drawing.Point(302, 232);
+            this.gameEnterButton.Location = new System.Drawing.Point(302, 244);
             this.gameEnterButton.Name = "gameEnterButton";
             this.gameEnterButton.Size = new System.Drawing.Size(75, 23);
             this.gameEnterButton.TabIndex = 1;
@@ -254,7 +254,7 @@
             // 
             // gameExitButton
             // 
-            this.gameExitButton.Location = new System.Drawing.Point(502, 232);
+            this.gameExitButton.Location = new System.Drawing.Point(502, 244);
             this.gameExitButton.Name = "gameExitButton";
             this.gameExitButton.Size = new System.Drawing.Size(75, 23);
             this.gameExitButton.TabIndex = 2;
@@ -371,7 +371,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(589, 263);
+            this.ClientSize = new System.Drawing.Size(589, 279);
             this.Controls.Add(this.timeLeft);
             this.Controls.Add(this.player2Score);
             this.Controls.Add(this.player2Name);

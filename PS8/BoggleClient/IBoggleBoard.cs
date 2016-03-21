@@ -19,13 +19,6 @@ namespace BoggleClient
         event Action ExitGameEvent;
 
         /// <summary>
-        /// Event is fired when we start a new game.
-        /// </summary>
-        event Action<string, string, int> JoinGameEvent;
-
-        string BoggleServerURL { get; set;}
-
-        /// <summary>
         /// Represents player 1's name. Associated with Player1Name text label on the GameBoard.
         /// </summary>
         string Player1Name { get; set; }
@@ -43,7 +36,11 @@ namespace BoggleClient
         /// <summary>
         /// Represents player 2's score. Associated with Player2Score text label on the GameBoard.
         /// </summary>
-        string Player2Score { get; set; }       
+        string Player2Score { get; set; }
 
+        /// <summary>
+        /// Closes this IBoggleBoard window.
+        /// </summary>
+        void CloseWindow();
     } 
 }
