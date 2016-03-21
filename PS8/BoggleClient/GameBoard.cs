@@ -12,16 +12,14 @@ namespace BoggleClient
 {
     public partial class GameBoard : Form, IBoggleBoard
     {
+        private StartForm newGame;
+
         public GameBoard()
         {
-
-            StartForm h = new StartForm();
-
-            h.Select();
-
-            h.SendGameInfo += JoinGameEvent;
-
             InitializeComponent();
+
+            newGame = new StartForm();
+            newGame.SendGameInfo += JoinGame;
         }
 
         // Possibly not needed.
@@ -118,6 +116,7 @@ namespace BoggleClient
 
         private void JoinGame(string url, string name, int timeLeft)
         {
+            newGame.Close();
             JoinGameEvent(url, name, timeLeft);
         }
 
@@ -148,6 +147,12 @@ namespace BoggleClient
             {
                 ExitGameEvent();
             }
+        }
+
+        private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            newGame.Show();
+            
         }
     }
 }

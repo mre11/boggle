@@ -27,10 +27,6 @@ namespace BoggleClient
             {
                 // Respond with code 403 (Forbidden)
             }
-            //else if ()
-            //{
-            //    // (Server game id || UserToken) is missing or invalid //)
-            //}
         }
 
         private void CreateClient(string url, string playerName, int timeLeft)
@@ -39,8 +35,6 @@ namespace BoggleClient
             client.BaseAddress = new Uri(url);
 
             client.DefaultRequestHeaders.Accept.Clear();
-
-            throw new NotImplementedException();
         }
 
         private string CreateUser(string name)

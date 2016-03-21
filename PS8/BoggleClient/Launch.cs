@@ -16,7 +16,9 @@ namespace BoggleClient
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new GameBoard());
+            GameBoard g = new GameBoard();
+            new Controller(g);
+            Application.Run(g);
         }
     }
 }
