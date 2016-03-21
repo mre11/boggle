@@ -12,19 +12,23 @@ namespace BoggleClient
 {
     public partial class StartForm : Form
     {
+        public event Action<string, string, int> SendGameInfo;
+
         public StartForm()
         {
-            InitializeComponent();
+            InitializeComponent();       
         }
 
         private void startOkButton_Click(object sender, EventArgs e)
         {
-
+            if(SendGameInfo != null)
+            {
+                SendGameInfo(serverUrlBox.Text, playerNameBox.Text, (int) durationUpDown.Value);
+            }
         }
 
         private void startCancelButton_Click(object sender, EventArgs e)
         {
-
         }
     }
 }
