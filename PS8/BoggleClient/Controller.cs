@@ -57,6 +57,7 @@ namespace BoggleClient
 
         private void CancelGameSearch()
         {
+            int u = 7;
             throw new NotImplementedException();
         }
 

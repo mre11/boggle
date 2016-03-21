@@ -16,7 +16,16 @@ namespace BoggleClient
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new StartForm());
+
+            // Control both game board and start form.
+            GameBoard i = new GameBoard();
+            StartForm j = new StartForm();
+            new Controller(i, j);
+
+            // Or new Controller(j); Use this if we change the constructor of the 
+            // controller to take in 1 parameter.
+
+            Application.Run(j);
         }
     }
 }

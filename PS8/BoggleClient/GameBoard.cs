@@ -17,6 +17,7 @@ namespace BoggleClient
         public GameBoard()
         {
             InitializeComponent();
+            
         }
 
         /// <summary>
