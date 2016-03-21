@@ -37,5 +37,10 @@ namespace BoggleClientControllerTester
         public event Action ExitGameEvent;
         public event Action<string, string, int> JoinGameEvent;
         public event Action<string> PlayWordEvent;
+
+        public void CloseWindow()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

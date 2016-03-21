@@ -11,14 +11,12 @@ namespace BoggleClient
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        [STAThread]
+        [MTAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            GameBoard g = new GameBoard();
-            new Controller(g);
-            Application.Run(g);
+            Application.Run(new StartForm());
         }
     }
 }

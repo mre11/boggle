@@ -17,9 +17,6 @@ namespace BoggleClient
         public GameBoard()
         {
             InitializeComponent();
-
-            newGame = new StartForm();
-            newGame.SendGameInfo += JoinGame;
         }
 
         /// <summary>
@@ -78,12 +75,6 @@ namespace BoggleClient
             Close();
         }
 
-        private void JoinGame(string url, string name, int timeLeft)
-        {
-            newGame.Close();
-            JoinGameEvent(url, name, timeLeft);
-        }
-
         /// <summary>
         /// When the enter button is clicked, the wordBox text value is sent
         /// through a delegate to the controller. The controller will then handle 
@@ -107,12 +98,6 @@ namespace BoggleClient
             {
                 ExitGameEvent();
             }
-        }
-
-        private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            newGame.Show();
-            
         }
     }
 }
