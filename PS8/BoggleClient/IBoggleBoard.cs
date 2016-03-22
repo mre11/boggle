@@ -1,10 +1,7 @@
 ﻿/// Morgan Empy (U0634576), Braden Klunker (U0725294)
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace BoggleClient
 {
@@ -18,7 +15,7 @@ namespace BoggleClient
         /// <summary>
         /// Event is fired if the exit game button is pressed.
         /// </summary>
-        event Action ExitGameEvent;
+        event Action<FormClosingEventArgs> ExitGameEvent;
 
         /// <summary>
         /// Represents player 1's name. Associated with Player1Name text label on the GameBoard.
@@ -43,7 +40,7 @@ namespace BoggleClient
         /// <summary>
         /// Closes this IBoggleBoard window.
         /// </summary>
-        void CloseWindow();
+        void HideWindow();
 
         /// <summary>
         /// Opens the GameBoard UI.

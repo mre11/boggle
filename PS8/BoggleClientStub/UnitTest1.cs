@@ -10,8 +10,8 @@ namespace BoggleClientControllerTester
         [TestMethod]
         public void TestMethod1()
         {
-            BoggleClientStub stub = new BoggleClientStub();
-            Controller controller = new Controller(stub);
+            IBoggleBoard stub = new BoggleClientStub();
+            Controller controller = new Controller(stub, new StartForm());
 
         }
     }

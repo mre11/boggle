@@ -403,6 +403,7 @@
             this.Controls.Add(this.boardSpace0);
             this.Name = "GameBoard";
             this.Text = "Boggle";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GameBoard_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 

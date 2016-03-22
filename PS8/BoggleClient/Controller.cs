@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace BoggleClient
 {
+    /// <summary>
+    /// Provides a controller for the Boggle client
+    /// </summary>
     public class Controller
     {
         /// <summary>
@@ -20,24 +21,10 @@ namespace BoggleClient
         private StartForm startWindow;
 
         /// <summary>
-        /// The URL of the Boggle server
+        /// Creates a controller for the given game board and start window
         /// </summary>
-        private string serverUrl;
-
-        /// <summary>
-        /// The player name for the game instance
-        /// </summary>
-        private string playerName;
-
-        /// <summary>
-        /// The user-requested Boggle game duration
-        /// </summary>
-        private int requestedDuration;
-
         public Controller(IBoggleBoard game, StartForm start)
         {
-            //  TODO Maybe the constructor should only take "start" as a parameter
-            // then the Controller can create an IBoggleBoard later once a game is joined?
             startWindow = start;
             startWindow.JoinGameEvent += JoinGame;
             startWindow.CancelEvent += CancelGameSearch;
@@ -47,28 +34,31 @@ namespace BoggleClient
             gameWindow.ExitGameEvent += ExitGame;            
         }
 
-        private void JoinGame()
+        private async void JoinGame()
         {
-            // TODO these may not need to be member variables
-            serverUrl = startWindow.ServerUrl;
-            playerName = startWindow.PlayerName;
-            requestedDuration = startWindow.RequestedDuration;
+            // Try connecting to the boggle server
+            bool success = true;
 
-            // Try connecting to the boggle server.
-
-            // TODO: If successful, close start form and open gameboard window.
-            startWindow.Close();
-
-            // TODO: need to figure out why gameWindow is not displaying.
-            gameWindow.OpenWindow();
-            // Else, Display msgbox telling the user they've entered the wrong Boggle Server.
-            startWindow.DisplayErrorMessage();
+            if (success)
+            {
+                // TODO populate the game window using the game status
+                startWindow.Hide();
+                gameWindow.OpenWindow();
+            }
+            else
+            {
+                // Display error message telling the user they've entered the wrong Boggle Server.
+                // TODO also catch the case that they haven't entered a player name!
+                startWindow.DisplayErrorMessage();
+            }            
         }
 
         private void CancelGameSearch()
         {
             // TODO: I think we need to some how implement this Asyn.
-            startWindow.Close();
+            // maybe this isn't async but the join is?
+            // also we don't want this to close the window, just cancel the join game search...somehow...
+            // startWindow.Close();
         }
 
         private void PlayWord(string word)
@@ -76,11 +66,18 @@ namespace BoggleClient
             throw new NotImplementedException();
         }
 
-        private void ExitGame()
-        {            
-            gameWindow.CloseWindow();
-            startWindow.Show();
-            throw new NotImplementedException();
+        /// <summary>
+        /// If the game window is exited, hides the window instead of closing
+        /// and brings up the start window for a new game.
+        /// </summary>
+        private void ExitGame(FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                gameWindow.HideWindow();
+                startWindow.Show();
+            }            
         }
 
         private HttpClient CreateClient(string url)

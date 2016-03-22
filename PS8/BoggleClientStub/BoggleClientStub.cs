@@ -1,44 +1,71 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BoggleClient;
 
 namespace BoggleClientControllerTester
 {
     class BoggleClientStub : IBoggleBoard
     {
-        public string BoggleServerURL
-        {
-            get; set;
-        }
-
         public string Player1Name
         {
-            get; set;
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public string Player1Score
         {
-            get; set;
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public string Player2Name
         {
-            get; set;
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public string Player2Score
         {
-            get; set;
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
         }
 
-        public event Action ExitGameEvent;
-        public event Action<string, string, int> JoinGameEvent;
+        public event Action<System.Windows.Forms.FormClosingEventArgs> ExitGameEvent;
         public event Action<string> PlayWordEvent;
 
-        public void CloseWindow()
+        public void HideWindow()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OpenWindow()
         {
             throw new NotImplementedException();
         }

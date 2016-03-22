@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BoggleClient
@@ -61,7 +54,7 @@ namespace BoggleClient
         /// <summary>
         /// Event is fired if the exit game button is pressed.
         /// </summary>
-        public event Action ExitGameEvent;
+        public event Action<FormClosingEventArgs> ExitGameEvent;
 
         /// <summary>
         /// Event is fired when enter button is pressed.
@@ -71,9 +64,9 @@ namespace BoggleClient
         /// <summary>
         /// Closes this game window.
         /// </summary>
-        public void CloseWindow()
+        public void HideWindow()
         {
-            Close();
+            Hide();
         }
 
         /// <summary>
@@ -81,7 +74,7 @@ namespace BoggleClient
         /// </summary>
         public void OpenWindow()
         {
-            this.Show();
+            Show();
         }
 
         /// <summary>
@@ -98,14 +91,22 @@ namespace BoggleClient
         }
 
         /// <summary>
-        /// When the exit button is clicked, ExitGameEvent is fired and the
-        /// controller handles it accordingly.
+        /// When the exit button is clicked, close the window. The FormClosing event
+        /// is then handled.
         /// </summary>
         private void gameExitButton_Click(object sender, EventArgs e)
         {
+            Close(); // handle the FormClosing event
+        }
+
+        /// <summary>
+        /// If the form is closed, handle it in the controller
+        /// </summary>
+        private void GameBoard_FormClosing(object sender, FormClosingEventArgs e)
+        {
             if (ExitGameEvent != null)
             {
-                ExitGameEvent();
+                ExitGameEvent(e);
             }
         }
     }
