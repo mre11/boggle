@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace BoggleClient
@@ -6,11 +7,28 @@ namespace BoggleClient
     public partial class GameBoard : Form, IBoggleBoard
     {
         private StartForm newGame;
-
+        private List<Label> boardSpaces;
         public GameBoard()
         {
             InitializeComponent();
-            
+            boardSpaces = new List<Label>();
+            boardSpaces.Add(boardSpace0);
+            boardSpaces.Add(boardSpace1);
+            boardSpaces.Add(boardSpace2);
+            boardSpaces.Add(boardSpace3);
+            boardSpaces.Add(boardSpace4);
+            boardSpaces.Add(boardSpace5);
+            boardSpaces.Add(boardSpace6);
+            boardSpaces.Add(boardSpace7);
+            boardSpaces.Add(boardSpace8);
+            boardSpaces.Add(boardSpace9);
+            boardSpaces.Add(boardSpace10);
+            boardSpaces.Add(boardSpace11);
+            boardSpaces.Add(boardSpace12);
+            boardSpaces.Add(boardSpace13);
+            boardSpaces.Add(boardSpace14);
+            boardSpaces.Add(boardSpace15);
+
         }
 
         /// <summary>
@@ -49,7 +67,14 @@ namespace BoggleClient
             set { player2Score.Text = value; }
         }
 
-        // TODO need access to the 16 boggle game labels
+        /// <summary>
+        /// Updates the time left label.
+        /// </summary>
+        public string TimeLeft
+        {
+            get { return timeLeft.Text; }
+            set { timeLeft.Text = value; }
+        }
 
         /// <summary>
         /// Event is fired if the exit game button is pressed.
@@ -108,6 +133,24 @@ namespace BoggleClient
             {
                 ExitGameEvent(e);
             }
+        }
+
+
+        /// <summary>
+        /// Updates the boardspaces with a letter from a string of input.
+        /// </summary>
+        /// <param name="board"></param>
+        public void WriteBoardSpaces(string board)
+        {
+            // TODO: Just a simple implementation, We can change if we find something more efficient.
+            Char[] letters = board.ToCharArray();
+            int i = 0;
+
+            foreach(Label space in boardSpaces)
+            {
+                space.Text = letters[i++].ToString();
+            }
+            
         }
     }
 }

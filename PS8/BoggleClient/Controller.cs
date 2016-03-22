@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 
+
+
+
+
+// TODO: Need to handle pending games
+
+
 namespace BoggleClient
 {
     /// <summary>
@@ -47,8 +54,14 @@ namespace BoggleClient
             // Join a game
             string gameID = await JoinGame(userToken, startWindow.RequestedDuration);
 
-            // TODO Update the game board using Game Status request before showing the window
-            string board = await GameStatus(gameID);
+            // Get the game status
+            dynamic gameStatus = await GameStatus(gameID);
+
+            gameWindow.WriteBoardSpaces(gameStatus.Board.ToString());
+            gameWindow.Player1Name = gameStatus.Player1.Nickname;
+            gameWindow.Player1Score = gameStatus.Player1.Score;
+            gameWindow.Player2Name = gameStatus.Player2.Nickname;
+            gameWindow.Player2Score = gameStatus.Player2.Score;
 
             bool success = userToken != "" && gameID != "";
 
@@ -65,38 +78,30 @@ namespace BoggleClient
             }
         }
 
-        private async Task<string> GameStatus(string gameId)
+        /// <summary>
+        /// Gets the game status from the boggle server for a specific gameID. 
+        /// </summary>
+        /// <param name="gameId"></param>
+        /// <returns> Returns a dynamic game status object </returns>
+        private async Task<dynamic> GameStatus(string gameId)
         {
-            
+            // Connects to the boggle server
             using (HttpClient client = CreateClient(startWindow.ServerUrl))
             {
+                // Get the game status for the specified gameID
                 HttpResponseMessage response = client.GetAsync("/BoggleService.svc/games/" + gameId).Result;
-                
+                dynamic data = new ExpandoObject();
+
+                // If we succesfully got the gam
                 if(response.IsSuccessStatusCode)
                 {
                     string content = response.Content.ReadAsStringAsync().Result;
-                    dynamic data = new ExpandoObject();
-
                     data = JsonConvert.DeserializeObject(content);
-
-                    string board = data.Board;
-
-                    Delegate UpdateBoard = UpdateBoardSpaces(board);
-
-                    //return data.Board;
                 }
-                
-                return null;
+                return data;
             }
         }
 
-        private Delegate UpdateBoard(string board);
-
-
-        private void UpdateBoardSpaces(string board)
-        {
-
-        }
         /// <summary>
         /// Creates a new user with the given name for the boggle game.  Returns a unique user token.
         /// </summary>

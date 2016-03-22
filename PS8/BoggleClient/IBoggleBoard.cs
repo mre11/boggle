@@ -38,6 +38,11 @@ namespace BoggleClient
         string Player2Score { get; set; }
 
         /// <summary>
+        /// Updates the time left label.
+        /// </summary>
+        string TimeLeft { get; set; }
+
+        /// <summary>
         /// Closes this IBoggleBoard window.
         /// </summary>
         void HideWindow();
@@ -46,5 +51,11 @@ namespace BoggleClient
         /// Opens the GameBoard UI.
         /// </summary>
         void OpenWindow();
+
+        /// <summary>
+        /// Updates the boardspaces with a letter from a string of input.
+        /// </summary>
+        /// <param name="board"></param>
+        void WriteBoardSpaces(string board);
     } 
 }
