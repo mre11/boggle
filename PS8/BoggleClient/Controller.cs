@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Dynamic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 
 namespace BoggleClient
 {
@@ -36,6 +39,11 @@ namespace BoggleClient
 
         private async void JoinGame()
         {
+            string userToken = await CreateUser(startWindow.PlayerName);
+
+            HttpClient client = CreateClient(startWindow.ServerUrl);
+
+
             // Try connecting to the boggle server
             bool success = true;
 
@@ -53,12 +61,9 @@ namespace BoggleClient
             }            
         }
 
-        private void CancelGameSearch()
+        private async void CancelGameSearch()
         {
-            // TODO: I think we need to some how implement this Asyn.
-            // maybe this isn't async but the join is?
-            // also we don't want this to close the window, just cancel the join game search...somehow...
-            // startWindow.Close();
+            // TODO: send a cancel join request to the server, don't do anything else
         }
 
         private void PlayWord(string word)
@@ -80,14 +85,48 @@ namespace BoggleClient
             }            
         }
 
+        /// <summary>
+        /// Returns a client with the given url as its base address
+        /// </summary>
         private HttpClient CreateClient(string url)
         {
-            throw new NotImplementedException();
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(url);
+
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+
+            return client;
         }
 
-        private string CreateUser(string name)
+        /// <summary>
+        /// Creates a new user with the given name for the boggle game.  Returns a unique user token.
+        /// </summary>
+        private async Task<string> CreateUser(string name)
         {
-            throw new NotImplementedException();
+            using (HttpClient client = CreateClient(startWindow.ServerUrl))
+            {
+                // Create the data for the request
+                dynamic data = new ExpandoObject();
+                data.Nickname = name;
+
+                // Send POST request
+                StringContent content = new StringContent(JsonConvert.SerializeObject(data));
+                content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
+                HttpResponseMessage response = await client.PostAsync("/BoggleService.svc/users", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Return the unique user token from the response
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    dynamic result = JsonConvert.DeserializeObject(responseContent);
+                    return result.UserToken;
+                }
+                else
+                {
+                    return "";
+                }
+            }            
         }
     }
 }

@@ -59,7 +59,7 @@
             this.serverUrlBox.Name = "serverUrlBox";
             this.serverUrlBox.Size = new System.Drawing.Size(371, 20);
             this.serverUrlBox.TabIndex = 1;
-            this.serverUrlBox.Text = "http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/";
+            this.serverUrlBox.Text = "http://bogglecs3500s16.azurewebsites.net";
             // 
             // playerNameLabel
             // 
@@ -128,19 +128,19 @@
             // contentsToolStripMenuItem
             // 
             this.contentsToolStripMenuItem.Name = "contentsToolStripMenuItem";
-            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.contentsToolStripMenuItem.Text = "Contents";
             // 
             // durationUpDown
             // 
             this.durationUpDown.Location = new System.Drawing.Point(148, 71);
             this.durationUpDown.Maximum = new decimal(new int[] {
-            999,
+            120,
             0,
             0,
             0});
             this.durationUpDown.Minimum = new decimal(new int[] {
-            1,
+            5,
             0,
             0,
             0});
