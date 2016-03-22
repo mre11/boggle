@@ -35,6 +35,8 @@ namespace BoggleClient
             gameWindow = game;
             gameWindow.PlayWordEvent += PlayWord;
             gameWindow.ExitGameEvent += ExitGame;
+
+            
         }
 
         private async void StartNewGame()
@@ -46,7 +48,7 @@ namespace BoggleClient
             string gameID = await JoinGame(userToken, startWindow.RequestedDuration);
 
             // TODO Update the game board using Game Status request before showing the window
-
+            string board = await GameStatus(gameID);
 
             bool success = userToken != "" && gameID != "";
 
@@ -63,6 +65,38 @@ namespace BoggleClient
             }
         }
 
+        private async Task<string> GameStatus(string gameId)
+        {
+            
+            using (HttpClient client = CreateClient(startWindow.ServerUrl))
+            {
+                HttpResponseMessage response = client.GetAsync("/BoggleService.svc/games/" + gameId).Result;
+                
+                if(response.IsSuccessStatusCode)
+                {
+                    string content = response.Content.ReadAsStringAsync().Result;
+                    dynamic data = new ExpandoObject();
+
+                    data = JsonConvert.DeserializeObject(content);
+
+                    string board = data.Board;
+
+                    Delegate UpdateBoard = UpdateBoardSpaces(board);
+
+                    //return data.Board;
+                }
+                
+                return null;
+            }
+        }
+
+        private Delegate UpdateBoard(string board);
+
+
+        private void UpdateBoardSpaces(string board)
+        {
+
+        }
         /// <summary>
         /// Creates a new user with the given name for the boggle game.  Returns a unique user token.
         /// </summary>
