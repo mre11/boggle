@@ -33,6 +33,32 @@ namespace BoggleClient
         }
 
         /// <summary>
+        /// Property that enables the controller to make the all text boxes on the Start Form
+        /// read only.
+        /// </summary>
+        public bool DisableStartTextBoxes
+        {
+            set
+            {
+                if(value)
+                {
+                    playerNameBox.ReadOnly = true;
+                    serverUrlBox.ReadOnly = true;
+                    durationUpDown.ReadOnly = true;
+                    durationUpDown.Enabled = false;
+                }
+                else
+                {
+                    playerNameBox.ReadOnly = false;
+                    serverUrlBox.ReadOnly = false;
+                    durationUpDown.ReadOnly = false;
+                    durationUpDown.Enabled = true;
+                }
+
+            }
+        }
+
+        /// <summary>
         /// Event is fired when we start a new game.
         /// </summary>
         public event Action JoinGameEvent;
@@ -48,6 +74,7 @@ namespace BoggleClient
         public StartForm()
         {
             InitializeComponent();
+            startCancelButton.Enabled = false;
         }
 
         /// <summary>
@@ -57,6 +84,11 @@ namespace BoggleClient
         public void DisplayErrorMessage()
         {
             MessageBox.Show("Invalid Boggle server url.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+            // Re-enable input components
+            startOkButton.Enabled = true;
+            startCancelButton.Enabled = false;
+            DisableStartTextBoxes = false;
         }
 
         /// <summary>
@@ -66,6 +98,9 @@ namespace BoggleClient
         {
             if (JoinGameEvent != null)
             {
+                startOkButton.Enabled = false;
+                startCancelButton.Enabled = true;
+                DisableStartTextBoxes = true;
                 JoinGameEvent();
             }
         }
@@ -77,8 +112,32 @@ namespace BoggleClient
         {
             if (CancelEvent != null)
             {
+                startCancelButton.Enabled = false;
+                startOkButton.Enabled = true;
+                DisableStartTextBoxes = false;
                 CancelEvent();
             }
+        }
+
+        /// <summary>
+        /// When content is clicked in the help menu, display a help message box.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void contentsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // TODO: Modify contents of help message box or create a new form with drop down items for help information.
+            MessageBox.Show("Welcome", "Help", MessageBoxButtons.OK);
+        }
+
+        /// <summary>
+        /// Handle a form closing event in the start form
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void StartForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // TODO: Make sure that if we connect then click exit, we don't get an exception from inside of the controller.
         }
     }
 }
