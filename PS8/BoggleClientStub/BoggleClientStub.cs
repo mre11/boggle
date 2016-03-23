@@ -57,6 +57,19 @@ namespace BoggleClientControllerTester
             }
         }
 
+        public string TimeLeft
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public event Action<System.Windows.Forms.FormClosingEventArgs> ExitGameEvent;
         public event Action<string> PlayWordEvent;
 
@@ -66,6 +79,11 @@ namespace BoggleClientControllerTester
         }
 
         public void OpenWindow()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteBoardSpaces(string board)
         {
             throw new NotImplementedException();
         }

@@ -112,7 +112,20 @@ namespace BoggleClient
             if (PlayWordEvent != null)
             {
                 PlayWordEvent(wordBox.Text);
+                wordBox.Text = "";
             }
+        }
+
+        /// <summary>
+        /// If the user presses the Enter key in the word box, treat it the same
+        /// as pressing the "Enter" button
+        /// </summary>
+        private void wordBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)13)
+            {
+                gameEnterButton_Click(sender, e);
+            }            
         }
 
         /// <summary>
@@ -135,22 +148,16 @@ namespace BoggleClient
             }
         }
 
-
         /// <summary>
         /// Updates the boardspaces with a letter from a string of input.
         /// </summary>
-        /// <param name="board"></param>
         public void WriteBoardSpaces(string board)
         {
-            // TODO: Just a simple implementation, We can change if we find something more efficient.
-            Char[] letters = board.ToCharArray();
             int i = 0;
-
             foreach(Label space in boardSpaces)
             {
-                space.Text = letters[i++].ToString();
-            }
-            
+                space.Text = board[i++].ToString();
+            }            
         }
     }
 }

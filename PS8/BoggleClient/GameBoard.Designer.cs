@@ -63,10 +63,9 @@
             // 
             this.boardSpace0.AutoSize = true;
             this.boardSpace0.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace0.Location = new System.Drawing.Point(16, 11);
-            this.boardSpace0.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace0.Location = new System.Drawing.Point(12, 9);
             this.boardSpace0.Name = "boardSpace0";
-            this.boardSpace0.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace0.Size = new System.Drawing.Size(88, 55);
             this.boardSpace0.TabIndex = 0;
             this.boardSpace0.Text = "Qu";
             this.boardSpace0.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -75,10 +74,9 @@
             // 
             this.boardSpace1.AutoSize = true;
             this.boardSpace1.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace1.Location = new System.Drawing.Point(139, 11);
-            this.boardSpace1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace1.Location = new System.Drawing.Point(104, 9);
             this.boardSpace1.Name = "boardSpace1";
-            this.boardSpace1.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace1.Size = new System.Drawing.Size(88, 55);
             this.boardSpace1.TabIndex = 1;
             this.boardSpace1.Text = "Qu";
             this.boardSpace1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -87,10 +85,9 @@
             // 
             this.boardSpace2.AutoSize = true;
             this.boardSpace2.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace2.Location = new System.Drawing.Point(264, 11);
-            this.boardSpace2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace2.Location = new System.Drawing.Point(198, 9);
             this.boardSpace2.Name = "boardSpace2";
-            this.boardSpace2.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace2.Size = new System.Drawing.Size(88, 55);
             this.boardSpace2.TabIndex = 2;
             this.boardSpace2.Text = "Qu";
             this.boardSpace2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -99,10 +96,9 @@
             // 
             this.boardSpace3.AutoSize = true;
             this.boardSpace3.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace3.Location = new System.Drawing.Point(389, 11);
-            this.boardSpace3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace3.Location = new System.Drawing.Point(292, 9);
             this.boardSpace3.Name = "boardSpace3";
-            this.boardSpace3.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace3.Size = new System.Drawing.Size(88, 55);
             this.boardSpace3.TabIndex = 3;
             this.boardSpace3.Text = "Qu";
             this.boardSpace3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -111,10 +107,9 @@
             // 
             this.boardSpace4.AutoSize = true;
             this.boardSpace4.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace4.Location = new System.Drawing.Point(16, 79);
-            this.boardSpace4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace4.Location = new System.Drawing.Point(12, 64);
             this.boardSpace4.Name = "boardSpace4";
-            this.boardSpace4.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace4.Size = new System.Drawing.Size(88, 55);
             this.boardSpace4.TabIndex = 4;
             this.boardSpace4.Text = "Qu";
             this.boardSpace4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -123,10 +118,9 @@
             // 
             this.boardSpace5.AutoSize = true;
             this.boardSpace5.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace5.Location = new System.Drawing.Point(139, 79);
-            this.boardSpace5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace5.Location = new System.Drawing.Point(104, 64);
             this.boardSpace5.Name = "boardSpace5";
-            this.boardSpace5.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace5.Size = new System.Drawing.Size(88, 55);
             this.boardSpace5.TabIndex = 5;
             this.boardSpace5.Text = "Qu";
             this.boardSpace5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -135,10 +129,9 @@
             // 
             this.boardSpace6.AutoSize = true;
             this.boardSpace6.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace6.Location = new System.Drawing.Point(264, 79);
-            this.boardSpace6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace6.Location = new System.Drawing.Point(198, 64);
             this.boardSpace6.Name = "boardSpace6";
-            this.boardSpace6.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace6.Size = new System.Drawing.Size(88, 55);
             this.boardSpace6.TabIndex = 6;
             this.boardSpace6.Text = "Qu";
             this.boardSpace6.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -147,10 +140,9 @@
             // 
             this.boardSpace7.AutoSize = true;
             this.boardSpace7.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace7.Location = new System.Drawing.Point(389, 79);
-            this.boardSpace7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace7.Location = new System.Drawing.Point(292, 64);
             this.boardSpace7.Name = "boardSpace7";
-            this.boardSpace7.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace7.Size = new System.Drawing.Size(88, 55);
             this.boardSpace7.TabIndex = 7;
             this.boardSpace7.Text = "Qu";
             this.boardSpace7.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -159,10 +151,9 @@
             // 
             this.boardSpace8.AutoSize = true;
             this.boardSpace8.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace8.Location = new System.Drawing.Point(16, 146);
-            this.boardSpace8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace8.Location = new System.Drawing.Point(12, 119);
             this.boardSpace8.Name = "boardSpace8";
-            this.boardSpace8.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace8.Size = new System.Drawing.Size(88, 55);
             this.boardSpace8.TabIndex = 8;
             this.boardSpace8.Text = "Qu";
             this.boardSpace8.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -171,10 +162,9 @@
             // 
             this.boardSpace9.AutoSize = true;
             this.boardSpace9.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace9.Location = new System.Drawing.Point(141, 146);
-            this.boardSpace9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace9.Location = new System.Drawing.Point(106, 119);
             this.boardSpace9.Name = "boardSpace9";
-            this.boardSpace9.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace9.Size = new System.Drawing.Size(88, 55);
             this.boardSpace9.TabIndex = 9;
             this.boardSpace9.Text = "Qu";
             this.boardSpace9.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -183,10 +173,9 @@
             // 
             this.boardSpace10.AutoSize = true;
             this.boardSpace10.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace10.Location = new System.Drawing.Point(264, 146);
-            this.boardSpace10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace10.Location = new System.Drawing.Point(198, 119);
             this.boardSpace10.Name = "boardSpace10";
-            this.boardSpace10.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace10.Size = new System.Drawing.Size(88, 55);
             this.boardSpace10.TabIndex = 10;
             this.boardSpace10.Text = "Qu";
             this.boardSpace10.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -195,10 +184,9 @@
             // 
             this.boardSpace11.AutoSize = true;
             this.boardSpace11.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace11.Location = new System.Drawing.Point(389, 146);
-            this.boardSpace11.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace11.Location = new System.Drawing.Point(292, 119);
             this.boardSpace11.Name = "boardSpace11";
-            this.boardSpace11.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace11.Size = new System.Drawing.Size(88, 55);
             this.boardSpace11.TabIndex = 11;
             this.boardSpace11.Text = "Qu";
             this.boardSpace11.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -207,10 +195,9 @@
             // 
             this.boardSpace12.AutoSize = true;
             this.boardSpace12.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace12.Location = new System.Drawing.Point(16, 214);
-            this.boardSpace12.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace12.Location = new System.Drawing.Point(12, 174);
             this.boardSpace12.Name = "boardSpace12";
-            this.boardSpace12.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace12.Size = new System.Drawing.Size(88, 55);
             this.boardSpace12.TabIndex = 12;
             this.boardSpace12.Text = "Qu";
             this.boardSpace12.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -219,10 +206,9 @@
             // 
             this.boardSpace13.AutoSize = true;
             this.boardSpace13.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace13.Location = new System.Drawing.Point(139, 214);
-            this.boardSpace13.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace13.Location = new System.Drawing.Point(104, 174);
             this.boardSpace13.Name = "boardSpace13";
-            this.boardSpace13.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace13.Size = new System.Drawing.Size(88, 55);
             this.boardSpace13.TabIndex = 13;
             this.boardSpace13.Text = "Qu";
             this.boardSpace13.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -231,10 +217,9 @@
             // 
             this.boardSpace14.AutoSize = true;
             this.boardSpace14.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace14.Location = new System.Drawing.Point(264, 214);
-            this.boardSpace14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace14.Location = new System.Drawing.Point(198, 174);
             this.boardSpace14.Name = "boardSpace14";
-            this.boardSpace14.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace14.Size = new System.Drawing.Size(88, 55);
             this.boardSpace14.TabIndex = 14;
             this.boardSpace14.Text = "Qu";
             this.boardSpace14.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -243,28 +228,26 @@
             // 
             this.boardSpace15.AutoSize = true;
             this.boardSpace15.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.boardSpace15.Location = new System.Drawing.Point(389, 214);
-            this.boardSpace15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.boardSpace15.Location = new System.Drawing.Point(292, 174);
             this.boardSpace15.Name = "boardSpace15";
-            this.boardSpace15.Size = new System.Drawing.Size(110, 69);
+            this.boardSpace15.Size = new System.Drawing.Size(88, 55);
             this.boardSpace15.TabIndex = 15;
             this.boardSpace15.Text = "Qu";
             this.boardSpace15.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // wordBox
             // 
-            this.wordBox.Location = new System.Drawing.Point(24, 303);
-            this.wordBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.wordBox.Location = new System.Drawing.Point(18, 246);
             this.wordBox.Name = "wordBox";
-            this.wordBox.Size = new System.Drawing.Size(369, 22);
+            this.wordBox.Size = new System.Drawing.Size(278, 20);
             this.wordBox.TabIndex = 16;
+            this.wordBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.wordBox_KeyPress);
             // 
             // gameEnterButton
             // 
-            this.gameEnterButton.Location = new System.Drawing.Point(403, 300);
-            this.gameEnterButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.gameEnterButton.Location = new System.Drawing.Point(302, 244);
             this.gameEnterButton.Name = "gameEnterButton";
-            this.gameEnterButton.Size = new System.Drawing.Size(100, 28);
+            this.gameEnterButton.Size = new System.Drawing.Size(75, 23);
             this.gameEnterButton.TabIndex = 1;
             this.gameEnterButton.Text = "Enter";
             this.gameEnterButton.UseVisualStyleBackColor = true;
@@ -272,10 +255,9 @@
             // 
             // gameExitButton
             // 
-            this.gameExitButton.Location = new System.Drawing.Point(669, 300);
-            this.gameExitButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.gameExitButton.Location = new System.Drawing.Point(502, 244);
             this.gameExitButton.Name = "gameExitButton";
-            this.gameExitButton.Size = new System.Drawing.Size(100, 28);
+            this.gameExitButton.Size = new System.Drawing.Size(75, 23);
             this.gameExitButton.TabIndex = 2;
             this.gameExitButton.Text = "Exit Game";
             this.gameExitButton.UseVisualStyleBackColor = true;
@@ -285,10 +267,9 @@
             // 
             this.label15.AutoSize = true;
             this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label15.Location = new System.Drawing.Point(515, 32);
-            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label15.Location = new System.Drawing.Point(386, 26);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(75, 20);
+            this.label15.Size = new System.Drawing.Size(60, 16);
             this.label15.TabIndex = 19;
             this.label15.Text = "Player 1:";
             this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -297,10 +278,9 @@
             // 
             this.label16.AutoSize = true;
             this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label16.Location = new System.Drawing.Point(515, 96);
-            this.label16.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label16.Location = new System.Drawing.Point(386, 78);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(75, 20);
+            this.label16.Size = new System.Drawing.Size(60, 16);
             this.label16.TabIndex = 20;
             this.label16.Text = "Player 2:";
             this.label16.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -309,10 +289,9 @@
             // 
             this.label17.AutoSize = true;
             this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label17.Location = new System.Drawing.Point(507, 164);
-            this.label17.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label17.Location = new System.Drawing.Point(380, 133);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(85, 20);
+            this.label17.Size = new System.Drawing.Size(66, 16);
             this.label17.TabIndex = 21;
             this.label17.Text = "Time Left:";
             this.label17.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -321,10 +300,9 @@
             // 
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(532, 52);
-            this.label18.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label18.Location = new System.Drawing.Point(399, 42);
             this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(58, 20);
+            this.label18.Size = new System.Drawing.Size(47, 16);
             this.label18.TabIndex = 22;
             this.label18.Text = "Score:";
             this.label18.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -333,10 +311,9 @@
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(532, 116);
-            this.label19.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label19.Location = new System.Drawing.Point(399, 94);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(58, 20);
+            this.label19.Size = new System.Drawing.Size(47, 16);
             this.label19.TabIndex = 23;
             this.label19.Text = "Score:";
             this.label19.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -345,10 +322,9 @@
             // 
             this.player1Name.AutoSize = true;
             this.player1Name.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.player1Name.Location = new System.Drawing.Point(603, 32);
-            this.player1Name.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.player1Name.Location = new System.Drawing.Point(452, 26);
             this.player1Name.Name = "player1Name";
-            this.player1Name.Size = new System.Drawing.Size(107, 20);
+            this.player1Name.Size = new System.Drawing.Size(90, 16);
             this.player1Name.TabIndex = 24;
             this.player1Name.Text = "player1Name";
             // 
@@ -356,10 +332,9 @@
             // 
             this.player1Score.AutoSize = true;
             this.player1Score.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.player1Score.Location = new System.Drawing.Point(603, 52);
-            this.player1Score.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.player1Score.Location = new System.Drawing.Point(452, 42);
             this.player1Score.Name = "player1Score";
-            this.player1Score.Size = new System.Drawing.Size(107, 20);
+            this.player1Score.Size = new System.Drawing.Size(89, 16);
             this.player1Score.TabIndex = 25;
             this.player1Score.Text = "player1Score";
             // 
@@ -367,10 +342,9 @@
             // 
             this.player2Name.AutoSize = true;
             this.player2Name.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.player2Name.Location = new System.Drawing.Point(603, 96);
-            this.player2Name.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.player2Name.Location = new System.Drawing.Point(452, 78);
             this.player2Name.Name = "player2Name";
-            this.player2Name.Size = new System.Drawing.Size(107, 20);
+            this.player2Name.Size = new System.Drawing.Size(90, 16);
             this.player2Name.TabIndex = 26;
             this.player2Name.Text = "player2Name";
             // 
@@ -378,10 +352,9 @@
             // 
             this.player2Score.AutoSize = true;
             this.player2Score.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.player2Score.Location = new System.Drawing.Point(603, 116);
-            this.player2Score.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.player2Score.Location = new System.Drawing.Point(452, 94);
             this.player2Score.Name = "player2Score";
-            this.player2Score.Size = new System.Drawing.Size(107, 20);
+            this.player2Score.Size = new System.Drawing.Size(89, 16);
             this.player2Score.TabIndex = 27;
             this.player2Score.Text = "player2Score";
             // 
@@ -389,18 +362,17 @@
             // 
             this.timeLeft.AutoSize = true;
             this.timeLeft.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.timeLeft.Location = new System.Drawing.Point(603, 164);
-            this.timeLeft.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.timeLeft.Location = new System.Drawing.Point(452, 133);
             this.timeLeft.Name = "timeLeft";
-            this.timeLeft.Size = new System.Drawing.Size(70, 20);
+            this.timeLeft.Size = new System.Drawing.Size(54, 16);
             this.timeLeft.TabIndex = 28;
             this.timeLeft.Text = "timeLeft";
             // 
             // GameBoard
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(785, 343);
+            this.ClientSize = new System.Drawing.Size(589, 279);
             this.Controls.Add(this.timeLeft);
             this.Controls.Add(this.player2Score);
             this.Controls.Add(this.player2Name);
@@ -430,7 +402,6 @@
             this.Controls.Add(this.boardSpace2);
             this.Controls.Add(this.boardSpace1);
             this.Controls.Add(this.boardSpace0);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "GameBoard";
             this.Text = "Boggle";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GameBoard_FormClosing);
