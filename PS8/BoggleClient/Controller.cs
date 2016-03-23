@@ -6,12 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
-// TODO maybe we can disable/enable the Cancel button in the start window depending on whether there's a pending request?
-// TODO we still need to write the help menu
 // TODO testing and error handling
 // TODO From assignment: The interface should remain responsive even if a REST request takes a long time to complete.  When a request is active, a Cancel button should become active.  Clicking on this button should gracefully cancel the request.  (Note that the various request methods in C# all have versions that take CancellationTokens as parameters.)
 // TODO make sure we have all the comments we need
+// TODO make sure if we exit the game or click the x button we leave the server.
+// TODO figure out how to get the words of the players.
 
 namespace BoggleClient
 {
@@ -41,6 +42,16 @@ namespace BoggleClient
         private string gameId;
 
         /// <summary>
+        /// List of words that player 1 entered.
+        /// </summary>
+        private List<Tuple<string, int>> player1Words;
+
+        /// <summary>
+        /// List of words that player 2 entered.
+        /// </summary>
+        private List<Tuple<string, int>> player2Words;
+
+        /// <summary>
         /// Creates a controller for the given game board and start window
         /// </summary>
         public Controller(IBoggleBoard game, StartForm start)
@@ -59,43 +70,51 @@ namespace BoggleClient
 
         private async void RunGame()
         {
-            // Create a new user
-            userToken = await CreateUser(startWindow.PlayerName);
-
-            // Join a game
-            gameId = await JoinGame(userToken, startWindow.RequestedDuration);
-
-            // Get the initial game status
-            dynamic gameStatus = null;
-
-            while (gameStatus == null || gameStatus.GameState != "active")
+            try
             {
-                gameStatus = await GameStatus(gameId, false);
+                // Create a new user
+                userToken = await CreateUser(startWindow.PlayerName);
+
+                // Join a game
+                gameId = await JoinGame(userToken, startWindow.RequestedDuration);
+
+                // Get the initial game status
+                dynamic gameStatus = null;
+
+                while (gameStatus == null || gameStatus.GameState != "active")
+                {
+                    gameStatus = await GameStatus(gameId, false);
+                }
+
+                player1Words = new List<Tuple<string, int>>();
+                player2Words = new List<Tuple<string, int>>();
+
+                gameWindow.WriteBoardSpaces(gameStatus.Board.ToString());
+                gameWindow.Player1Name = gameStatus.Player1.Nickname;
+                gameWindow.Player1Score = gameStatus.Player1.Score;
+                gameWindow.Player2Name = gameStatus.Player2.Nickname;
+                gameWindow.Player2Score = gameStatus.Player2.Score;
+                gameWindow.TimeLeft = gameStatus.TimeLeft;
+
+                bool success = userToken != "" && gameId != "";
+
+                if (success)
+                {
+                    startWindow.Hide();
+                    gameWindow.OpenWindow();
+
+                    // TODO use this result to show some kind of results window
+                    dynamic result = await ContinuousUpdateGameStatus();
+                    //MessageBox.Show(result.Player1.WordsPlayed);
+                    //MessageBox.Show(result.Player2.WordsPlayed[0]);
+                    //MessageBox.Show(player1Words.ToString() + "\n" + player2Words.ToString(), "Words");
+                }
             }
-
-            gameWindow.WriteBoardSpaces(gameStatus.Board.ToString());
-            gameWindow.Player1Name = gameStatus.Player1.Nickname;
-            gameWindow.Player1Score = gameStatus.Player1.Score;
-            gameWindow.Player2Name = gameStatus.Player2.Nickname;
-            gameWindow.Player2Score = gameStatus.Player2.Score;
-            gameWindow.TimeLeft = gameStatus.TimeLeft;
-
-            bool success = userToken != "" && gameId != "";
-
-            if (success)
+            catch (HttpRequestException) 
             {
-                startWindow.Hide();
-                gameWindow.OpenWindow();
-
-                // TODO use this result to show some kind of results window
-                dynamic result = await ContinuousUpdateGameStatus();
-            }
-            else
-            {
-                // Display error message telling the user they've entered the wrong Boggle Server.
-                // TODO also catch the case that they haven't entered a player name! generally more error handling
                 startWindow.DisplayErrorMessage();
             }
+
         }
 
         /// <summary>
@@ -125,6 +144,12 @@ namespace BoggleClient
 
             if (gameStatus.GameState == "completed")
             {
+                // TODO: Figure out how to get all of the words out of dynamic type
+                // If you figure out how to do it, might as well delete the lists and move this for-loop in run game.
+                foreach(dynamic word in gameStatus.Player2.WordsAdded)
+                {
+                    player2Words.Add(new Tuple<string, int>(word, word.Score));
+                }
                 return gameStatus;
             }
             return "";
@@ -223,6 +248,12 @@ namespace BoggleClient
                 if (!response.IsSuccessStatusCode)
                 {
                     MessageBox.Show(response.StatusCode.ToString());
+                }
+                else
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    dynamic playWordResponse = JsonConvert.DeserializeObject(responseContent);
+                    player1Words.Add(new Tuple<string, int>(word, (int) playWordResponse.Score));
                 }
             }
         }
