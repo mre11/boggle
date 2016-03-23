@@ -6,8 +6,14 @@ namespace BoggleClient
 {
     public partial class GameBoard : Form, IBoggleBoard
     {
-        private StartForm newGame;
+        /// <summary>
+        /// Represents a list of all the board spaces on the game board UI.
+        /// </summary>
         private List<Label> boardSpaces;
+
+        /// <summary>
+        /// Intializes a new game board GUI.
+        /// </summary>
         public GameBoard()
         {
             InitializeComponent();
