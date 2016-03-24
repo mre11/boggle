@@ -22,11 +22,6 @@ namespace BoggleClient
         event Action<FormClosingEventArgs> ExitGameEvent;
 
         /// <summary>
-        /// Event is fired when exit game button is pressed.
-        /// </summary>
-        event Action Exit;
-
-        /// <summary>
         /// Represents player 1's name. Associated with Player1Name text label on the GameBoard.
         /// </summary>
         string Player1Name { get; set; }

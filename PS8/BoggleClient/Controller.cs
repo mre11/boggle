@@ -64,7 +64,7 @@ namespace BoggleClient
             gameWindow = game;
             gameWindow.PlayWordEvent += PlayWord;
             gameWindow.ExitGameEvent += ExitGame;
-            gameWindow.Exit += Close;
+
             userToken = "";
             gameId = "";
             cancelJoin = false;
@@ -108,19 +108,6 @@ namespace BoggleClient
         }
 
         /// <summary>
-        /// When the exit button is click, the timer is stopped and buttons are enable for both windows.
-        /// </summary>
-        private void Close()
-        {
-            updateTimer.Stop();
-            gameWindow.EnterBoxEnabled = true;
-            gameWindow.EnterButtonEnabled = true;
-            gameWindow.HideWindow();
-            startWindow.JoiningGame = false;
-            startWindow.Show();
-        }
-
-        /// <summary>
         /// Requests the game status and uses it to update the view
         /// </summary>
         private async void UpdateGameStatus(object sender, System.Timers.ElapsedEventArgs e)
@@ -129,6 +116,19 @@ namespace BoggleClient
 
             if (cancelJoin)
             {
+                updateTimer.Stop();
+                cancelJoin = false;
+
+                // Invoke this code baack on the GUI thread.
+                startWindow.Invoke((Action)(() =>
+                {
+                    gameWindow.EnterBoxEnabled = true;
+                    gameWindow.EnterButtonEnabled = true;
+                    gameWindow.HideWindow();
+                    startWindow.JoiningGame = false;
+                    startWindow.ShowWindow();
+                }));
+
                 return;
             }
             else if (gameStatus.GameState == "completed")
@@ -330,6 +330,7 @@ namespace BoggleClient
         {
             if (e.CloseReason == CloseReason.UserClosing)
             {
+                cancelJoin = true;
                 e.Cancel = true;
                 gameWindow.HideWindow();
                 startWindow.Show();

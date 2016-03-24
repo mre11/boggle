@@ -123,5 +123,10 @@ namespace BoggleClient
                 CancelEvent();
             }
         }
+
+        public void ShowWindow()
+        {
+            Show();
+        }
     }
 }

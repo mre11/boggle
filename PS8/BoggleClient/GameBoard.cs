@@ -109,8 +109,6 @@ namespace BoggleClient
         /// </summary>
         public event Action<FormClosingEventArgs> ExitGameEvent;
 
-        public event Action Exit;
-
         /// <summary>
         /// Event is fired when enter button is pressed.
         /// </summary>
@@ -165,11 +163,7 @@ namespace BoggleClient
         /// </summary>
         private void gameExitButton_Click(object sender, EventArgs e)
         {
-            if(Exit != null)
-            {
-                Close();
-                Exit();
-            }
+            Close();
         }
 
         /// <summary>
