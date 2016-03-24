@@ -1,18 +1,18 @@
-﻿using System;
+﻿// Created for CS3500, Spring 2016
+// Morgan Empey (U0634576), Braden Klunker (U0725294)
+
+using System;
 using System.Dynamic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 
 // TODO testing and error handling
 // TODO From assignment: The interface should remain responsive even if a REST request takes a long time to complete.  When a request is active, a Cancel button should become active.  Clicking on this button should gracefully cancel the request.  (Note that the various request methods in C# all have versions that take CancellationTokens as parameters.)
-// TODO make sure we have all the comments we need
-// TODO make sure if we exit the game or click the x button we leave the server.
+// make sure if we exit the game or click the x button we leave the server.
 //              we don't need to do anything here.  we aren't "on" the server, when we exit we just send no more requests.
-// TODO write help menu
 
 namespace BoggleClient
 {
@@ -64,6 +64,9 @@ namespace BoggleClient
             cancelJoin = false;
         }
 
+        /// <summary>
+        /// Sets up and runs a single game
+        /// </summary>
         private async void RunGame()
         {
             try
@@ -112,11 +115,8 @@ namespace BoggleClient
                 startWindow.Hide();
                 gameWindow.ShowWindow();
                 startWindow.JoiningGame = false;
-
-                // TODO use this result to show some kind of results window
-                dynamic result = await ContinuousUpdateGameStatus();
-                string test = result.Player1.Score;
-                MessageBox.Show(test);
+               
+                ShowResults(await ContinuousUpdateGameStatus());
             }
             catch (HttpRequestException) 
             {
@@ -134,7 +134,7 @@ namespace BoggleClient
         {
             dynamic gameStatus = await GameStatus(gameId, true);
 
-            while (gameStatus.GameState == "active")
+            while (!cancelJoin && gameStatus.GameState == "active")
             {
                 // TODO try to figure out how to do this once a second
                 gameWindow.Player1Score = gameStatus.Player1.Score;
@@ -142,6 +142,11 @@ namespace BoggleClient
                 gameWindow.TimeLeft = gameStatus.TimeLeft;
 
                 gameStatus = await GameStatus(gameId, true);
+            }
+
+            if (cancelJoin)
+            {
+                return "";
             }
 
             gameStatus = await GameStatus(gameId, false);
@@ -154,6 +159,14 @@ namespace BoggleClient
                 return gameStatus;
             }
             return "";
+        }
+
+        /// <summary>
+        /// Displays the results of a completed game given a GameStatus response.
+        /// </summary>
+        private void ShowResults(dynamic gameStatus)
+        {
+
         }
 
         /// <summary>

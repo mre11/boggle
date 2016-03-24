@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Created for CS3500, Spring 2016
+// Morgan Empey (U0634576), Braden Klunker (U0725294)
+
+using System;
 using BoggleClient;
 
 namespace BoggleClientControllerTester

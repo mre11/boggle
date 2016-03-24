@@ -1,9 +1,15 @@
-﻿using System;
+﻿// Created for CS3500, Spring 2016
+// Morgan Empey (U0634576), Braden Klunker (U0725294)
+
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace BoggleClient
 {
+    /// <summary>
+    /// Provides a window to display a game of Boggle
+    /// </summary>
     public partial class GameBoard : Form, IBoggleBoard
     {
         /// <summary>

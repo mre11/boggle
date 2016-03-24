@@ -1,8 +1,14 @@
-﻿using System;
+﻿// Created for CS3500, Spring 2016
+// Morgan Empey (U0634576), Braden Klunker (U0725294)
+
+using System;
 using System.Windows.Forms;
 
 namespace BoggleClient
 {
+    /// <summary>
+    /// Provides a window to start games of Boggle
+    /// </summary>
     public partial class StartForm : Form
     {
         /// <summary>
@@ -101,8 +107,6 @@ namespace BoggleClient
         /// <summary>
         /// When content is clicked in the help menu, display a help message box.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void contentsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // TODO: Modify contents of help message box or create a new form with drop down items for help information.
@@ -112,11 +116,12 @@ namespace BoggleClient
         /// <summary>
         /// Handle a form closing event in the start form
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void StartForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // TODO: Make sure that if we connect then click exit, we don't get an exception from inside of the controller.
+            if (CancelEvent != null)
+            {
+                CancelEvent();
+            }
         }
     }
 }

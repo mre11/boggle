@@ -1,10 +1,14 @@
-﻿/// Morgan Empy (U0634576), Braden Klunker (U0725294)
+﻿// Created for CS3500, Spring 2016
+// Morgan Empey (U0634576), Braden Klunker (U0725294)
 
 using System;
 using System.Windows.Forms;
 
 namespace BoggleClient
 {
+    /// <summary>
+    /// Provides an interface for a Boggle game board window
+    /// </summary>
     public interface IBoggleBoard
     {
         /// <summary>
@@ -55,7 +59,6 @@ namespace BoggleClient
         /// <summary>
         /// Updates the boardspaces with a letter from a string of input.
         /// </summary>
-        /// <param name="board"></param>
         void WriteBoardSpaces(string board);
     } 
 }
