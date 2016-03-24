@@ -92,10 +92,22 @@ namespace BoggleClientControllerTester
         public event Action<System.Windows.Forms.FormClosingEventArgs> ExitGameEvent;
         public event Action<string> PlayWordEvent;
 
+        public bool ExitGameEventCalled
+        {
+            get; private set;
+        }
+
+        public bool PlayWordEventCalled
+        {
+            get; private set;
+        }
+
         public void HideWindow()
         {
             throw new NotImplementedException();
         }
+
+        
 
         public void ShowWindow()
         {

@@ -104,6 +104,7 @@ namespace BoggleClient
             {
 
                 startWindow.DisplayErrorMessage();
+
             }
         }
 

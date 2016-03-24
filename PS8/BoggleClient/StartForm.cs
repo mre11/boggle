@@ -2,6 +2,7 @@
 // Morgan Empey (U0634576), Braden Klunker (U0725294)
 
 using System;
+using System.Text;
 using System.Windows.Forms;
 
 namespace BoggleClient
@@ -73,13 +74,15 @@ namespace BoggleClient
             startCancelButton.Enabled = false;
         }
 
+        private bool validUrl = true;
         /// <summary>
         /// Displays an error message if we could not connect to the boggle server or 
         /// the url was incorrect. 
         /// </summary>
         public void DisplayErrorMessage()
         {
-            MessageBox.Show("Invalid Boggle server url.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            validUrl = false;
+            MessageBox.Show("Invalid Boggle server url.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         /// <summary>
@@ -90,6 +93,7 @@ namespace BoggleClient
             if (JoinGameEvent != null)
             {
                 JoinGameEvent();
+                validUrl = true;
             }
         }
 
@@ -110,7 +114,15 @@ namespace BoggleClient
         private void contentsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // TODO: Modify contents of help message box or create a new form with drop down items for help information.
-            MessageBox.Show("Welcome", "Help", MessageBoxButtons.OK);
+            var connecting = new StringBuilder();
+            connecting.Append("CONNECTING\n\n"
+                            + "1) Enter a boggle server url into the url text box.\n"
+                            + "2) Enter player name into the player name box.\n"
+                            + "3) Choose the duration for how long you would like to play.");           
+            connecting.Append("\n\nHOW TO PLAY\n"
+                            + "The game begins by shaking a covered tray of 16 cubic dice, each with a different letter printed on each of its sides. The dice settle into a 4×4 tray so that only the top letter of each cube is visible. After they have settled into the grid, a three-minute sand timer is started and all players simultaneously begin the main phase of play.[3] Each player searches for words that can be constructed from the letters of sequentially adjacent cubes, where adjacent cubes are those horizontally, vertically, and diagonally neighboring.Words must be at least three letters long, may include singular and plural(or other derived forms) separately, but may not use the same letter cube more than once per word.Each player records all the words he or she finds by writing on a private sheet of paper.After three minutes have elapsed, all players must immediately stop writing and the game enters the scoring phase. In the scoring phase, each player reads off his or her list of discovered words.If two or more players wrote the same word, it is removed from all players' lists. Any player may challenge the validity of a word, in which case a previously nominated dictionary is used to verify or refute it. For all words remaining after duplicates have been eliminated, points are awarded based on the length of the word. The winner is the player whose point total is highest, with any ties typically broken by count of long words. One cube is printed with Qu. This is because Q is nearly always followed by U in English words (see exceptions), and if there were a Q in Boggle, it would be challenging to use if a U did not, by chance, appear next to it.For the purposes of scoring Qu counts as two letters: squid would score two points (for a five-letter word) despite being formed from a chain of only four cubes.");
+
+            MessageBox.Show("WELCOME\n\n" + connecting.ToString(), "Help", MessageBoxButtons.OK);
         }
 
         /// <summary>
@@ -120,10 +132,17 @@ namespace BoggleClient
         {
             if (CancelEvent != null)
             {
-                CancelEvent();
+                if(validUrl)
+                {
+                    CancelEvent();
+                }
             }
         }
 
+        /// <summary>
+        /// Shows the start from window. Made this method so the controller doesn't open the 
+        /// GUI from inside the controller. Makes testing easier.
+        /// </summary>
         public void ShowWindow()
         {
             Show();
