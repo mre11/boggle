@@ -78,7 +78,7 @@ namespace BoggleClientControllerTester
             throw new NotImplementedException();
         }
 
-        public void OpenWindow()
+        public void ShowWindow()
         {
             throw new NotImplementedException();
         }

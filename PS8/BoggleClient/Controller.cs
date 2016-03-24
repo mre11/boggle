@@ -2,17 +2,17 @@
 using System.Dynamic;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 
 // TODO testing and error handling
 // TODO From assignment: The interface should remain responsive even if a REST request takes a long time to complete.  When a request is active, a Cancel button should become active.  Clicking on this button should gracefully cancel the request.  (Note that the various request methods in C# all have versions that take CancellationTokens as parameters.)
 // TODO make sure we have all the comments we need
 // TODO make sure if we exit the game or click the x button we leave the server.
-// TODO figure out how to get the words of the players.
+//              we don't need to do anything here.  we aren't "on" the server, when we exit we just send no more requests.
+// TODO write help menu
 
 namespace BoggleClient
 {
@@ -42,14 +42,9 @@ namespace BoggleClient
         private string gameId;
 
         /// <summary>
-        /// List of words that player 1 entered.
+        /// Set to true if the Join request has been cancelled
         /// </summary>
-        private List<Tuple<string, int>> player1Words;
-
-        /// <summary>
-        /// List of words that player 2 entered.
-        /// </summary>
-        private List<Tuple<string, int>> player2Words;
+        private bool cancelJoin;
 
         /// <summary>
         /// Creates a controller for the given game board and start window
@@ -66,6 +61,7 @@ namespace BoggleClient
 
             userToken = "";
             gameId = "";
+            cancelJoin = false;
         }
 
         private async void RunGame()
@@ -74,20 +70,37 @@ namespace BoggleClient
             {
                 // Create a new user
                 userToken = await CreateUser(startWindow.PlayerName);
+                if (userToken == "")
+                {
+                    throw new HttpRequestException();
+                }
 
                 // Join a game
+                startWindow.JoiningGame = true;
                 gameId = await JoinGame(userToken, startWindow.RequestedDuration);
+                
+                if (gameId == "")
+                {
+                    throw new HttpRequestException();
+                }
 
                 // Get the initial game status
-                dynamic gameStatus = null;
+                dynamic gameStatus = await GameStatus(gameId, false);
 
-                while (gameStatus == null || gameStatus.GameState != "active")
+                while (!cancelJoin && gameStatus.GameState == "pending")
                 {
                     gameStatus = await GameStatus(gameId, false);
                 }
 
-                player1Words = new List<Tuple<string, int>>();
-                player2Words = new List<Tuple<string, int>>();
+                if (cancelJoin)
+                {
+                    return;
+                }
+
+                if (gameStatus.GameState != "active")
+                {
+                    throw new HttpRequestException();
+                }
 
                 gameWindow.WriteBoardSpaces(gameStatus.Board.ToString());
                 gameWindow.Player1Name = gameStatus.Player1.Nickname;
@@ -96,22 +109,18 @@ namespace BoggleClient
                 gameWindow.Player2Score = gameStatus.Player2.Score;
                 gameWindow.TimeLeft = gameStatus.TimeLeft;
 
-                bool success = userToken != "" && gameId != "";
+                startWindow.Hide();
+                gameWindow.ShowWindow();
+                startWindow.JoiningGame = false;
 
-                if (success)
-                {
-                    startWindow.Hide();
-                    gameWindow.OpenWindow();
-
-                    // TODO use this result to show some kind of results window
-                    dynamic result = await ContinuousUpdateGameStatus();
-                    //MessageBox.Show(result.Player1.WordsPlayed);
-                    //MessageBox.Show(result.Player2.WordsPlayed[0]);
-                    //MessageBox.Show(player1Words.ToString() + "\n" + player2Words.ToString(), "Words");
-                }
+                // TODO use this result to show some kind of results window
+                dynamic result = await ContinuousUpdateGameStatus();
+                string test = result.Player1.Score;
+                MessageBox.Show(test);
             }
             catch (HttpRequestException) 
             {
+
                 startWindow.DisplayErrorMessage();
             }
 
@@ -127,12 +136,10 @@ namespace BoggleClient
 
             while (gameStatus.GameState == "active")
             {
+                // TODO try to figure out how to do this once a second
                 gameWindow.Player1Score = gameStatus.Player1.Score;
                 gameWindow.Player2Score = gameStatus.Player2.Score;
                 gameWindow.TimeLeft = gameStatus.TimeLeft;
-
-                // TODO how to properly only update once a second? this way freezes up the GUI
-                //Thread.Sleep(900);
 
                 gameStatus = await GameStatus(gameId, true);
             }
@@ -144,12 +151,6 @@ namespace BoggleClient
 
             if (gameStatus.GameState == "completed")
             {
-                // TODO: Figure out how to get all of the words out of dynamic type
-                // If you figure out how to do it, might as well delete the lists and move this for-loop in run game.
-                foreach(dynamic word in gameStatus.Player2.WordsAdded)
-                {
-                    player2Words.Add(new Tuple<string, int>(word, word.Score));
-                }
                 return gameStatus;
             }
             return "";
@@ -215,6 +216,7 @@ namespace BoggleClient
         /// </summary>
         private async void CancelJoinRequest()
         {
+            cancelJoin = true;
             using (HttpClient client = CreateClient(startWindow.ServerUrl))
             {
                 // Create the data for the request
@@ -226,6 +228,7 @@ namespace BoggleClient
                 content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
                 await client.PutAsync("/BoggleService.svc/games", content);
             }
+            startWindow.JoiningGame = false;
         }
 
         /// <summary>
@@ -249,12 +252,6 @@ namespace BoggleClient
                 {
                     MessageBox.Show(response.StatusCode.ToString());
                 }
-                else
-                {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    dynamic playWordResponse = JsonConvert.DeserializeObject(responseContent);
-                    player1Words.Add(new Tuple<string, int>(word, (int) playWordResponse.Score));
-                }
             }
         }
 
@@ -273,7 +270,7 @@ namespace BoggleClient
                     string responseContent = await response.Content.ReadAsStringAsync();
                     return JsonConvert.DeserializeObject(responseContent);
                 }
-                return null;
+                return "";
             }
         }
 

@@ -103,7 +103,7 @@ namespace BoggleClient
         /// <summary>
         /// Opens the GameBoard UI.
         /// </summary>
-        public void OpenWindow()
+        public void ShowWindow()
         {
             Show();
         }

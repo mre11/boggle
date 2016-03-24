@@ -33,28 +33,18 @@ namespace BoggleClient
         }
 
         /// <summary>
-        /// Property that enables the controller to make the all text boxes on the Start Form
-        /// read only.
+        /// When JoiningGame is true, the only UI element which is enabled is the Cancel button.
         /// </summary>
-        public bool DisableStartTextBoxes
+        public bool JoiningGame
         {
             set
             {
-                if(value)
-                {
-                    playerNameBox.ReadOnly = true;
-                    serverUrlBox.ReadOnly = true;
-                    durationUpDown.ReadOnly = true;
-                    durationUpDown.Enabled = false;
-                }
-                else
-                {
-                    playerNameBox.ReadOnly = false;
-                    serverUrlBox.ReadOnly = false;
-                    durationUpDown.ReadOnly = false;
-                    durationUpDown.Enabled = true;
-                }
+                startOkButton.Enabled = !value;
+                startCancelButton.Enabled = value;
 
+                playerNameBox.Enabled = !value;
+                serverUrlBox.Enabled = !value;
+                durationUpDown.Enabled = !value;
             }
         }
 
@@ -84,11 +74,6 @@ namespace BoggleClient
         public void DisplayErrorMessage()
         {
             MessageBox.Show("Invalid Boggle server url.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-
-            // Re-enable input components
-            startOkButton.Enabled = true;
-            startCancelButton.Enabled = false;
-            DisableStartTextBoxes = false;
         }
 
         /// <summary>
@@ -98,9 +83,6 @@ namespace BoggleClient
         {
             if (JoinGameEvent != null)
             {
-                startOkButton.Enabled = false;
-                startCancelButton.Enabled = true;
-                DisableStartTextBoxes = true;
                 JoinGameEvent();
             }
         }
@@ -112,9 +94,6 @@ namespace BoggleClient
         {
             if (CancelEvent != null)
             {
-                startCancelButton.Enabled = false;
-                startOkButton.Enabled = true;
-                DisableStartTextBoxes = false;
                 CancelEvent();
             }
         }

@@ -50,7 +50,7 @@ namespace BoggleClient
         /// <summary>
         /// Opens the GameBoard UI.
         /// </summary>
-        void OpenWindow();
+        void ShowWindow();
 
         /// <summary>
         /// Updates the boardspaces with a letter from a string of input.
