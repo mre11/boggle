@@ -64,7 +64,7 @@ namespace BoggleClient
             gameWindow = game;
             gameWindow.PlayWordEvent += PlayWord;
             gameWindow.ExitGameEvent += ExitGame;
-
+            gameWindow.Exit += Close;
             userToken = "";
             gameId = "";
             cancelJoin = false;
@@ -108,12 +108,25 @@ namespace BoggleClient
         }
 
         /// <summary>
+        /// When the exit button is click, the timer is stopped and buttons are enable for both windows.
+        /// </summary>
+        private void Close()
+        {
+            updateTimer.Stop();
+            gameWindow.EnterBoxEnabled = true;
+            gameWindow.EnterButtonEnabled = true;
+            gameWindow.HideWindow();
+            startWindow.JoiningGame = false;
+            startWindow.Show();
+        }
+
+        /// <summary>
         /// Requests the game status and uses it to update the view
         /// </summary>
         private async void UpdateGameStatus(object sender, System.Timers.ElapsedEventArgs e)
         {
             dynamic gameStatus = await GameStatus(gameId, true);
-            // TODO we need the stuff below to be called on the GUI event thread!
+
             if (cancelJoin)
             {
                 return;
@@ -126,8 +139,7 @@ namespace BoggleClient
                     gameWindow.EnterButtonEnabled = false;
                     gameWindow.EnterBoxEnabled = false;
                     ShowResults(gameStatus);
-                }));
-                
+                }));              
 
             }
             else if (gameStatus.GameState == "active")
@@ -186,7 +198,7 @@ namespace BoggleClient
             builder.AppendLine("Player 2: " + gameStatus.Player2.NickName);
             for (int i = 0; i < player2Words.Count; i++)
             {
-                builder.AppendLine(player2Words[i] + "\t\t" + player2Scores[i]);
+                builder.AppendLine(player2Words[i] + "\t" + player2Scores[i]);
             }
             
             MessageBox.Show(builder.ToString(), "Results");
