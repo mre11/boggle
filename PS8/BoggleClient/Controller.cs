@@ -87,8 +87,9 @@ namespace BoggleClient
 
                 // Join a game
                 startWindow.JoiningGame = true;
-                gameId = await JoinGame(userToken, startWindow.RequestedDuration);
                 
+                gameId = await JoinGame(userToken, startWindow.RequestedDuration);
+
                 if (gameId == "")
                 {
                     throw new HttpRequestException();
@@ -120,22 +121,30 @@ namespace BoggleClient
             else if (gameStatus.GameState == "completed")
             {
                 updateTimer.Stop();
-                gameWindow.EnterButtonEnabled = false;
-                gameWindow.EnterBoxEnabled = false;
-                ShowResults(gameStatus);
+                startWindow.Invoke((Action)(() =>
+                {
+                    gameWindow.EnterButtonEnabled = false;
+                    gameWindow.EnterBoxEnabled = false;
+                    ShowResults(gameStatus);
+                }));
+                
+
             }
             else if (gameStatus.GameState == "active")
             {
                 // TODO Maybe put a flag on some of these so we only do them once
-                startWindow.JoiningGame = false;
-                startWindow.Hide();
-                gameWindow.ShowWindow();
-                gameWindow.WriteBoardSpaces(gameStatus.Board.ToString());
-                gameWindow.Player1Name = gameStatus.Player1.Nickname;
-                gameWindow.Player1Score = gameStatus.Player1.Score;
-                gameWindow.Player2Name = gameStatus.Player2.Nickname;
-                gameWindow.Player2Score = gameStatus.Player2.Score;
-                gameWindow.TimeLeft = gameStatus.TimeLeft;
+                startWindow.Invoke((Action)(() => 
+                {
+                    startWindow.JoiningGame = false;
+                    startWindow.Hide();
+                    gameWindow.ShowWindow();
+                    gameWindow.WriteBoardSpaces(gameStatus.Board.ToString());
+                    gameWindow.Player1Name = gameStatus.Player1.Nickname;
+                    gameWindow.Player1Score = gameStatus.Player1.Score;
+                    gameWindow.Player2Name = gameStatus.Player2.Nickname;
+                    gameWindow.Player2Score = gameStatus.Player2.Score;
+                    gameWindow.TimeLeft = gameStatus.TimeLeft;
+                }));
             }
         }
 
