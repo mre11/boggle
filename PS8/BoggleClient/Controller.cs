@@ -126,6 +126,7 @@ namespace BoggleClient
             }
             else if (gameStatus.GameState == "active")
             {
+                // TODO Maybe put a flag on some of these so we only do them once
                 startWindow.JoiningGame = false;
                 startWindow.Hide();
                 gameWindow.ShowWindow();
