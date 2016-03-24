@@ -8,6 +8,22 @@ namespace BoggleClientControllerTester
 {
     class BoggleClientStub : IBoggleBoard
     {
+        public bool EnterBoxEnabled
+        {
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public bool EnterButtonEnabled
+        {
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public string Player1Name
         {
             get

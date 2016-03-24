@@ -2,17 +2,18 @@
 // Morgan Empey (U0634576), Braden Klunker (U0725294)
 
 using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 
 // TODO testing and error handling
 // TODO From assignment: The interface should remain responsive even if a REST request takes a long time to complete.  When a request is active, a Cancel button should become active.  Clicking on this button should gracefully cancel the request.  (Note that the various request methods in C# all have versions that take CancellationTokens as parameters.)
-// make sure if we exit the game or click the x button we leave the server.
-//              we don't need to do anything here.  we aren't "on" the server, when we exit we just send no more requests.
+//          check this out for the above: http://stackoverflow.com/questions/10547895/how-can-i-tell-when-httpclient-has-timed-out
 
 namespace BoggleClient
 {
@@ -115,8 +116,12 @@ namespace BoggleClient
                 startWindow.Hide();
                 gameWindow.ShowWindow();
                 startWindow.JoiningGame = false;
-               
-                ShowResults(await ContinuousUpdateGameStatus());
+
+                dynamic result = await ContinuousUpdateGameStatus();
+
+                gameWindow.EnterButtonEnabled = false;
+                gameWindow.EnterBoxEnabled = false;
+                ShowResults(result);
             }
             catch (HttpRequestException) 
             {
@@ -166,7 +171,43 @@ namespace BoggleClient
         /// </summary>
         private void ShowResults(dynamic gameStatus)
         {
+            var player1Words = new List<string>();
+            var player1Scores = new List<string>();
+            var player2Words = new List<string>();
+            var player2Scores = new List<string>();
 
+            // Store the words and scores in lists
+            foreach (dynamic wordScorePair in gameStatus.Player1.WordsPlayed)
+            {
+                string word = wordScorePair.Word;
+                string score = wordScorePair.Score;
+                player1Words.Add(word);
+                player1Scores.Add(score);
+            }
+
+            foreach (dynamic wordScorePair in gameStatus.Player2.WordsPlayed)
+            {
+                string word = wordScorePair.Word;
+                string score = wordScorePair.Score;
+                player2Words.Add(word);
+                player2Scores.Add(score);
+            }
+
+            // Write out a string containing the results
+            var builder = new StringBuilder();
+            builder.AppendLine("Player 1: " + gameStatus.Player1.NickName);
+            for (int i = 0; i < player1Words.Count; i++)
+            {
+                builder.AppendLine(player1Words[i] + "\t" + player1Scores[i]);
+            }
+            builder.AppendLine();
+            builder.AppendLine("Player 2: " + gameStatus.Player2.NickName);
+            for (int i = 0; i < player2Words.Count; i++)
+            {
+                builder.AppendLine(player2Words[i] + "\t\t" + player2Scores[i]);
+            }
+            
+            MessageBox.Show(builder.ToString(), "Results");
         }
 
         /// <summary>

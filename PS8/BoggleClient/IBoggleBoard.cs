@@ -47,6 +47,16 @@ namespace BoggleClient
         string TimeLeft { get; set; }
 
         /// <summary>
+        /// Sets the enabled state of the enter button
+        /// </summary>
+        bool EnterButtonEnabled { set; }
+
+        /// <summary>
+        /// Sets the enabled state of the enter word text box
+        /// </summary>
+        bool EnterBoxEnabled { set; }
+
+        /// <summary>
         /// Closes this IBoggleBoard window.
         /// </summary>
         void HideWindow();

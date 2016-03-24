@@ -89,6 +89,22 @@ namespace BoggleClient
         }
 
         /// <summary>
+        /// Sets the enabled state of the enter button
+        /// </summary>
+        public bool EnterButtonEnabled
+        {
+            set { gameEnterButton.Enabled = value; }
+        }
+
+        /// <summary>
+        /// Sets the enabled state of the enter word text box
+        /// </summary>
+        public bool EnterBoxEnabled
+        {
+            set { wordBox.Enabled = value; }
+        }
+
+        /// <summary>
         /// Event is fired if the exit game button is pressed.
         /// </summary>
         public event Action<FormClosingEventArgs> ExitGameEvent;
@@ -136,6 +152,7 @@ namespace BoggleClient
         {
             if (e.KeyChar == (char)13)
             {
+                e.Handled = true;
                 gameEnterButton_Click(sender, e);
             }            
         }

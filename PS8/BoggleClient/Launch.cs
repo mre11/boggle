@@ -19,13 +19,13 @@ namespace BoggleClient
 
             // Control both game board and start form.
             GameBoard gameBoard = new GameBoard();
-            StartForm startWIndow = new StartForm();
-            new Controller(gameBoard, startWIndow);
+            StartForm startWindow = new StartForm();
+            new Controller(gameBoard, startWindow);
 
             // Or new Controller(j); Use this if we change the constructor of the 
             // controller to take in 1 parameter.
 
-            Application.Run(startWIndow);
+            Application.Run(startWindow);
         }
     }
 }
