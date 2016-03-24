@@ -48,6 +48,11 @@ namespace BoggleClient
         private bool cancelJoin;
 
         /// <summary>
+        /// Timer
+        /// </summary>
+        private System.Timers.Timer updateTimer;
+
+        /// <summary>
         /// Creates a controller for the given game board and start window
         /// </summary>
         public Controller(IBoggleBoard game, StartForm start)
@@ -63,6 +68,7 @@ namespace BoggleClient
             userToken = "";
             gameId = "";
             cancelJoin = false;
+            updateTimer = new System.Timers.Timer(1000);
         }
 
         /// <summary>
@@ -87,83 +93,49 @@ namespace BoggleClient
                 {
                     throw new HttpRequestException();
                 }
-
-                // Get the initial game status
-                dynamic gameStatus = await GameStatus(gameId, false);
-
-                while (!cancelJoin && gameStatus.GameState == "pending")
-                {
-                    gameStatus = await GameStatus(gameId, false);
-                }
-
-                if (cancelJoin)
-                {
-                    return;
-                }
-
-                if (gameStatus.GameState != "active")
-                {
-                    throw new HttpRequestException();
-                }
-
-                gameWindow.WriteBoardSpaces(gameStatus.Board.ToString());
-                gameWindow.Player1Name = gameStatus.Player1.Nickname;
-                gameWindow.Player1Score = gameStatus.Player1.Score;
-                gameWindow.Player2Name = gameStatus.Player2.Nickname;
-                gameWindow.Player2Score = gameStatus.Player2.Score;
-                gameWindow.TimeLeft = gameStatus.TimeLeft;
-
-                startWindow.Hide();
-                gameWindow.ShowWindow();
-                startWindow.JoiningGame = false;
-
-                dynamic result = await ContinuousUpdateGameStatus();
-
-                gameWindow.EnterButtonEnabled = false;
-                gameWindow.EnterBoxEnabled = false;
-                ShowResults(result);
+                
+                // Start timer to update the game view periodically
+                updateTimer.Elapsed += UpdateGameStatus;
+                updateTimer.AutoReset = true;
+                updateTimer.Start();
             }
             catch (HttpRequestException) 
             {
 
                 startWindow.DisplayErrorMessage();
             }
-
         }
 
         /// <summary>
-        /// Continuously requests the game status to update the scores and time left in the view.
-        /// Returns the status of the completed game, or the empty string if the game was not completed.
+        /// Requests the game status and uses it to update the view
         /// </summary>
-        private async Task<dynamic> ContinuousUpdateGameStatus()
+        private async void UpdateGameStatus(object sender, System.Timers.ElapsedEventArgs e)
         {
             dynamic gameStatus = await GameStatus(gameId, true);
-
-            while (!cancelJoin && gameStatus.GameState == "active")
-            {
-                // TODO try to figure out how to do this once a second
-                gameWindow.Player1Score = gameStatus.Player1.Score;
-                gameWindow.Player2Score = gameStatus.Player2.Score;
-                gameWindow.TimeLeft = gameStatus.TimeLeft;
-
-                gameStatus = await GameStatus(gameId, true);
-            }
-
+            // TODO we need the stuff below to be called on the GUI event thread!
             if (cancelJoin)
             {
-                return "";
+                return;
             }
-
-            gameStatus = await GameStatus(gameId, false);
-            gameWindow.Player1Score = gameStatus.Player1.Score;
-            gameWindow.Player2Score = gameStatus.Player2.Score;
-            gameWindow.TimeLeft = gameStatus.TimeLeft;
-
-            if (gameStatus.GameState == "completed")
+            else if (gameStatus.GameState == "completed")
             {
-                return gameStatus;
+                updateTimer.Stop();
+                gameWindow.EnterButtonEnabled = false;
+                gameWindow.EnterBoxEnabled = false;
+                ShowResults(gameStatus);
             }
-            return "";
+            else if (gameStatus.GameState == "active")
+            {
+                startWindow.JoiningGame = false;
+                startWindow.Hide();
+                gameWindow.ShowWindow();
+                gameWindow.WriteBoardSpaces(gameStatus.Board.ToString());
+                gameWindow.Player1Name = gameStatus.Player1.Nickname;
+                gameWindow.Player1Score = gameStatus.Player1.Score;
+                gameWindow.Player2Name = gameStatus.Player2.Nickname;
+                gameWindow.Player2Score = gameStatus.Player2.Score;
+                gameWindow.TimeLeft = gameStatus.TimeLeft;
+            }
         }
 
         /// <summary>
