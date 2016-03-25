@@ -7,12 +7,10 @@ using System.Dynamic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
-
-// TODO From assignment: The interface should remain responsive even if a REST request takes a long time to complete.  When a request is active, a Cancel button should become active.  Clicking on this button should gracefully cancel the request.  (Note that the various request methods in C# all have versions that take CancellationTokens as parameters.)
-//          check this out for the above: http://stackoverflow.com/questions/10547895/how-can-i-tell-when-httpclient-has-timed-out
 
 namespace BoggleClient
 {
@@ -52,6 +50,11 @@ namespace BoggleClient
         private bool initializeGameBoard;
 
         /// <summary>
+        /// Provides a source for a cancellation token
+        /// </summary>
+        private CancellationTokenSource cts;
+
+        /// <summary>
         /// Creates a controller for the given game board and start window
         /// </summary>
         public Controller(IBoggleBoard game, StartForm start)
@@ -61,13 +64,14 @@ namespace BoggleClient
             startWindow.CancelEvent += CancelJoinRequest;
 
             gameWindow = game;
-            gameWindow.PlayWordEvent += PlayWord;
+            gameWindow.PlayWordEvent += PlayWordHandler;
             gameWindow.ExitGameEvent += ExitGame;
 
             userToken = "";
             gameId = "";
             initializeGameBoard = true;
             updateTimer = new System.Timers.Timer(1000);
+            cts = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -78,7 +82,7 @@ namespace BoggleClient
             try
             {
                 // Create a new user
-                userToken = await CreateUser(startWindow.PlayerName);
+                userToken = await CreateUser(startWindow.PlayerName, cts.Token);
                 if (userToken == null)
                 {
                     throw new HttpRequestException();
@@ -87,7 +91,7 @@ namespace BoggleClient
                 // Join a game
                 startWindow.JoiningGame = true;
                 
-                gameId = await JoinGame(userToken, startWindow.RequestedDuration);
+                gameId = await JoinGame(userToken, startWindow.RequestedDuration, cts.Token);
 
                 if (gameId == null)
                 {
@@ -110,7 +114,7 @@ namespace BoggleClient
         /// </summary>
         private async void UpdateGameStatus(object sender, System.Timers.ElapsedEventArgs e)
         {
-            dynamic gameStatus = await GameStatus(gameId, true);
+            dynamic gameStatus = await GameStatus(gameId, true, cts.Token);
 
             if (gameStatus == null)
             {
@@ -204,7 +208,7 @@ namespace BoggleClient
         /// <summary>
         /// Creates a new user with the given name for the boggle game.  Returns a unique user token.
         /// </summary>
-        private async Task<string> CreateUser(string name)
+        private async Task<string> CreateUser(string name, CancellationToken token)
         {
             using (HttpClient client = CreateClient(startWindow.ServerUrl))
             {
@@ -215,7 +219,7 @@ namespace BoggleClient
                 // Send POST request
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data));
                 content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
-                HttpResponseMessage response = await client.PostAsync("/BoggleService.svc/users", content);
+                HttpResponseMessage response = await client.PostAsync("/BoggleService.svc/users", content, token);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -231,7 +235,7 @@ namespace BoggleClient
         /// <summary>
         /// Requests the server to join a game using the given user token and specified duration
         /// </summary>
-        private async Task<string> JoinGame(string userToken, int duration)
+        private async Task<string> JoinGame(string userToken, int duration, CancellationToken token)
         {
             using (HttpClient client = CreateClient(startWindow.ServerUrl))
             {
@@ -243,7 +247,7 @@ namespace BoggleClient
                 // Send POST request
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data));
                 content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
-                HttpResponseMessage response = await client.PostAsync("/BoggleService.svc/games", content);
+                HttpResponseMessage response = await client.PostAsync("/BoggleService.svc/games", content, token);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -261,6 +265,9 @@ namespace BoggleClient
         /// </summary>
         private async void CancelJoinRequest()
         {
+            cts.Cancel();
+            cts = new CancellationTokenSource();
+
             using (HttpClient client = CreateClient(startWindow.ServerUrl))
             {
                 // Create the data for the request
@@ -278,7 +285,7 @@ namespace BoggleClient
         /// <summary>
         /// Sends a play word request using the given word
         /// </summary>
-        private async void PlayWord(string word)
+        private async void PlayWord(string word, CancellationToken token)
         {
             using (HttpClient client = CreateClient(startWindow.ServerUrl))
             {
@@ -290,7 +297,7 @@ namespace BoggleClient
                 // Send PUT request
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data));
                 content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
-                HttpResponseMessage response = await client.PutAsync("/BoggleService.svc/games/" + gameId, content);
+                HttpResponseMessage response = await client.PutAsync("/BoggleService.svc/games/" + gameId, content, token);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -300,14 +307,22 @@ namespace BoggleClient
         }
 
         /// <summary>
+        /// Handles the PlayWord event
+        /// </summary>
+        private void PlayWordHandler(string word)
+        {
+            PlayWord(word, cts.Token);
+        }
+
+        /// <summary>
         /// Gets the game status from the boggle server for a specific gameID. 
         /// </summary>
-        private async Task<dynamic> GameStatus(string gameId, bool brief)
+        private async Task<dynamic> GameStatus(string gameId, bool brief, CancellationToken token)
         {
             using (HttpClient client = CreateClient(startWindow.ServerUrl))
             {
                 // Get the game status for the specified gameID                
-                HttpResponseMessage response = await client.GetAsync("/BoggleService.svc/games/" + gameId + (brief ? "?Brief:yes":""));
+                HttpResponseMessage response = await client.GetAsync("/BoggleService.svc/games/" + gameId + (brief ? "?Brief:yes":""), token);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -327,6 +342,8 @@ namespace BoggleClient
             if (e.CloseReason == CloseReason.UserClosing)
             {
                 e.Cancel = true;
+                cts.Cancel();
+                cts = new CancellationTokenSource();
                 gameWindow.EnterBoxEnabled = true;
                 gameWindow.EnterButtonEnabled = true;
                 gameWindow.HideWindow();                
