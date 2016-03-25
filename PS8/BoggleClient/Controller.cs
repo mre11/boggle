@@ -60,7 +60,7 @@ namespace BoggleClient
         public Controller(IBoggleBoard game, StartForm start)
         {
             startWindow = start;
-            startWindow.JoinGameEvent += RunGame;
+            startWindow.JoinGameEvent += StartGame;
             startWindow.CancelEvent += CancelJoinRequest;
 
             gameWindow = game;
@@ -77,7 +77,7 @@ namespace BoggleClient
         /// <summary>
         /// Sets up and runs a single game
         /// </summary>
-        private async void RunGame()
+        private async void StartGame()
         {
             try
             {
@@ -103,9 +103,9 @@ namespace BoggleClient
                 updateTimer.AutoReset = true;
                 updateTimer.Start();
             }
-            catch (HttpRequestException) 
+            catch (Exception)
             {
-                startWindow.DisplayErrorMessage(); // TODO better error messages?
+                startWindow.DisplayErrorMessage();
             }
         }
 
@@ -114,7 +114,12 @@ namespace BoggleClient
         /// </summary>
         private async void UpdateGameStatus(object sender, System.Timers.ElapsedEventArgs e)
         {
-            dynamic gameStatus = await GameStatus(gameId, true, cts.Token);
+            dynamic gameStatus = null;
+            try
+            {
+                gameStatus = await GameStatus(gameId, true, cts.Token);
+            }
+            catch (Exception) { }
 
             if (gameStatus == null)
             {

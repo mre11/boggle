@@ -83,7 +83,7 @@ namespace BoggleClient
         public void DisplayErrorMessage()
         {
             validUrl = false;
-            MessageBox.Show("Invalid Boggle server url.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show("Error starting game.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         /// <summary>
