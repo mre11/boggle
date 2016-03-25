@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 
-// TODO testing and error handling
 // TODO From assignment: The interface should remain responsive even if a REST request takes a long time to complete.  When a request is active, a Cancel button should become active.  Clicking on this button should gracefully cancel the request.  (Note that the various request methods in C# all have versions that take CancellationTokens as parameters.)
 //          check this out for the above: http://stackoverflow.com/questions/10547895/how-can-i-tell-when-httpclient-has-timed-out
 
@@ -43,14 +42,14 @@ namespace BoggleClient
         private string gameId;
 
         /// <summary>
-        /// Set to true if the Join request has been cancelled
-        /// </summary>
-        private bool cancelJoin;
-
-        /// <summary>
         /// Timer
         /// </summary>
         private System.Timers.Timer updateTimer;
+
+        /// <summary>
+        /// True if the game board hasn't been initialized yet
+        /// </summary>
+        private bool initializeGameBoard;
 
         /// <summary>
         /// Creates a controller for the given game board and start window
@@ -67,7 +66,7 @@ namespace BoggleClient
 
             userToken = "";
             gameId = "";
-            cancelJoin = false;
+            initializeGameBoard = true;
             updateTimer = new System.Timers.Timer(1000);
         }
 
@@ -80,7 +79,7 @@ namespace BoggleClient
             {
                 // Create a new user
                 userToken = await CreateUser(startWindow.PlayerName);
-                if (userToken == "")
+                if (userToken == null)
                 {
                     throw new HttpRequestException();
                 }
@@ -90,7 +89,7 @@ namespace BoggleClient
                 
                 gameId = await JoinGame(userToken, startWindow.RequestedDuration);
 
-                if (gameId == "")
+                if (gameId == null)
                 {
                     throw new HttpRequestException();
                 }
@@ -102,9 +101,7 @@ namespace BoggleClient
             }
             catch (HttpRequestException) 
             {
-
                 startWindow.DisplayErrorMessage();
-
             }
         }
 
@@ -115,21 +112,14 @@ namespace BoggleClient
         {
             dynamic gameStatus = await GameStatus(gameId, true);
 
-            if (cancelJoin)
+            if (gameStatus == null)
             {
-                updateTimer.Stop();
-                cancelJoin = false;
-
-                // Invoke this code baack on the GUI thread.
+                updateTimer.Stop();                
+                initializeGameBoard = true;
                 startWindow.Invoke((Action)(() =>
                 {
-                    gameWindow.EnterBoxEnabled = true;
-                    gameWindow.EnterButtonEnabled = true;
                     gameWindow.HideWindow();
-                    startWindow.JoiningGame = false;
-                    startWindow.ShowWindow();
                 }));
-
                 return;
             }
             else if (gameStatus.GameState == "completed")
@@ -138,23 +128,29 @@ namespace BoggleClient
                 startWindow.Invoke((Action)(() =>
                 {
                     gameWindow.EnterButtonEnabled = false;
-                    gameWindow.EnterBoxEnabled = false;
-                    ShowResults(gameStatus);
-                }));              
+                    gameWindow.EnterBoxEnabled = false;                    
+                }));
+
+                initializeGameBoard = true;                
+                ShowResults(gameStatus);
 
             }
             else if (gameStatus.GameState == "active")
             {
-                // TODO Maybe put a flag on some of these so we only do them once
                 startWindow.Invoke((Action)(() => 
                 {
-                    startWindow.JoiningGame = false;
-                    startWindow.Hide();
-                    gameWindow.ShowWindow();
-                    gameWindow.WriteBoardSpaces(gameStatus.Board.ToString());
-                    gameWindow.Player1Name = gameStatus.Player1.Nickname;
-                    gameWindow.Player1Score = gameStatus.Player1.Score;
-                    gameWindow.Player2Name = gameStatus.Player2.Nickname;
+                    if (initializeGameBoard)
+                    {
+                        initializeGameBoard = false;
+                        startWindow.JoiningGame = false;
+                        startWindow.Hide();
+                        gameWindow.ShowWindow();
+                        gameWindow.WriteBoardSpaces(gameStatus.Board.ToString());
+                        gameWindow.Player1Name = gameStatus.Player1.Nickname;
+                        gameWindow.Player2Name = gameStatus.Player2.Nickname;
+                    }      
+                                  
+                    gameWindow.Player1Score = gameStatus.Player1.Score;                    
                     gameWindow.Player2Score = gameStatus.Player2.Score;
                     gameWindow.TimeLeft = gameStatus.TimeLeft;
                 }));
@@ -190,13 +186,13 @@ namespace BoggleClient
 
             // Write out a string containing the results
             var builder = new StringBuilder();
-            builder.AppendLine("Player 1: " + gameStatus.Player1.NickName);
+            builder.AppendLine("Player 1:\t" + gameStatus.Player1.Nickname);
             for (int i = 0; i < player1Words.Count; i++)
             {
                 builder.AppendLine(player1Words[i] + "\t" + player1Scores[i]);
             }
             builder.AppendLine();
-            builder.AppendLine("Player 2: " + gameStatus.Player2.NickName);
+            builder.AppendLine("Player 2:\t" + gameStatus.Player2.Nickname);
             for (int i = 0; i < player2Words.Count; i++)
             {
                 builder.AppendLine(player2Words[i] + "\t" + player2Scores[i]);
@@ -228,7 +224,7 @@ namespace BoggleClient
                     dynamic result = JsonConvert.DeserializeObject(responseContent);
                     return result.UserToken;
                 }
-                return "";
+                return null;
             }
         }
 
@@ -256,7 +252,7 @@ namespace BoggleClient
                     dynamic result = JsonConvert.DeserializeObject(responseContent);
                     return result.GameID;
                 }
-                return "";
+                return null;
             }
         }
 
@@ -265,7 +261,6 @@ namespace BoggleClient
         /// </summary>
         private async void CancelJoinRequest()
         {
-            cancelJoin = true;
             using (HttpClient client = CreateClient(startWindow.ServerUrl))
             {
                 // Create the data for the request
@@ -319,7 +314,7 @@ namespace BoggleClient
                     string responseContent = await response.Content.ReadAsStringAsync();
                     return JsonConvert.DeserializeObject(responseContent);
                 }
-                return "";
+                return null;
             }
         }
 
@@ -331,9 +326,10 @@ namespace BoggleClient
         {
             if (e.CloseReason == CloseReason.UserClosing)
             {
-                cancelJoin = true;
                 e.Cancel = true;
-                gameWindow.HideWindow();
+                gameWindow.EnterBoxEnabled = true;
+                gameWindow.EnterButtonEnabled = true;
+                gameWindow.HideWindow();                
                 startWindow.Show();
             }
         }

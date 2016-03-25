@@ -185,7 +185,8 @@ namespace BoggleClient
             int i = 0;
             foreach(Label space in boardSpaces)
             {
-                space.Text = board[i++].ToString();
+                var letter = board[i++].ToString();
+                space.Text = letter == "Q" ? letter + "u" : letter;
             }            
         }
     }
