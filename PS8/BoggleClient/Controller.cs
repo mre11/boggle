@@ -101,7 +101,7 @@ namespace BoggleClient
             }
             catch (HttpRequestException) 
             {
-                startWindow.DisplayErrorMessage();
+                startWindow.DisplayErrorMessage(); // TODO better error messages?
             }
         }
 

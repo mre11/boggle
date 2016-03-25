@@ -402,6 +402,7 @@
             this.Controls.Add(this.boardSpace2);
             this.Controls.Add(this.boardSpace1);
             this.Controls.Add(this.boardSpace0);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "GameBoard";
             this.Text = "Boggle";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GameBoard_FormClosing);
