@@ -30,6 +30,21 @@ namespace Boggle
             return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
         }
 
+        public void CancelJoin(string userToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string CreateUser(string nickname)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IList<string> GameStatus(bool brief, string gameID)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Demo.  You can delete this.
         /// </summary>
@@ -37,6 +52,11 @@ namespace Boggle
         {
             SetStatus(OK);
             return list[0];
+        }
+
+        public string JoinGame(string userToken, int timeLimit)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -61,6 +81,11 @@ namespace Boggle
                 SetStatus(OK);
                 return list;
             }
+        }
+
+        public void PlayWord(string gameID, string userToken, string word)
+        {
+            throw new NotImplementedException();
         }
     }
 }
