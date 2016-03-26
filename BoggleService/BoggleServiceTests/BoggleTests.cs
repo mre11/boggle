@@ -262,5 +262,136 @@ namespace Boggle
             r = client.DoPutAsync("/games/" + gameID, data).Result;
             Assert.AreEqual(Forbidden, r.Status);
         }
+
+        /// <summary>
+        /// Test when GameID is invalid
+        /// </summary>
+        [TestMethod]
+        public void TestPlayWord2()
+        {
+            // First create a game
+            dynamic data = new ExpandoObject();
+            var userToken1 = Guid.NewGuid().ToString();
+            data.UserToken = userToken1;
+            data.TimeLimit = 10;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+
+            string gameID = r.Data.GameID;
+            Assert.AreNotEqual(null, gameID);
+
+            var userToken2 = Guid.NewGuid().ToString();
+            data.UserToken = userToken2;
+            r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            Assert.AreEqual(gameID, (string)r.Data.GameID);
+
+            // Do the put request
+            data = new ExpandoObject();
+            data.UserToken = userToken1;
+            data.Word = "hello";
+
+            gameID = "test";
+
+            r = client.DoPutAsync("/games/" + gameID, data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
+
+        /// <summary>
+        /// Test when UserToken is invalid
+        /// </summary>
+        [TestMethod]
+        public void TestPlayWord3()
+        {
+            // First create a game
+            dynamic data = new ExpandoObject();
+            var userToken1 = Guid.NewGuid().ToString();
+            data.UserToken = userToken1;
+            data.TimeLimit = 10;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+
+            string gameID = r.Data.GameID;
+            Assert.AreNotEqual(null, gameID);
+
+            var userToken2 = Guid.NewGuid().ToString();
+            data.UserToken = userToken2;
+            r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            Assert.AreEqual(gameID, r.Data.GameID.ToString());
+
+            // Do the put request
+            data = new ExpandoObject();
+            data.UserToken = Guid.NewGuid().ToString();
+            data.Word = "hello";
+
+            r = client.DoPutAsync("/games/" + gameID, data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
+
+        /// <summary>
+        /// Test when game state is not active
+        /// </summary>
+        [TestMethod]
+        public void TestPlayWord4()
+        {
+            // First create a game
+            dynamic data = new ExpandoObject();
+            var userToken1 = Guid.NewGuid().ToString();
+            data.UserToken = userToken1;
+            data.TimeLimit = 5;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+
+            string gameID = r.Data.GameID;
+            Assert.AreNotEqual(null, gameID);
+
+            //var userToken2 = Guid.NewGuid().ToString();
+            //data.UserToken = userToken2;
+            //r = client.DoPostAsync("/games", data).Result;
+            //Assert.AreEqual(Created, r.Status);
+            //Assert.AreEqual(gameID, (string)r.Data.GameID);
+
+            // Do the put request
+            data = new ExpandoObject();
+            data.UserToken = userToken1;
+            data.Word = "hello";
+
+            r = client.DoPutAsync("/games/" + gameID, data).Result;
+            Assert.AreEqual(Conflict, r.Status);
+        }
+
+        /// <summary>
+        /// Test a successful request
+        /// </summary>
+        [TestMethod]
+        public void TestPlayWord5()
+        {
+            // First create a game
+            dynamic data = new ExpandoObject();
+            var userToken1 = Guid.NewGuid().ToString();
+            data.UserToken = userToken1;
+            data.TimeLimit = 5;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+
+            string gameID = r.Data.GameID;
+            Assert.AreNotEqual(null, gameID);
+
+            var userToken2 = Guid.NewGuid().ToString();
+            data.UserToken = userToken2;
+            r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            Assert.AreEqual(gameID, (string)r.Data.GameID);
+
+            // Do the put request
+            data = new ExpandoObject();
+            data.UserToken = userToken1;
+            data.Word = "asdf";
+
+            r = client.DoPutAsync("/games/" + gameID, data).Result;
+            Assert.AreEqual(OK, r.Status);
+            Assert.AreEqual("-1", r.Data.Score.ToString());
+        }
     }
 }
