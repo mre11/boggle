@@ -79,7 +79,7 @@ namespace Boggle
             return list[0];
         }
 
-        public string JoinGame(string userToken)
+        public string JoinGame(string userToken, int timeLimit)
         {
             throw new NotImplementedException();
         }
