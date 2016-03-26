@@ -38,7 +38,7 @@ namespace Boggle
         /// should be used to identify the user in subsequent requests.Responds with status 201 (Created). 
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/users")]
-        string CreateUser(string nickname);
+        dynamic CreateUser(Player newPlayer);
 
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Boggle
         /// game's requested time limit. Returns the pending game's GameID. Responds with status 202 (Accepted).
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
-        string JoinGame(string userToken, int timeLimit);
+        string JoinGame(BoggleGame game);
 
         /// <summary>
         /// Cancel a pending request to join a game.
@@ -83,7 +83,7 @@ namespace Boggle
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{gameID}")]
-        void PlayWord(string gameID, string userToken, string word);
+        int PlayWord(string gameID, string userToken, string word);
 
         /// <summary>
         /// Get game status information.
