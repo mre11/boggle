@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using static System.Net.HttpStatusCode;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Boggle
 {
@@ -391,7 +392,106 @@ namespace Boggle
 
             r = client.DoPutAsync("/games/" + gameID, data).Result;
             Assert.AreEqual(OK, r.Status);
-            Assert.AreEqual("-1", r.Data.Score.ToString());
+            Assert.AreEqual(-1, (int)r.Data.Score);
+        }
+
+        /// <summary>
+        /// Test when GameID is invalid
+        /// </summary>
+        [TestMethod]
+        public void TestGameStatus1()
+        {
+            Response r = client.DoGetAsync("/games/badID").Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
+
+        /// <summary>
+        /// Test when GameState is pending
+        /// </summary>
+        [TestMethod]
+        public void TestGameStatus2()
+        {
+            // First create a game
+            dynamic data = new ExpandoObject();
+            var userToken1 = Guid.NewGuid().ToString();
+            data.UserToken = userToken1;
+            data.TimeLimit = 5;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+
+            string gameID = r.Data.GameID;
+            Assert.AreNotEqual(null, gameID);
+
+            // Do the get request
+            r = client.DoGetAsync("/games/" + gameID).Result;
+            Assert.AreEqual(OK, r.Status);
+            Assert.AreEqual("pending", r.Data.GameState.ToString());
+        }
+
+        /// <summary>
+        /// Test when Brief = "yes" and GameState is active
+        /// </summary>
+        [TestMethod]
+        public void TestGameStatus3()
+        {
+            // First create a game
+            dynamic data = new ExpandoObject();
+            var userToken1 = Guid.NewGuid().ToString();
+            data.UserToken = userToken1;
+            data.TimeLimit = 60;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+
+            string gameID = r.Data.GameID;
+            Assert.AreNotEqual(null, gameID);
+
+            var userToken2 = Guid.NewGuid().ToString();
+            data.UserToken = userToken2;
+            r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            Assert.AreEqual(gameID, (string)r.Data.GameID);
+
+            // Do the get request
+            r = client.DoGetAsync("/games/" + gameID, new string[] { "yes" }).Result;
+            Assert.AreEqual(OK, r.Status);
+            Assert.AreEqual("active", r.Data.GameState.ToString());
+            Assert.AreNotEqual(null, r.Data.TimeLeft.ToString());
+            Assert.AreEqual(0, (int)r.Data.Player1.Score);
+            Assert.AreEqual(0, (int)r.Data.Player2.Score);
+        }
+
+        /// <summary>
+        /// Test when Brief = "yes" and GameState is completed
+        /// </summary>
+        [TestMethod]
+        public void TestGameStatus4()
+        {
+            // First create a game
+            dynamic data = new ExpandoObject();
+            var userToken1 = Guid.NewGuid().ToString();
+            data.UserToken = userToken1;
+            data.TimeLimit = 5;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+
+            string gameID = r.Data.GameID;
+            Assert.AreNotEqual(null, gameID);
+
+            var userToken2 = Guid.NewGuid().ToString();
+            data.UserToken = userToken2;
+            r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            Assert.AreEqual(gameID, (string)r.Data.GameID);
+
+            Thread.Sleep(6000); // make sure the game is completed
+
+            // Do the get request
+            r = client.DoGetAsync("/games/" + gameID, new string[] { "yes" }).Result;
+            Assert.AreEqual(OK, r.Status);
+            Assert.AreEqual("completed", r.Data.GameState.ToString());
+            Assert.AreEqual(0, (int)r.Data.TimeLeft);
+            Assert.AreEqual(0, (int)r.Data.Player1.Score);
+            Assert.AreEqual(0, (int)r.Data.Player2.Score);
         }
     }
 }
