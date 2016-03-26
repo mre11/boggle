@@ -58,7 +58,7 @@ namespace Boggle
         /// game's requested time limit. Returns the pending game's GameID. Responds with status 202 (Accepted).
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
-        string JoinGame(string userToken, int timeLimit);
+        string JoinGame(string userToken);
 
         /// <summary>
         /// Cancel a pending request to join a game.
@@ -83,7 +83,7 @@ namespace Boggle
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{gameID}")]
-        int PlayWord(string gameID, string userToken, string word);
+        void PlayWord(string gameID, string userToken, string word);
 
         /// <summary>
         /// Get game status information.
@@ -98,7 +98,7 @@ namespace Boggle
         /// <param name="gameID"></param>
         /// <returns></returns>
         [WebGet(UriTemplate = "/games?Brief={brief}&game={gameID}")]
-        IList<dynamic> GameStatus(bool brief, string gameID);
+        dynamic GameStatus(bool brief, string gameID);
 
     }
 }

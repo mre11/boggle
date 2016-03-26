@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Net;
 using System.ServiceModel.Web;
@@ -42,9 +43,31 @@ namespace Boggle
             throw new NotImplementedException();
         }
 
-        public IList<dynamic> GameStatus(bool brief, string gameID)
+        public dynamic GameStatus(bool brief, string gameID)
         {
-            throw new NotImplementedException();
+            if(!boards.ContainsKey(gameID))
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            SetStatus(OK);
+
+            dynamic status = new ExpandoObject();
+            if(brief)
+            {
+                status.GameState = "active";
+                BoggleBoard temp;
+                boards.TryGetValue(gameID, out temp);
+                status.Board = temp.ToString();
+                //status.TimeLeft = 
+
+            }
+            else
+            {
+
+            }
+            return status;
         }
 
         /// <summary>
@@ -56,7 +79,7 @@ namespace Boggle
             return list[0];
         }
 
-        public string JoinGame(string userToken, int timeLimit)
+        public string JoinGame(string userToken)
         {
             throw new NotImplementedException();
         }
@@ -85,7 +108,7 @@ namespace Boggle
             }
         }
 
-        public int PlayWord(string gameID, string userToken, string word)
+        public void PlayWord(string gameID, string userToken, string word)
         {
             throw new NotImplementedException();
         }

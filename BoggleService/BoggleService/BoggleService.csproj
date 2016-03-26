@@ -135,6 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoggleBoard.cs" />
+    <Compile Include="BoggleGame.cs" />
     <Compile Include="BoggleService.svc.cs">
       <DependentUpon>BoggleService.svc</DependentUpon>
     </Compile>
