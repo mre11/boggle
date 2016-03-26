@@ -58,7 +58,7 @@ namespace Boggle
         /// game's requested time limit. Returns the pending game's GameID. Responds with status 202 (Accepted).
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
-        string JoinGame(string userToken);
+        string JoinGame(string userToken, int timeLimit);
 
         /// <summary>
         /// Cancel a pending request to join a game.
