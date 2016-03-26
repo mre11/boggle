@@ -110,6 +110,9 @@ namespace Boggle
             data.Nickname = "";
             Response r = client.DoPostAsync("/users", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
+
+            r = client.DoPostAsync("/users", null).Result;
+            Assert.AreEqual(Forbidden, r.Status);
         }
 
         /// <summary>

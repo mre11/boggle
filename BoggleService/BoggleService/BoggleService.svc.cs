@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Net;
 using System.ServiceModel.Web;
@@ -37,7 +38,16 @@ namespace Boggle
 
         public string CreateUser(string nickname)
         {
-            throw new NotImplementedException();
+            if (nickname == null || nickname.Trim() == "")
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            SetStatus(Created);
+            dynamic response = new ExpandoObject();
+            response.UserToken = Guid.NewGuid().ToString();
+            return response;
         }
 
         public IList<string> GameStatus(bool brief, string gameID)
