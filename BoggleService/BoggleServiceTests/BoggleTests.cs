@@ -85,5 +85,182 @@ namespace Boggle
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual(15, r.Data);
         }
+
+        /// <summary>
+        /// Test successful request
+        /// </summary>
+        [TestMethod]
+        public void TestCreateUser1()
+        {
+            dynamic data = new ExpandoObject();
+            data.Nickname = "Test";
+            Response r = client.DoPostAsync("/users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            Assert.AreEqual(36, r.Data.UserToken.Length);
+        }
+
+        /// <summary>
+        /// Test when Nickname is invalid
+        /// </summary>
+        [TestMethod]
+        public void TestCreateUser2()
+        {
+            dynamic data = new ExpandoObject();
+            data.Nickname = "";
+            Response r = client.DoPostAsync("/users", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
+
+        /// <summary>
+        /// Test when UserToken is invalid
+        /// </summary>
+        [TestMethod]
+        public void TestJoinGame1()
+        {
+            dynamic data = new ExpandoObject();
+            data.UserToken = "";
+            data.TimeLimit = 10;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
+
+        /// <summary>
+        /// Test when TimeLimit is less than 5
+        /// </summary>
+        [TestMethod]
+        public void TestJoinGame2()
+        {
+            dynamic data = new ExpandoObject();
+            data.UserToken = Guid.NewGuid().ToString();
+            data.TimeLimit = 4;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
+
+        /// <summary>
+        /// Test when TimeLimit is greater than 120
+        /// </summary>
+        [TestMethod]
+        public void TestJoinGame3()
+        {
+            dynamic data = new ExpandoObject();
+            data.UserToken = Guid.NewGuid().ToString();
+            data.TimeLimit = 4;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
+
+        /// <summary>
+        /// Test for a UserToken conflict
+        /// </summary>
+        [TestMethod]
+        public void TestJoinGame4()
+        {
+            dynamic data = new ExpandoObject();
+            var guid = Guid.NewGuid().ToString();
+            data.UserToken = guid;
+            data.TimeLimit = 10;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+
+            r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Conflict, r.Status);
+        }
+
+        /// <summary>
+        /// Test a successful request
+        /// </summary>
+        [TestMethod]
+        public void TestJoinGame5()
+        {
+            dynamic data = new ExpandoObject();
+            data.UserToken = Guid.NewGuid().ToString();
+            data.TimeLimit = 10;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+
+            string gameID = r.Data.GameID;
+            Assert.AreNotEqual(null, gameID);
+
+            data.UserToken = Guid.NewGuid().ToString();
+            r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            Assert.AreEqual(gameID, (string)r.Data.GameID);
+        }
+
+        /// <summary>
+        /// Test when UserToken is invalid
+        /// </summary>
+        [TestMethod]
+        public void TestCancelJoin1()
+        {
+            dynamic data = new ExpandoObject();
+            Response r = client.DoPutAsync("/games", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
+
+        /// <summary>
+        /// Test when UserToken is not in pending game
+        /// </summary>
+        [TestMethod]
+        public void TestCancelJoin2()
+        {
+            dynamic data = new ExpandoObject();
+            data.UserToken = Guid.NewGuid().ToString();
+            Response r = client.DoPutAsync("/games", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
+
+        /// <summary>
+        /// Test successful request
+        /// </summary>
+        [TestMethod]
+        public void TestCancelJoin3()
+        {
+            var userToken = Guid.NewGuid().ToString();
+            dynamic data = new ExpandoObject();
+            data.UserToken = userToken;
+            data.TimeLimit = 10;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+
+            data = new ExpandoObject();
+            data.UserToken = userToken;
+
+            r = client.DoPutAsync("/games", data).Result;
+            Assert.AreEqual(OK, r.Status);
+        }
+
+        /// <summary>
+        /// Test when word is invalid
+        /// </summary>
+        [TestMethod]
+        public void TestPlayWord1()
+        {
+            // First create a game
+            dynamic data = new ExpandoObject();
+            var userToken1 = Guid.NewGuid().ToString();
+            data.UserToken = userToken1;
+            data.TimeLimit = 10;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+
+            string gameID = r.Data.GameID;
+            Assert.AreNotEqual(null, gameID);
+
+            var userToken2 = Guid.NewGuid().ToString();
+            data.UserToken = userToken2;
+            r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            Assert.AreEqual(gameID, (string)r.Data.GameID);
+
+            // Do the put request
+            data = new ExpandoObject();
+            data.UserToken = userToken1;
+            data.Word = "";
+
+            r = client.DoPutAsync("/games/" + gameID, data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
     }
 }
