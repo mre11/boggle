@@ -44,7 +44,7 @@ namespace Boggle
         /// <summary>
         /// Join a game.
         /// 
-        /// If UserToken is invalid, TimeLimit< 5, or TimeLimit> 120, responds with status 403 (Forbidden).
+        /// If UserToken is invalid, TimeLimit<5, or TimeLimit> 120, responds with status 403 (Forbidden).
         /// 
         /// Otherwise, if UserToken is already a player in the pending game, responds with status 409 (Conflict).
         /// 
@@ -83,7 +83,7 @@ namespace Boggle
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{gameID}")]
-        void PlayWord(string gameID, string userToken, string word);
+        int PlayWord(string gameID, string userToken, string word);
 
         /// <summary>
         /// Get game status information.
@@ -98,7 +98,7 @@ namespace Boggle
         /// <param name="gameID"></param>
         /// <returns></returns>
         [WebGet(UriTemplate = "/games?Brief={brief}&game={gameID}")]
-        IList<string> GameStatus(bool brief, string gameID);
+        IList<dynamic> GameStatus(bool brief, string gameID);
 
     }
 }

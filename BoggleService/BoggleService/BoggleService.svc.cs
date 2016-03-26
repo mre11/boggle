@@ -9,6 +9,8 @@ namespace Boggle
 {
     public class BoggleService : IBoggleService
     {
+        private readonly static Dictionary<string, string> tokens = new Dictionary<string, string>();
+        private readonly static Dictionary<string, BoggleBoard> boards = new Dictionary<string, BoggleBoard>();
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
@@ -40,7 +42,7 @@ namespace Boggle
             throw new NotImplementedException();
         }
 
-        public IList<string> GameStatus(bool brief, string gameID)
+        public IList<dynamic> GameStatus(bool brief, string gameID)
         {
             throw new NotImplementedException();
         }
@@ -83,7 +85,7 @@ namespace Boggle
             }
         }
 
-        public void PlayWord(string gameID, string userToken, string word)
+        public int PlayWord(string gameID, string userToken, string word)
         {
             throw new NotImplementedException();
         }
