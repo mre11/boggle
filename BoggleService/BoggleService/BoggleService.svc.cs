@@ -10,6 +10,8 @@ namespace Boggle
 {
     public class BoggleService : IBoggleService
     {
+        private readonly static Dictionary<string, string> tokens = new Dictionary<string, string>();
+        private readonly static Dictionary<string, BoggleBoard> boards = new Dictionary<string, BoggleBoard>();
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
@@ -50,9 +52,31 @@ namespace Boggle
             return response;
         }
 
-        public IList<string> GameStatus(bool brief, string gameID)
+        public dynamic GameStatus(bool brief, string gameID)
         {
-            throw new NotImplementedException();
+            if(!boards.ContainsKey(gameID))
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            SetStatus(OK);
+
+            dynamic status = new ExpandoObject();
+            if(brief)
+            {
+                status.GameState = "active";
+                BoggleBoard temp;
+                boards.TryGetValue(gameID, out temp);
+                status.Board = temp.ToString();
+                //status.TimeLeft = 
+
+            }
+            else
+            {
+
+            }
+            return status;
         }
 
         /// <summary>

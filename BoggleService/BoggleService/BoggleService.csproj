@@ -135,6 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoggleBoard.cs" />
+    <Compile Include="BoggleGame.cs" />
     <Compile Include="BoggleService.svc.cs">
       <DependentUpon>BoggleService.svc</DependentUpon>
     </Compile>
@@ -166,7 +167,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>23055</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:50000/</IISUrl>
+          <IISUrl>http://localhost:60000/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
