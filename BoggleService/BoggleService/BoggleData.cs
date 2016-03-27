@@ -7,7 +7,7 @@ using System.Web;
 namespace Boggle
 {
     [DataContract]
-    public class BoggleData
+    public class BoggleGame
     {
         [DataMember]
         public string GameID { get; set; }
@@ -30,7 +30,7 @@ namespace Boggle
         [DataMember]
         public User Player2 { get; set; }
 
-        public BoggleData(BoggleBoard board, int timeLeft)
+        public BoggleGame(BoggleBoard board, int timeLeft)
         {
             Board = board;
             GameState = "pending";

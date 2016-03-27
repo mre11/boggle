@@ -34,16 +34,11 @@ namespace Boggle
             return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
         }
 
-        public void CancelJoin(string userToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string CreateUser(User newPlayer)
+        public User CreateUser(User user)
         {
             lock(sync)
             {
-                if (newPlayer.Nickname == null || newPlayer.Nickname.Trim() == "")
+                if (user.Nickname == null || user.Nickname.Trim() == "")
                 {
                     SetStatus(Forbidden);
                     return null;
@@ -55,13 +50,13 @@ namespace Boggle
                 //return response;
 
                 string userToken = Guid.NewGuid().ToString();
-                return userToken;
+                return null;
 
             }
 
         }
 
-        public dynamic GameStatus(bool brief, string gameID)
+        public BoggleGame GameStatus(bool brief, string gameID)
         {
             lock (sync)
             {
@@ -100,11 +95,6 @@ namespace Boggle
             return list[0];
         }
 
-        public string JoinGame(BoggleData game)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Demo.  You can delete this.
         /// </summary>
@@ -129,7 +119,17 @@ namespace Boggle
             }
         }
 
-        public int PlayWord(string gameID, string userToken, string word)
+        public BoggleGame JoinGame(BoggleGame game)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CancelJoin(User user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public BoggleWord PlayWord(string gameID, string userToken, string word)
         {
             throw new NotImplementedException();
         }

@@ -38,7 +38,7 @@ namespace Boggle
         /// should be used to identify the user in subsequent requests.Responds with status 201 (Created). 
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/users")]
-        string CreateUser(User newPlayer);
+        User CreateUser(User user);
 
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Boggle
         /// game's requested time limit. Returns the pending game's GameID. Responds with status 202 (Accepted).
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
-        string JoinGame(BoggleData game);
+        BoggleGame JoinGame(BoggleGame game); // TODO maybe it takes a JoinGameData?
 
         /// <summary>
         /// Cancel a pending request to join a game.
@@ -67,8 +67,8 @@ namespace Boggle
         /// 
         /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
         /// </summary>
-        [WebInvoke(Method = "PUT", UriTemplate = "/games/{userToken}")]
-        void CancelJoin(string userToken);
+        [WebInvoke(Method = "PUT", UriTemplate = "/games")]
+        void CancelJoin(User user);
 
         /// <summary>
         /// Play a word in a game.
@@ -83,7 +83,7 @@ namespace Boggle
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{gameID}")]
-        int PlayWord(string gameID, string userToken, string word);
+        BoggleWord PlayWord(string gameID, string userToken, string word); // TODO maybe it takes a gameID and a PlayWordRequest?
 
         /// <summary>
         /// Get game status information.
@@ -97,8 +97,8 @@ namespace Boggle
         /// <param name="brief"></param>
         /// <param name="gameID"></param>
         /// <returns></returns>
-        [WebGet(UriTemplate = "/games?Brief={brief}&game={gameID}")]
-        dynamic GameStatus(bool brief, string gameID);
+        [WebGet(UriTemplate = "/games/{gameID}?Brief={brief}")] // TODO GameStatus Uri still not quite right. How to make Brief optional?
+        BoggleGame GameStatus(bool brief, string gameID);
 
     }
 }
