@@ -84,6 +84,22 @@ namespace Boggle
 
         }
 
+        /// <summary>
+        /// Join a game.
+        /// 
+        /// If UserToken is invalid, TimeLimit<5, or TimeLimit> 120, responds with status 403 (Forbidden).
+        /// 
+        /// Otherwise, if UserToken is already a player in the pending game, responds with status 409 (Conflict).
+        /// 
+        /// Otherwise, if there is already one player in the pending game, adds UserToken as the second player.
+        /// The pending game becomes active and a new pending game with no players is created.The active game's 
+        /// time limit is the integer average of the time limits requested by the two players. Returns the new 
+        /// active game's GameID(which should be the same as the old pending game's GameID). Responds with 
+        /// status 201 (Created).
+        /// 
+        /// Otherwise, adds UserToken as the first player of the pending game, and the TimeLimit as the pending 
+        /// game's requested time limit. Returns the pending game's GameID. Responds with status 202 (Accepted).
+        /// </summary>
         public BoggleGame JoinGame(JoinGameRequest requestBody)
         {          
             // This is the usage I'm thinking we'll want to keep track of the pending game
@@ -104,41 +120,105 @@ namespace Boggle
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Play a word in a game.
+        /// 
+        /// If Word is null or empty when trimmed, or if GameID or UserToken is missing or invalid, or if 
+        /// UserToken is not a player in the game identified by GameID, responds with response code 403 (Forbidden).
+        /// 
+        /// Otherwise, if the game state is anything other than "active", responds with response code 409 (Conflict).
+        /// 
+        /// Otherwise, records the trimmed Word as being played by UserToken in the game identified by GameID. Returns
+        /// the score for Word in the context of the game(e.g. if Word has been played before the score is zero). 
+        /// Responds with status 200 (OK). Note: The word is not case sensitive.
+        /// </summary>
         public BoggleWord PlayWord(string gameID, BoggleWord word)
         {
-            throw new NotImplementedException();
-        }
-
-        public BoggleGame GameStatus(string brief, string gameID)
-        {        
             lock (sync)
             {
                 int intGameID;
+                // Trim word so we only have to trim it once.
+                word.Word = word.Word.Trim();
 
-                if (!int.TryParse(gameID, out intGameID) || !games.ContainsKey(intGameID))
+                // TODO: usertoken not a player in the game identified by gameID
+                if (!int.TryParse(gameID, out intGameID) || (word.Word == "" || word.Word == null))
                 {
                     SetStatus(Forbidden);
                     return null;
                 }
 
-                SetStatus(OK);
+                // Get boggle game out of dictionary
+                BoggleGame game;
 
-                dynamic status = new ExpandoObject();
-                if (brief == "yes")
+                // Game ID was invalid
+                if(games.TryGetValue(intGameID, out game))
                 {
-                    status.GameState = "active";
-                    BoggleGame temp;
-                    games.TryGetValue(intGameID, out temp);
-                    status.Board = temp.ToString();
-                    //status.TimeLeft = 
-
+                    SetStatus(Forbidden);
+                    return null;
                 }
-                else
+
+                // Not active games will respond with code 403 Forbidden
+                if (game.GameState != "active")
                 {
-
-                }
-                return status;
+                    SetStatus(Conflict);
+                    return null;
+                } 
             }
+
+            throw new NotImplementedException();
         }
+
+
+        /// <summary>
+        /// Get game status information.
+        /// 
+        /// If GameID is invalid, responds with status 403 (Forbidden).
+        /// 
+        /// Otherwise, returns information about the game named by GameID as illustrated below.Note that the information
+        /// returned depends on whether "Brief=yes" was included as a parameter as well as on the state of the game. 
+        /// Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
+        /// </summary>
+        public BoggleGame GameStatus(string brief, string gameID)
+        {       
+            int intGameID;
+
+            if (!int.TryParse(gameID, out intGameID) || !games.ContainsKey(intGameID))
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            SetStatus(OK);
+
+            //dynamic status = new ExpandoObject();
+
+            BoggleGame temp;
+
+            games.TryGetValue(intGameID, out temp);
+
+            if(temp.GameState == "pending")
+            {
+                return temp;
+            }
+
+            if (brief == "yes")
+            {
+                //status.GameState = "active";
+                //BoggleGame temp;
+                //games.TryGetValue(intGameID, out temp);
+                //status.Board = temp.ToString();
+                //status.TimeLeft = 
+
+            }
+            else
+            {
+                
+            }
+
+
+            return temp;
+        }
+
+
     }
 }

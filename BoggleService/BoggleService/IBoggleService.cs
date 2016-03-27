@@ -78,9 +78,6 @@ namespace Boggle
         /// returned depends on whether "Brief=yes" was included as a parameter as well as on the state of the game. 
         /// Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
         /// </summary>
-        /// <param name="brief"></param>
-        /// <param name="gameID"></param>
-        /// <returns></returns>
         [WebGet(UriTemplate = "/games/{gameID}?Brief={brief}")] // TODO GameStatus Uri still not quite right. How to make Brief optional?
         BoggleGame GameStatus(string brief, string gameID);
 
