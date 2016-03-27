@@ -20,14 +20,14 @@ namespace Boggle
         /// Keeps track of the unique BoggleGames on the service.
         /// The key is the BoggleGame's GameID.
         /// </summary>
-        private readonly static Dictionary<string, BoggleGame> games = new Dictionary<string, BoggleGame>();
+        private readonly static Dictionary<int, BoggleGame> games = new Dictionary<int, BoggleGame>();
 
         /// <summary>
         /// The pending game has a GameID.
         /// If one player belongs to the pending game, it also has a UserID and a requested time limit.
         /// There is always exactly one pending game.
         /// </summary>
-        private static BoggleGame pendingGame;
+        private static int pendingGameID = 1;
 
         /// <summary>
         /// Provides a way to lock the data representation
@@ -84,8 +84,11 @@ namespace Boggle
 
         }
 
-        public BoggleGame JoinGame(BoggleGame game)
-        {
+        public BoggleGame JoinGame(JoinGameRequest requestBody)
+        {          
+            // This is the usage I'm thinking we'll want to keep track of the pending game
+            var tempGame = new BoggleGame(pendingGameID++);
+
             throw new NotImplementedException();
         }
 
@@ -107,10 +110,12 @@ namespace Boggle
         }
 
         public BoggleGame GameStatus(string brief, string gameID)
-        {
+        {        
             lock (sync)
             {
-                if (!games.ContainsKey(gameID))
+                int intGameID;
+
+                if (!int.TryParse(gameID, out intGameID) || !games.ContainsKey(intGameID))
                 {
                     SetStatus(Forbidden);
                     return null;
@@ -123,7 +128,7 @@ namespace Boggle
                 {
                     status.GameState = "active";
                     BoggleGame temp;
-                    games.TryGetValue(gameID, out temp);
+                    games.TryGetValue(intGameID, out temp);
                     status.Board = temp.ToString();
                     //status.TimeLeft = 
 

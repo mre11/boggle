@@ -9,32 +9,31 @@ namespace Boggle
     [DataContract]
     public class BoggleGame
     {
-        [DataMember]
-        public string GameID { get; set; }
+        [DataMember(EmitDefaultValue = false)]
+        public int GameID { get; set; }
 
-        [DataMember]
+        [DataMember(EmitDefaultValue = false)]
         public BoggleBoard Board { get; set; }
 
         [DataMember]
         public string GameState { get; set; }
 
-        [DataMember]
+        [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
 
-        [DataMember]
+        [DataMember(EmitDefaultValue = false)]
         public int TimeLeft { get; set; }
 
-        [DataMember]
+        [DataMember(EmitDefaultValue = false)]
         public User Player1 { get; set; }
 
-        [DataMember]
+        [DataMember(EmitDefaultValue = false)]
         public User Player2 { get; set; }
 
-        public BoggleGame(BoggleBoard board, int timeLeft)
+        public BoggleGame(int gameID)
         {
-            Board = board;
+            GameID = gameID;
             GameState = "pending";
-            TimeLeft = timeLeft;
         }
 
     }
@@ -57,8 +56,20 @@ namespace Boggle
 
     public class BoggleWord
     {
+        /// <summary>
+        /// The user token of the user who played this BoggleWord.
+        /// </summary>
+        public string UserToken { get; set; }
+
         public string Word { get; set; }
 
         public int Score { get; set; }
+    }
+
+    public class JoinGameRequest
+    {
+        public string UserToken { get; set; }
+
+        public int TimeLimit { get; set; }
     }
 }

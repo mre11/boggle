@@ -42,7 +42,7 @@ namespace Boggle
         /// game's requested time limit. Returns the pending game's GameID. Responds with status 202 (Accepted).
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
-        BoggleGame JoinGame(BoggleGame game); // TODO JoinGame: does this take a BoggleGame or a new class instead?
+        BoggleGame JoinGame(JoinGameRequest requestBody);
 
         /// <summary>
         /// Cancel a pending request to join a game.
@@ -67,7 +67,7 @@ namespace Boggle
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{gameID}")]
-        BoggleWord PlayWord(string gameID, BoggleWord word); // TODO PlayWord: maybe BoggleWord has a UserToken, or maybe we need a new class for the request body?
+        BoggleWord PlayWord(string gameID, BoggleWord word);
 
         /// <summary>
         /// Get game status information.
