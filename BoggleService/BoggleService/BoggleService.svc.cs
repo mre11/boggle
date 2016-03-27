@@ -10,9 +10,30 @@ namespace Boggle
 {
     public class BoggleService : IBoggleService
     {
-        private readonly static Dictionary<string, string> tokens = new Dictionary<string, string>();
-        private readonly static Dictionary<string, BoggleBoard> boards = new Dictionary<string, BoggleBoard>();
+        /// <summary>
+        /// Keeps track of the unique Users on the service.
+        /// The key is the User's UserToken.
+        /// </summary>
+        private readonly static Dictionary<string, User> users = new Dictionary<string, User>();
+
+        /// <summary>
+        /// Keeps track of the unique BoggleGames on the service.
+        /// The key is the BoggleGame's GameID.
+        /// </summary>
+        private readonly static Dictionary<string, BoggleGame> games = new Dictionary<string, BoggleGame>();
+
+        /// <summary>
+        /// The pending game has a GameID.
+        /// If one player belongs to the pending game, it also has a UserID and a requested time limit.
+        /// There is always exactly one pending game.
+        /// </summary>
+        private static BoggleGame pendingGame;
+
+        /// <summary>
+        /// Provides a way to lock the data representation
+        /// </summary>
         private readonly static object sync = new object();
+
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
@@ -26,7 +47,6 @@ namespace Boggle
         /// <summary>
         /// Returns a Stream version of index.html.
         /// </summary>
-        /// <returns></returns>
         public Stream API()
         {
             SetStatus(OK);
@@ -34,89 +54,34 @@ namespace Boggle
             return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
         }
 
-        public User CreateUser(User user)
+        /// <summary>
+        /// Creates a new user. 
+        /// 
+        /// If Nickname is null, or is empty when trimmed, responds with status 403 (Forbidden).
+        /// 
+        /// Otherwise, creates a new user with a unique UserToken and the trimmed Nickname.The returned UserToken 
+        /// should be used to identify the user in subsequent requests.Responds with status 201 (Created). 
+        /// </summary>
+        public User CreateUser(User requestedUser)
         {
             lock(sync)
             {
-                if (user.Nickname == null || user.Nickname.Trim() == "")
+                if (requestedUser.Nickname == null || requestedUser.Nickname.Trim() == "")
                 {
                     SetStatus(Forbidden);
                     return null;
                 }
-
-                SetStatus(Created);
-                //dynamic response = new ExpandoObject();
-                //UserToken = Guid.NewGuid().ToString();
-                //return response;
 
                 string userToken = Guid.NewGuid().ToString();
-                return null;
+                requestedUser.UserToken = userToken;
 
+                users.Add(requestedUser.UserToken, requestedUser);
+
+                SetStatus(Created);
+                requestedUser.Nickname = null;                
+                return requestedUser;
             }
 
-        }
-
-        public BoggleGame GameStatus(bool brief, string gameID)
-        {
-            lock (sync)
-            {
-                if (!boards.ContainsKey(gameID))
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-
-                SetStatus(OK);
-
-                dynamic status = new ExpandoObject();
-                if (brief)
-                {
-                    status.GameState = "active";
-                    BoggleBoard temp;
-                    boards.TryGetValue(gameID, out temp);
-                    status.Board = temp.ToString();
-                    //status.TimeLeft = 
-
-                }
-                else
-                {
-
-                }
-                return status; 
-            }
-        }
-
-        /// <summary>
-        /// Demo.  You can delete this.
-        /// </summary>
-        public int GetFirst(IList<int> list)
-        {
-            SetStatus(OK);
-            return list[0];
-        }
-
-        /// <summary>
-        /// Demo.  You can delete this.
-        /// </summary>
-        /// <returns></returns>
-        public IList<int> Numbers(string n)
-        {
-            int index;
-            if (!Int32.TryParse(n, out index) || index < 0)
-            {
-                SetStatus(Forbidden);
-                return null;
-            }
-            else
-            {
-                List<int> list = new List<int>();
-                for (int i = 0; i < index; i++)
-                {
-                    list.Add(i);
-                }
-                SetStatus(OK);
-                return list;
-            }
         }
 
         public BoggleGame JoinGame(BoggleGame game)
@@ -124,6 +89,13 @@ namespace Boggle
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Cancel a pending request to join a game.
+        /// 
+        /// If UserToken is invalid or is not a player in the pending game, responds with status 403 (Forbidden).
+        /// 
+        /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
+        /// </summary>
         public void CancelJoin(User user)
         {
             throw new NotImplementedException();
@@ -132,6 +104,36 @@ namespace Boggle
         public BoggleWord PlayWord(string gameID, string userToken, string word)
         {
             throw new NotImplementedException();
+        }
+
+        public BoggleGame GameStatus(string brief, string gameID)
+        {
+            lock (sync)
+            {
+                if (!games.ContainsKey(gameID))
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
+
+                SetStatus(OK);
+
+                dynamic status = new ExpandoObject();
+                if (brief == "yes")
+                {
+                    status.GameState = "active";
+                    BoggleGame temp;
+                    games.TryGetValue(gameID, out temp);
+                    status.Board = temp.ToString();
+                    //status.TimeLeft = 
+
+                }
+                else
+                {
+
+                }
+                return status;
+            }
         }
     }
 }

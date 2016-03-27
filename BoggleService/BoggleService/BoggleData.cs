@@ -42,7 +42,7 @@ namespace Boggle
     [DataContract]
     public class User
     {
-        [DataMember]
+        [DataMember(EmitDefaultValue = false)]
         public string Nickname { get; set; }
 
         [DataMember]

@@ -15,21 +15,6 @@ namespace Boggle
         Stream API();
 
         /// <summary>
-        /// Demo.  You can delete this.
-        /// </summary>
-        /// <param name="n"></param>
-        /// <returns></returns>
-        [WebGet(UriTemplate = "/numbers?length={n}")]
-        IList<int> Numbers(string n);
-
-        /// <summary>
-        /// Demo.  You can delete this.
-        /// </summary>
-        [WebInvoke(Method = "POST", UriTemplate = "/first")]
-        int GetFirst(IList<int> list);
-
-
-        /// <summary>
         /// Creates a new user. 
         /// 
         /// If Nickname is null, or is empty when trimmed, responds with status 403 (Forbidden).
@@ -98,7 +83,7 @@ namespace Boggle
         /// <param name="gameID"></param>
         /// <returns></returns>
         [WebGet(UriTemplate = "/games/{gameID}?Brief={brief}")] // TODO GameStatus Uri still not quite right. How to make Brief optional?
-        BoggleGame GameStatus(bool brief, string gameID);
+        BoggleGame GameStatus(string brief, string gameID);
 
     }
 }
