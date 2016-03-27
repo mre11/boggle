@@ -12,6 +12,7 @@ namespace Boggle
     {
         private readonly static Dictionary<string, string> tokens = new Dictionary<string, string>();
         private readonly static Dictionary<string, BoggleBoard> boards = new Dictionary<string, BoggleBoard>();
+        private readonly static object sync = new object();
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
@@ -38,45 +39,56 @@ namespace Boggle
             throw new NotImplementedException();
         }
 
-        public string CreateUser(string nickname)
+        public string CreateUser(Player newPlayer)
         {
-            if (nickname == null || nickname.Trim() == "")
+            lock(sync)
             {
-                SetStatus(Forbidden);
-                return null;
+                if (newPlayer.nickname == null || newPlayer.nickname.Trim() == "")
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
+
+                SetStatus(Created);
+                //dynamic response = new ExpandoObject();
+                //UserToken = Guid.NewGuid().ToString();
+                //return response;
+
+                string userToken = Guid.NewGuid().ToString();
+                return userToken;
+
             }
 
-            SetStatus(Created);
-            dynamic response = new ExpandoObject();
-            response.UserToken = Guid.NewGuid().ToString();
-            return response;
         }
 
         public dynamic GameStatus(bool brief, string gameID)
         {
-            if(!boards.ContainsKey(gameID))
+            lock (sync)
             {
-                SetStatus(Forbidden);
-                return null;
+                if (!boards.ContainsKey(gameID))
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
+
+                SetStatus(OK);
+
+                dynamic status = new ExpandoObject();
+                if (brief)
+                {
+                    status.GameState = "active";
+                    BoggleBoard temp;
+                    boards.TryGetValue(gameID, out temp);
+                    status.Board = temp.ToString();
+                    //status.TimeLeft = 
+
+                }
+                else
+                {
+
+                }
+                return status; 
             }
-
-            SetStatus(OK);
-
-            dynamic status = new ExpandoObject();
-            if(brief)
-            {
-                status.GameState = "active";
-                BoggleBoard temp;
-                boards.TryGetValue(gameID, out temp);
-                status.Board = temp.ToString();
-                //status.TimeLeft = 
-
-            }
-            else
-            {
-
-            }
-            return status;
         }
 
         /// <summary>
@@ -88,7 +100,7 @@ namespace Boggle
             return list[0];
         }
 
-        public string JoinGame(string userToken, int timeLimit)
+        public string JoinGame(BoggleGame game)
         {
             throw new NotImplementedException();
         }
@@ -117,7 +129,7 @@ namespace Boggle
             }
         }
 
-        public void PlayWord(string gameID, string userToken, string word)
+        public int PlayWord(string gameID, string userToken, string word)
         {
             throw new NotImplementedException();
         }

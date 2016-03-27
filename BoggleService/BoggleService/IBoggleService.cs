@@ -38,7 +38,7 @@ namespace Boggle
         /// should be used to identify the user in subsequent requests.Responds with status 201 (Created). 
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/users")]
-        dynamic CreateUser(Player newPlayer);
+        string CreateUser(Player newPlayer);
 
 
         /// <summary>
