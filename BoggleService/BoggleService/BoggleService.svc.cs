@@ -39,11 +39,11 @@ namespace Boggle
             throw new NotImplementedException();
         }
 
-        public string CreateUser(Player newPlayer)
+        public string CreateUser(User newPlayer)
         {
             lock(sync)
             {
-                if (newPlayer.nickname == null || newPlayer.nickname.Trim() == "")
+                if (newPlayer.Nickname == null || newPlayer.Nickname.Trim() == "")
                 {
                     SetStatus(Forbidden);
                     return null;
@@ -100,7 +100,7 @@ namespace Boggle
             return list[0];
         }
 
-        public string JoinGame(BoggleGame game)
+        public string JoinGame(BoggleData game)
         {
             throw new NotImplementedException();
         }
