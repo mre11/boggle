@@ -101,7 +101,7 @@ namespace Boggle
             throw new NotImplementedException();
         }
 
-        public BoggleWord PlayWord(string gameID, string userToken, string word)
+        public BoggleWord PlayWord(string gameID, BoggleWord word)
         {
             throw new NotImplementedException();
         }

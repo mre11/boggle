@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 
@@ -43,7 +42,7 @@ namespace Boggle
         /// game's requested time limit. Returns the pending game's GameID. Responds with status 202 (Accepted).
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
-        BoggleGame JoinGame(BoggleGame game); // TODO maybe it takes a JoinGameData?
+        BoggleGame JoinGame(BoggleGame game); // TODO JoinGame: does this take a BoggleGame or a new class instead?
 
         /// <summary>
         /// Cancel a pending request to join a game.
@@ -68,7 +67,7 @@ namespace Boggle
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{gameID}")]
-        BoggleWord PlayWord(string gameID, string userToken, string word); // TODO maybe it takes a gameID and a PlayWordRequest?
+        BoggleWord PlayWord(string gameID, BoggleWord word); // TODO PlayWord: maybe BoggleWord has a UserToken, or maybe we need a new class for the request body?
 
         /// <summary>
         /// Get game status information.
