@@ -106,6 +106,23 @@ namespace Boggle
             // This is the usage I'm thinking we'll want to keep track of the pending game
             var tempGame = new BoggleGame(pendingGameID++);
 
+            if((requestBody.UserToken == "" || requestBody.UserToken == null) || (requestBody.TimeLimit < 5 || requestBody.TimeLimit > 120))
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            if(users.ContainsKey(requestBody.UserToken))
+            {
+                SetStatus(Conflict);
+                return null;
+            }
+            else
+            {
+
+            }
+
+
             throw new NotImplementedException();
         }
 
@@ -198,6 +215,8 @@ namespace Boggle
 
             games.TryGetValue(intGameID, out temp);
 
+            BoggleGame h = new BoggleGame(temp);
+
             if(temp.GameState == "pending")
             {
                 return temp;
@@ -212,7 +231,13 @@ namespace Boggle
                 // score
                 // player2
                 // score
-                return temp;
+                h.GameID = 0;
+                h.TimeLimit = 0;
+                h.Player1.Nickname = null;
+                h.Player1.WordsPlayed = null;
+                h.Player2.Nickname = null;
+                h.Player2.WordsPlayed = null;
+                return h;
             }
             else
             {
@@ -228,9 +253,6 @@ namespace Boggle
                 // word
                 return temp;
             }
-
-
-            return temp;
         }
 
 

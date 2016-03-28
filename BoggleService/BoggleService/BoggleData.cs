@@ -36,6 +36,18 @@ namespace Boggle
             GameState = "pending";
         }
 
+        
+        public BoggleGame(BoggleGame newGame)
+        {
+            this.GameID = newGame.GameID;
+            this.GameState = newGame.GameState;
+            this.Board = newGame.Board;
+            this.TimeLimit = newGame.TimeLimit;
+            this.TimeLeft = newGame.TimeLeft;
+            this.Player1 = newGame.Player1;
+            this.Player2 = newGame.Player2;
+        }
+
     }
 
     [DataContract]
