@@ -22,8 +22,8 @@ namespace Boggle
         /// Otherwise, creates a new user with a unique UserToken and the trimmed Nickname.The returned UserToken 
         /// should be used to identify the user in subsequent requests.Responds with status 201 (Created). 
         /// </summary>
-        [OperationContract]
-        [WebInvoke(Method = "POST", UriTemplate = "/users")]
+        [OperationContract]                                                  // TODO: Not sure if we need to return it Json formatted.
+        [WebInvoke(Method = "POST", UriTemplate = "/users", ResponseFormat = WebMessageFormat.Json)]
         User CreateUser(User user);
 
 

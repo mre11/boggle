@@ -182,6 +182,7 @@ namespace Boggle
         {       
             int intGameID;
 
+            // Forbidden is returned if invalid gameID or no games witht that gameID are currently going on.
             if (!int.TryParse(gameID, out intGameID) || !games.ContainsKey(intGameID))
             {
                 SetStatus(Forbidden);
@@ -203,16 +204,11 @@ namespace Boggle
 
             if (brief == "yes")
             {
-                //status.GameState = "active";
-                //BoggleGame temp;
-                //games.TryGetValue(intGameID, out temp);
-                //status.Board = temp.ToString();
-                //status.TimeLeft = 
-
+                return temp;
             }
             else
             {
-                
+                return temp;
             }
 
 

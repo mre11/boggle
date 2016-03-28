@@ -15,7 +15,7 @@ namespace Boggle
         [DataMember(EmitDefaultValue = false)]
         public BoggleBoard Board { get; set; }
 
-        [DataMember]
+        [DataMember(Order = 1)]
         public string GameState { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
@@ -44,7 +44,9 @@ namespace Boggle
         [DataMember(EmitDefaultValue = false)]
         public string Nickname { get; set; }
 
-        [DataMember]
+        // Changed to false because if this is true it will be printed with player1 and player2
+        // we may want it to default. I'm not sure at the moment.
+        [DataMember(EmitDefaultValue = false)]
         public string UserToken { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
