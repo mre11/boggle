@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
@@ -204,10 +205,27 @@ namespace Boggle
 
             if (brief == "yes")
             {
+                // Need
+                // gamestate
+                // timeleft
+                // player1
+                // score
+                // player2
+                // score
                 return temp;
             }
             else
             {
+                // Need
+                // gamestate
+                // board
+                // timelimit
+                // timeleft
+                // player1
+                // nickname
+                // score
+                // wordsplayed
+                // word
                 return temp;
             }
 
