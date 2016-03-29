@@ -65,28 +65,32 @@ namespace Boggle
         /// </summary>
         public User CreateUser(User requestedUser)
         {
-            lock(sync)
+            try
             {
-                if (requestedUser.Nickname == null || requestedUser.Nickname.Trim() == "")
+                lock (sync)
                 {
-                    SetStatus(Forbidden);
-                    return null;
+                    InitializePendingGame();
+
+                    if (requestedUser.Nickname == null || requestedUser.Nickname.Trim() == "")
+                    {
+                        SetStatus(Forbidden);
+                        return null;
+                    }
+
+                    string userToken = Guid.NewGuid().ToString();
+                    requestedUser.UserToken = userToken;
+
+                    users.Add(requestedUser.UserToken, requestedUser);
+
+                    SetStatus(Created);
+                    requestedUser.Nickname = null;
+                    return requestedUser;
                 }
-
-                // If this is the first user on the service, we haven't initialized a pending game yet
-                if (games.Count == 0)
-                {
-                    games.Add(pendingGameID, new BoggleGame(pendingGameID));
-                }
-
-                string userToken = Guid.NewGuid().ToString();
-                requestedUser.UserToken = userToken;
-
-                users.Add(requestedUser.UserToken, requestedUser);
-
-                SetStatus(Created);
-                requestedUser.Nickname = null;                
-                return requestedUser;
+            }
+            catch (Exception)
+            {
+                SetStatus(InternalServerError);
+                return null;
             }
 
         }
@@ -109,55 +113,64 @@ namespace Boggle
         /// </summary>
         public BoggleGame JoinGame(JoinGameRequest requestBody)
         {
-            lock (sync)
+            try
             {
-                if (requestBody.UserToken == null || requestBody.UserToken == ""
-                    || requestBody.TimeLimit < 5 || requestBody.TimeLimit > 120)
+                lock (sync)
                 {
-                    SetStatus(Forbidden);
-                    return null;
-                }
+                    InitializePendingGame();
 
-                BoggleGame pendingGame;
-                if (games.TryGetValue(pendingGameID, out pendingGame))
-                {                    
-                    if (pendingGame.Player1 == null) // pending game has 0 players
+                    if (requestBody.UserToken == null || requestBody.UserToken == ""
+                        || requestBody.TimeLimit < 5 || requestBody.TimeLimit > 120)
                     {
-                        pendingGame.Player1 = new User();
-                        pendingGame.Player1.UserToken = requestBody.UserToken;
-                        pendingGame.TimeLimit = requestBody.TimeLimit;
-                        SetStatus(Accepted);
-
-                        // Compose the response. It should only contain the GameID.
-                        var response = new BoggleGame(pendingGameID);
-                        response.GameState = null;
-                        return response;
-                    }
-                    else if (pendingGame.Player1.UserToken == requestBody.UserToken) // requested user token is already in the pending game
-                    {
-                        SetStatus(Conflict);
+                        SetStatus(Forbidden);
                         return null;
                     }
-                    else // pending game has 1 player
+
+                    BoggleGame pendingGame;
+                    if (games.TryGetValue(pendingGameID, out pendingGame))
                     {
-                        pendingGame.Player2 = new User();
-                        pendingGame.Player2.UserToken = requestBody.UserToken;
-                        pendingGame.TimeLimit = (pendingGame.TimeLimit + requestBody.TimeLimit) / 2;
+                        if (pendingGame.Player1 == null) // pending game has 0 players
+                        {
+                            pendingGame.Player1 = new User();
+                            pendingGame.Player1.UserToken = requestBody.UserToken;
+                            pendingGame.TimeLimit = requestBody.TimeLimit;
+                            SetStatus(Accepted);
+
+                            // Compose the response. It should only contain the GameID.
+                            var response = new BoggleGame(pendingGameID);
+                            response.GameState = null;
+                            return response;
+                        }
+                        else if (pendingGame.Player1.UserToken == requestBody.UserToken) // requested user token is already in the pending game
+                        {
+                            SetStatus(Conflict);
+                            return null;
+                        }
+                        else // pending game has 1 player
+                        {
+                            pendingGame.Player2 = new User();
+                            pendingGame.Player2.UserToken = requestBody.UserToken;
+                            pendingGame.TimeLimit = (pendingGame.TimeLimit + requestBody.TimeLimit) / 2;
 
 
-                        // Compose the response. It should only contain the GameID.
-                        var response = new BoggleGame(pendingGameID);
-                        response.GameState = null;
+                            // Compose the response. It should only contain the GameID.
+                            var response = new BoggleGame(pendingGameID);
+                            response.GameState = null;
 
-                        // Create the next pending game
-                        pendingGameID++;
-                        games.Add(pendingGameID, new BoggleGame(pendingGameID));
+                            // Create the next pending game
+                            pendingGameID++;
+                            games.Add(pendingGameID, new BoggleGame(pendingGameID));
 
-                        SetStatus(Created);
-                        return response;
+                            SetStatus(Created);
+                            return response;
+                        }
                     }
+                    SetStatus(InternalServerError);
+                    return null;
                 }
-
+            }
+            catch (Exception)
+            {
                 SetStatus(InternalServerError);
                 return null;
             }
@@ -173,7 +186,38 @@ namespace Boggle
         public void CancelJoin(User user)
         {
             // TODO implement CancelJoin
-            throw new NotImplementedException();
+            try
+            {
+                lock (sync)
+                {
+                    InitializePendingGame();
+
+                    BoggleGame pendingGame;
+                    string pendingUserToken = "";
+                    if (games.TryGetValue(pendingGameID, out pendingGame) && pendingGame.Player1 != null)
+                    {
+                        if (pendingGame.Player1.UserToken != null)
+                        {
+                            pendingUserToken = pendingGame.Player1.UserToken;
+                        }
+                    }
+
+                    User existingUser;
+                    if (user.UserToken == null || !users.TryGetValue(user.UserToken, out existingUser)
+                        || user.UserToken != pendingUserToken)
+                    {
+                        SetStatus(Forbidden);
+                        return;
+                    }
+
+                    pendingGame.Player1 = null;
+                    SetStatus(OK);
+                }
+            }
+            catch (Exception)
+            {
+                SetStatus(InternalServerError); // TODO I think we want this in every method
+            }
         }
 
         /// <summary>
@@ -193,6 +237,8 @@ namespace Boggle
             // TODO finish implementing PlayWord
             lock (sync)
             {
+                InitializePendingGame();
+
                 int intGameID;
                 // Trim word so we only have to trim it once.
                 word.Word = word.Word.Trim();
@@ -208,7 +254,7 @@ namespace Boggle
                 BoggleGame game;
 
                 // Game ID was invalid
-                if(games.TryGetValue(intGameID, out game))
+                if (games.TryGetValue(intGameID, out game))
                 {
                     SetStatus(Forbidden);
                     return null;
@@ -239,6 +285,8 @@ namespace Boggle
         public BoggleGame GameStatus(string brief, string gameID)
         {
             // TODO finish implementing GameStatus
+            InitializePendingGame();
+
             int intGameID;
 
             // Forbidden is returned if invalid gameID or no games witht that gameID are currently going on.
@@ -258,7 +306,7 @@ namespace Boggle
 
             BoggleGame h = new BoggleGame(temp);
 
-            if(temp.GameState == "pending")
+            if (temp.GameState == "pending")
             {
                 return temp;
             }
@@ -293,6 +341,17 @@ namespace Boggle
                 // wordsplayed
                 // word
                 return temp;
+            }
+        }
+
+        /// <summary>
+        /// If the games record is empty, add a game as the first pending game.
+        /// </summary>
+        private void InitializePendingGame()
+        {
+            if (games.Count == 0)
+            {
+                games.Add(pendingGameID, new BoggleGame(pendingGameID));
             }
         }
     }
