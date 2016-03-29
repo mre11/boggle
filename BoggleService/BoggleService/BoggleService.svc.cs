@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.ServiceModel.Web;
+using System.Timers;
 using static System.Net.HttpStatusCode;
 
 namespace Boggle
@@ -149,7 +151,11 @@ namespace Boggle
                             pendingGame.Player2 = new User();
                             pendingGame.Player2.UserToken = requestBody.UserToken;
                             pendingGame.TimeLimit = (pendingGame.TimeLimit + requestBody.TimeLimit) / 2;
-
+                            //pendingGame.TimeLimitString = pendingGame.TimeLimit.ToString();
+                            pendingGame.GameState = "active";
+                            pendingGame.TimeLeft.Elapsed += GameOver;
+                            pendingGame.TimeLeft.Interval = pendingGame.TimeLimit * 1000;
+                            pendingGame.TimeLeft.Start();
 
                             // Compose the response. It should only contain the GameID.
                             var response = new BoggleGame(pendingGameID);
@@ -171,6 +177,16 @@ namespace Boggle
             {
                 SetStatus(InternalServerError);
                 return null;
+            }
+        }
+
+        private void GameOver(object sender, ElapsedEventArgs e)
+        {
+            if(sender is BoggleGame)
+            {
+                var t = (BoggleGame)sender;
+                t.GameState = "completed";
+                t.TimeLeft.Stop();
             }
         }
 
@@ -296,7 +312,7 @@ namespace Boggle
         {
             // TODO finish implementing GameStatus
             // TODO need to keep track of TimeLeft somehow... maybe use a Stopwatch?
-
+            
             try
             {
                 lock (sync)
@@ -321,11 +337,15 @@ namespace Boggle
                     games.TryGetValue(intGameID, out temp);
 
                     BoggleGame h = new BoggleGame(temp);
-
+                    
                     if (temp.GameState == "pending")
                     {
                         return temp;
                     }
+                    //else if(temp.TimeLeft.ToString() == "0")
+                    //{
+                    //    temp.GameState = "complete";
+                    //}
 
                     if (brief == "yes")
                     {
@@ -337,11 +357,14 @@ namespace Boggle
                         // player2
                         // score
                         h.GameID = 0;
-                        h.TimeLimit = 0;
+                        //h.TimeLimitString = null;
                         h.Player1.Nickname = null;
                         h.Player1.WordsPlayed = null;
+                        h.Player1.UserToken = null;
                         h.Player2.Nickname = null;
                         h.Player2.WordsPlayed = null;
+                        h.Player2.UserToken = null;
+
                         return h;
                     }
                     else
@@ -356,7 +379,8 @@ namespace Boggle
                         // score
                         // wordsplayed
                         // word
-                        return temp;
+                        //h.TimeLimitString = h.TimeLimit.ToString();
+                        return h;
                     }
                 }
             }

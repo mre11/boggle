@@ -9,17 +9,20 @@ namespace Boggle
         [DataMember(EmitDefaultValue = false)]
         public int GameID { get; set; }
 
-        [DataMember(EmitDefaultValue = false)]
-        public BoggleBoard Board { get; set; }
-
         [DataMember(Order = 1)]
         public string GameState { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public int TimeLimit { get; set; }
+        public BoggleBoard Board { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public int TimeLeft { get; set; }
+        public int TimeLimit { get; set; }
+
+        //[DataMember(EmitDefaultValue = false)]
+        //public string TimeLimitString { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public System.Timers.Timer TimeLeft { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
         public User Player1 { get; set; }
@@ -36,7 +39,6 @@ namespace Boggle
 
         public BoggleGame(BoggleGame newGame)
         {
-            this.GameID = newGame.GameID;
             this.GameState = newGame.GameState;
             this.Board = newGame.Board;
             this.TimeLimit = newGame.TimeLimit;
