@@ -10,7 +10,6 @@ namespace Boggle
         /// <summary>
         /// Sends back index.html as the response body.
         /// </summary>
-        //[OperationContract]
         [WebGet(UriTemplate = "/api")]
         Stream API();
 
@@ -22,7 +21,6 @@ namespace Boggle
         /// Otherwise, creates a new user with a unique UserToken and the trimmed Nickname.The returned UserToken 
         /// should be used to identify the user in subsequent requests.Responds with status 201 (Created). 
         /// </summary>
-        //[OperationContract]
         [WebInvoke(Method = "POST", UriTemplate = "/users")]
         User CreateUser(User user);
 
@@ -43,7 +41,6 @@ namespace Boggle
         /// Otherwise, adds UserToken as the first player of the pending game, and the TimeLimit as the pending 
         /// game's requested time limit. Returns the pending game's GameID. Responds with status 202 (Accepted).
         /// </summary>
-        //[OperationContract]
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
         BoggleGame JoinGame(JoinGameRequest requestBody);
 
@@ -54,7 +51,6 @@ namespace Boggle
         /// 
         /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
         /// </summary>
-        //[OperationContract]
         [WebInvoke(Method = "PUT", UriTemplate = "/games")]
         void CancelJoin(User user);
 
@@ -70,7 +66,6 @@ namespace Boggle
         /// the score for Word in the context of the game(e.g. if Word has been played before the score is zero). 
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
-        //[OperationContract]
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{gameID}")]
         BoggleWord PlayWord(string gameID, BoggleWord word);
 
@@ -83,7 +78,6 @@ namespace Boggle
         /// returned depends on whether "Brief=yes" was included as a parameter as well as on the state of the game. 
         /// Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
         /// </summary>
-        //[OperationContract]
         [WebGet(UriTemplate = "/games/{gameID}?Brief={brief}")] // TODO GameStatus Uri still not quite right. How to make Brief optional?
         BoggleGame GameStatus(string brief, string gameID);
     }
