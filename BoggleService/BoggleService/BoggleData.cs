@@ -18,11 +18,10 @@ namespace Boggle
         [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
 
-        //[DataMember(EmitDefaultValue = false)]
-        //public string TimeLimitString { get; set; }
+        public System.DateTime time { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public int TimeLeft { get; set; }
+        public int TimeLeft { get { return TimeLeft; } set { TimeLeft = (int)System.DateTime.Now.Subtract(time).TotalSeconds; } }
 
         [DataMember(EmitDefaultValue = false)]
         public User Player1 { get; set; }
@@ -35,18 +34,6 @@ namespace Boggle
             GameID = gameID;
             GameState = "pending";
         }
-
-
-        public BoggleGame(BoggleGame newGame)
-        {
-            this.GameState = newGame.GameState;
-            this.Board = newGame.Board;
-            this.TimeLimit = newGame.TimeLimit;
-            this.TimeLeft = newGame.TimeLeft;
-            this.Player1 = newGame.Player1;
-            this.Player2 = newGame.Player2;
-        }
-
     }
 
     [DataContract]
