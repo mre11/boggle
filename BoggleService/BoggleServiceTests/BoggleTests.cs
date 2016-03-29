@@ -328,7 +328,7 @@ namespace Boggle
         public void TestPlayWord5()
         {
             // Start a game
-            string[] result = StartBoggleGame(5);
+            string[] result = StartBoggleGame(60);
             string gameID = result[0];
             string userToken1 = result[1];
 

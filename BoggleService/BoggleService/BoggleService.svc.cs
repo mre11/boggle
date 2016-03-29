@@ -1,7 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Net;
 using System.ServiceModel.Web;
@@ -165,8 +163,8 @@ namespace Boggle
                             return response;
                         }
                     }
-                    SetStatus(InternalServerError);
-                    return null;
+
+                    throw new Exception();
                 }
             }
             catch (Exception)
@@ -185,7 +183,6 @@ namespace Boggle
         /// </summary>
         public void CancelJoin(User user)
         {
-            // TODO implement CancelJoin
             try
             {
                 lock (sync)
@@ -216,7 +213,7 @@ namespace Boggle
             }
             catch (Exception)
             {
-                SetStatus(InternalServerError); // TODO I think we want this in every method
+                SetStatus(InternalServerError);
             }
         }
 
@@ -234,39 +231,53 @@ namespace Boggle
         /// </summary>
         public BoggleWord PlayWord(string gameID, BoggleWord word)
         {
-            // TODO finish implementing PlayWord
-            lock (sync)
+            try
             {
-                InitializePendingGame();
-
-                int intGameID;
-                // Trim word so we only have to trim it once.
-                word.Word = word.Word.Trim();
-
-                // TODO: usertoken not a player in the game identified by gameID
-                if (!int.TryParse(gameID, out intGameID) || (word.Word == "" || word.Word == null))
+                lock (sync)
                 {
-                    SetStatus(Forbidden);
-                    return null;
+                    InitializePendingGame();
+
+                    // Word or UserToken is invalid
+                    User user;
+                    if (word.Word == null || word.UserToken == null || word.Word.Trim() == ""
+                        || !users.TryGetValue(word.UserToken, out user))
+                    {
+                        SetStatus(Forbidden);
+                        return null;
+                    }                    
+                    
+                    // GameID is invalid or we couldn't find the game
+                    int intGameID;
+                    BoggleGame game;
+                    if (!int.TryParse(gameID, out intGameID) || !games.TryGetValue(intGameID, out game))
+                    {
+                        SetStatus(Forbidden);
+                        return null;
+                    }
+
+                    // UserToken is not a player in this game
+                    if (game.Player1.UserToken != word.UserToken && game.Player2.UserToken != word.UserToken)
+                    {
+                        SetStatus(Forbidden);
+                        return null;
+                    }                    
+                    
+                    if (game.GameState != "active")
+                    {
+                        SetStatus(Conflict);
+                        return null;
+                    }
+
+                    var playedWord = word.Word;
+                    playedWord = playedWord.Trim();
+
+                    // TODO finish implementing PlayWord
+
+                    throw new Exception();
                 }
-
-                // Get boggle game out of dictionary
-                BoggleGame game;
-
-                // Game ID was invalid
-                if (games.TryGetValue(intGameID, out game))
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-
-                // Not active games will respond with code 403 Forbidden
-                if (game.GameState != "active")
-                {
-                    SetStatus(Conflict);
-                    return null;
-                }
-
+            }
+            catch (Exception)
+            {
                 SetStatus(InternalServerError);
                 return null;
             }
@@ -285,62 +296,75 @@ namespace Boggle
         public BoggleGame GameStatus(string brief, string gameID)
         {
             // TODO finish implementing GameStatus
-            InitializePendingGame();
+            // TODO need to keep track of TimeLeft somehow... maybe use a Stopwatch?
 
-            int intGameID;
-
-            // Forbidden is returned if invalid gameID or no games witht that gameID are currently going on.
-            if (!int.TryParse(gameID, out intGameID) || !games.ContainsKey(intGameID))
+            try
             {
-                SetStatus(Forbidden);
+                lock (sync)
+                {
+                    InitializePendingGame();
+
+                    int intGameID;
+
+                    // Forbidden is returned if invalid gameID or no games witht that gameID are currently going on.
+                    if (!int.TryParse(gameID, out intGameID) || !games.ContainsKey(intGameID))
+                    {
+                        SetStatus(Forbidden);
+                        return null;
+                    }
+
+                    SetStatus(OK);
+
+                    //dynamic status = new ExpandoObject();
+
+                    BoggleGame temp;
+
+                    games.TryGetValue(intGameID, out temp);
+
+                    BoggleGame h = new BoggleGame(temp);
+
+                    if (temp.GameState == "pending")
+                    {
+                        return temp;
+                    }
+
+                    if (brief == "yes")
+                    {
+                        // Need
+                        // gamestate
+                        // timeleft
+                        // player1
+                        // score
+                        // player2
+                        // score
+                        h.GameID = 0;
+                        h.TimeLimit = 0;
+                        h.Player1.Nickname = null;
+                        h.Player1.WordsPlayed = null;
+                        h.Player2.Nickname = null;
+                        h.Player2.WordsPlayed = null;
+                        return h;
+                    }
+                    else
+                    {
+                        // Need
+                        // gamestate
+                        // board
+                        // timelimit
+                        // timeleft
+                        // player1
+                        // nickname
+                        // score
+                        // wordsplayed
+                        // word
+                        return temp;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                SetStatus(InternalServerError);
                 return null;
-            }
-
-            SetStatus(OK);
-
-            //dynamic status = new ExpandoObject();
-
-            BoggleGame temp;
-
-            games.TryGetValue(intGameID, out temp);
-
-            BoggleGame h = new BoggleGame(temp);
-
-            if (temp.GameState == "pending")
-            {
-                return temp;
-            }
-
-            if (brief == "yes")
-            {
-                // Need
-                // gamestate
-                // timeleft
-                // player1
-                // score
-                // player2
-                // score
-                h.GameID = 0;
-                h.TimeLimit = 0;
-                h.Player1.Nickname = null;
-                h.Player1.WordsPlayed = null;
-                h.Player2.Nickname = null;
-                h.Player2.WordsPlayed = null;
-                return h;
-            }
-            else
-            {
-                // Need
-                // gamestate
-                // board
-                // timelimit
-                // timeleft
-                // player1
-                // nickname
-                // score
-                // wordsplayed
-                // word
-                return temp;
             }
         }
 
