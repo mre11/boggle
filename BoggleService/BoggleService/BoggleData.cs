@@ -22,7 +22,7 @@ namespace Boggle
         //public string TimeLimitString { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public System.Timers.Timer TimeLeft { get; set; }
+        public int TimeLeft { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
         public User Player1 { get; set; }

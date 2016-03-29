@@ -151,11 +151,11 @@ namespace Boggle
                             pendingGame.Player2 = new User();
                             pendingGame.Player2.UserToken = requestBody.UserToken;
                             pendingGame.TimeLimit = (pendingGame.TimeLimit + requestBody.TimeLimit) / 2;
-                            //pendingGame.TimeLimitString = pendingGame.TimeLimit.ToString();
-                            pendingGame.GameState = "active";
-                            pendingGame.TimeLeft.Elapsed += GameOver;
-                            pendingGame.TimeLeft.Interval = pendingGame.TimeLimit * 1000;
-                            pendingGame.TimeLeft.Start();
+
+                            //pendingGame.GameState = "active";                            
+                            //pendingGame.TimeLeft.Interval = pendingGame.TimeLimit * 1000;
+                            //pendingGame.TimeLeft.Elapsed += TimeLeftElapsed;
+                            //pendingGame.TimeLeft.Enabled = true;
 
                             // Compose the response. It should only contain the GameID.
                             var response = new BoggleGame(pendingGameID);
@@ -180,15 +180,20 @@ namespace Boggle
             }
         }
 
-        private void GameOver(object sender, ElapsedEventArgs e)
-        {
-            if(sender is BoggleGame)
-            {
-                var t = (BoggleGame)sender;
-                t.GameState = "completed";
-                t.TimeLeft.Stop();
-            }
-        }
+        /// <summary>
+        /// When time left for a game has elapsed, this method will handle the elapsed time event by setting gameState to completed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //private void TimeLeftElapsed(object sender, ElapsedEventArgs e)
+        //{
+        //    if(sender is BoggleGame)
+        //    {
+        //        var t = (BoggleGame)sender;
+        //        t.GameState = "completed";
+        //        t.TimeLeft.Enabled = false;
+        //    }
+        //}
 
         /// <summary>
         /// Cancel a pending request to join a game.
@@ -336,7 +341,7 @@ namespace Boggle
 
                     games.TryGetValue(intGameID, out temp);
 
-                    BoggleGame h = new BoggleGame(temp);
+                    //BoggleGame h = new BoggleGame(temp);
                     
                     if (temp.GameState == "pending")
                     {
@@ -356,16 +361,22 @@ namespace Boggle
                         // score
                         // player2
                         // score
-                        h.GameID = 0;
-                        //h.TimeLimitString = null;
-                        h.Player1.Nickname = null;
-                        h.Player1.WordsPlayed = null;
-                        h.Player1.UserToken = null;
-                        h.Player2.Nickname = null;
-                        h.Player2.WordsPlayed = null;
-                        h.Player2.UserToken = null;
+                        var briefGameStatus = new BoggleGame(temp.GameID);
+                        briefGameStatus.GameState = temp.GameState;
+                        briefGameStatus.TimeLeft = temp.TimeLeft;
+                        briefGameStatus.Player1.Score = temp.Player1.Score;
+                        briefGameStatus.Player2.Score = temp.Player2.Score;
 
-                        return h;
+                        //h.GameID = 0;
+                        ////h.TimeLimitString = null;
+                        //h.Player1.Nickname = null;
+                        //h.Player1.WordsPlayed = null;
+                        //h.Player1.UserToken = null;
+                        //h.Player2.Nickname = null;
+                        //h.Player2.WordsPlayed = null;
+                        //h.Player2.UserToken = null;
+
+                        return briefGameStatus;
                     }
                     else
                     {
@@ -380,7 +391,19 @@ namespace Boggle
                         // wordsplayed
                         // word
                         //h.TimeLimitString = h.TimeLimit.ToString();
-                        return h;
+                        var regGameStatus = new BoggleGame(temp.GameID);
+                        regGameStatus.GameState = temp.GameState;
+                        regGameStatus.Board = temp.Board;
+                        regGameStatus.TimeLimit = temp.TimeLimit;
+                        regGameStatus.TimeLeft = temp.TimeLeft;
+                        regGameStatus.Player1.Nickname = temp.Player1.Nickname;
+                        regGameStatus.Player1.Score = temp.Player1.Score;
+                        regGameStatus.Player1.WordsPlayed = temp.Player1.WordsPlayed;
+                        regGameStatus.Player2.Nickname = temp.Player2.Nickname;
+                        regGameStatus.Player2.Score = temp.Player2.Score;
+                        regGameStatus.Player2.WordsPlayed = temp.Player2.WordsPlayed;
+
+                        return regGameStatus;
                     }
                 }
             }
