@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 using System.Dynamic;
 using static System.Net.HttpStatusCode;
 using System.Diagnostics;
@@ -182,7 +181,7 @@ namespace Boggle
         [TestMethod]
         public void TestJoinGame5()
         {
-            StartBoggleGame(10);            
+            StartBoggleGame(10);
         }
 
         /// <summary>

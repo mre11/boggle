@@ -244,8 +244,8 @@ namespace Boggle
                     {
                         SetStatus(Forbidden);
                         return null;
-                    }                    
-                    
+                    }
+
                     // GameID is invalid or we couldn't find the game
                     int intGameID;
                     BoggleGame game;
@@ -260,8 +260,8 @@ namespace Boggle
                     {
                         SetStatus(Forbidden);
                         return null;
-                    }                    
-                    
+                    }
+
                     if (game.GameState != "active")
                     {
                         SetStatus(Conflict);
@@ -282,7 +282,6 @@ namespace Boggle
                 return null;
             }
         }
-
 
         /// <summary>
         /// Get game status information.

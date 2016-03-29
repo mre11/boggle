@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Web;
 
 namespace Boggle
 {
@@ -36,7 +33,7 @@ namespace Boggle
             GameState = "pending";
         }
 
-        
+
         public BoggleGame(BoggleGame newGame)
         {
             this.GameID = newGame.GameID;
@@ -56,8 +53,6 @@ namespace Boggle
         [DataMember(EmitDefaultValue = false)]
         public string Nickname { get; set; }
 
-        // Changed to false because if this is true it will be printed with player1 and player2
-        // we may want it to default. I'm not sure at the moment.
         [DataMember(EmitDefaultValue = false)]
         public string UserToken { get; set; }
 
