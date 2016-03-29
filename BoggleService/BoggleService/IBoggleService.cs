@@ -10,7 +10,7 @@ namespace Boggle
         /// <summary>
         /// Sends back index.html as the response body.
         /// </summary>
-        [OperationContract]
+        //[OperationContract]
         [WebGet(UriTemplate = "/api")]
         Stream API();
 
@@ -22,15 +22,15 @@ namespace Boggle
         /// Otherwise, creates a new user with a unique UserToken and the trimmed Nickname.The returned UserToken 
         /// should be used to identify the user in subsequent requests.Responds with status 201 (Created). 
         /// </summary>
-        [OperationContract]                                                  // TODO: Not sure if we need to return it Json formatted.
-        [WebInvoke(Method = "POST", UriTemplate = "/users", ResponseFormat = WebMessageFormat.Json)]
+        //[OperationContract]
+        [WebInvoke(Method = "POST", UriTemplate = "/users")]
         User CreateUser(User user);
 
 
         /// <summary>
         /// Join a game.
         /// 
-        /// If UserToken is invalid, TimeLimit<5, or TimeLimit> 120, responds with status 403 (Forbidden).
+        /// If UserToken is invalid, TimeLimit < 5, or TimeLimit > 120, responds with status 403 (Forbidden).
         /// 
         /// Otherwise, if UserToken is already a player in the pending game, responds with status 409 (Conflict).
         /// 
@@ -43,7 +43,7 @@ namespace Boggle
         /// Otherwise, adds UserToken as the first player of the pending game, and the TimeLimit as the pending 
         /// game's requested time limit. Returns the pending game's GameID. Responds with status 202 (Accepted).
         /// </summary>
-        [OperationContract]
+        //[OperationContract]
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
         BoggleGame JoinGame(JoinGameRequest requestBody);
 
@@ -54,7 +54,7 @@ namespace Boggle
         /// 
         /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
         /// </summary>
-        [OperationContract]
+        //[OperationContract]
         [WebInvoke(Method = "PUT", UriTemplate = "/games")]
         void CancelJoin(User user);
 
@@ -70,7 +70,7 @@ namespace Boggle
         /// the score for Word in the context of the game(e.g. if Word has been played before the score is zero). 
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
-        [OperationContract]
+        //[OperationContract]
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{gameID}")]
         BoggleWord PlayWord(string gameID, BoggleWord word);
 
@@ -83,9 +83,8 @@ namespace Boggle
         /// returned depends on whether "Brief=yes" was included as a parameter as well as on the state of the game. 
         /// Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
         /// </summary>
-        [OperationContract]
+        //[OperationContract]
         [WebGet(UriTemplate = "/games/{gameID}?Brief={brief}")] // TODO GameStatus Uri still not quite right. How to make Brief optional?
         BoggleGame GameStatus(string brief, string gameID);
-
     }
 }

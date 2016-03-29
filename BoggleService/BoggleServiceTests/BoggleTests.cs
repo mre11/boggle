@@ -118,10 +118,17 @@ namespace Boggle
         [TestMethod]
         public void TestJoinGame2()
         {
+            // First create a user
             dynamic data = new ExpandoObject();
-            data.UserToken = Guid.NewGuid().ToString();
+            data.Nickname = "Test";
+            Response r = client.DoPostAsync("/users", data).Result;
+            string userToken = r.Data.UserToken;
+
+            // Join game with the user
+            data = new ExpandoObject();
+            data.UserToken = userToken;
             data.TimeLimit = 4;
-            Response r = client.DoPostAsync("/games", data).Result;
+            r = client.DoPostAsync("/games", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
         }
 
@@ -131,10 +138,17 @@ namespace Boggle
         [TestMethod]
         public void TestJoinGame3()
         {
+            // First create a user
             dynamic data = new ExpandoObject();
-            data.UserToken = Guid.NewGuid().ToString();
+            data.Nickname = "Test";
+            Response r = client.DoPostAsync("/users", data).Result;
+            string userToken = r.Data.UserToken;
+
+            // Join game with the user
+            data = new ExpandoObject();
+            data.UserToken = userToken;
             data.TimeLimit = 4;
-            Response r = client.DoPostAsync("/games", data).Result;
+            r = client.DoPostAsync("/games", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
         }
 
@@ -168,7 +182,7 @@ namespace Boggle
         [TestMethod]
         public void TestJoinGame5()
         {
-            StartBoggleGame(5);            
+            StartBoggleGame(10);            
         }
 
         /// <summary>
@@ -444,5 +458,7 @@ namespace Boggle
 
             return new string[3] { gameID, userToken1, userToken2 };
         }
+
+        // TODO still need more GameStatus tests, plus any others for code coverage
     }
 }
