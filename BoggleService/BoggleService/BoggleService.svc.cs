@@ -85,8 +85,6 @@ namespace Boggle
                     var response = new User();
                     response.UserToken = userToken;
 
-                    // TODO User gets added to the list of users then we set the nickname to null? Gives correct format in response but the nickname cannot be
-                    // seen later because it is null.
                     SetStatus(Created);
 
                     return response;
@@ -134,6 +132,7 @@ namespace Boggle
                     BoggleGame pendingGame;
                     if (games.TryGetValue(pendingGameID, out pendingGame))
                     {
+                        // Create User newPlayer to act as reference to the user in the users list.
                         User newPlayer;
 
                         // Haven't created the user yet.
@@ -291,7 +290,6 @@ namespace Boggle
                     playedBoggleWord.Word = playedWord;
                     playedBoggleWord.UserToken = user.UserToken;
 
-                    var result = new BoggleWord();  // this will be returned and hold only the score
                     int wordScore = 0;
 
                     if (game.Board.CanBeFormed(playedWord))
@@ -314,18 +312,26 @@ namespace Boggle
                         wordScore = -1;
                     }
 
-                    game.wordsPlayed.Add(playedWord);
+                    //game.wordsPlayed.Add(playedWord);
+
+                    var result = new BoggleWord();  // this will be returned and hold only the score
                     playedBoggleWord.Score = result.Score = wordScore;
+                    
+                    // Initialize user.WordsPlayed if it is null.
+                    if(user.WordsPlayed == null)
+                    {
+                        user.WordsPlayed = new List<BoggleWord>();
+                    }
+
                     user.WordsPlayed.Add(playedBoggleWord);
+
                     return result;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                BoggleWord test = new BoggleWord();
-                test.Word = e.Message;
                 SetStatus(InternalServerError);
-                return test;
+                return null;
             }
         }
 
@@ -350,6 +356,7 @@ namespace Boggle
                     // Invalid gameID or the game doesn't exist
                     int intGameID;
                     BoggleGame currentGame;
+
                     if (!int.TryParse(gameID, out intGameID) || !games.TryGetValue(intGameID, out currentGame))
                     {
                         SetStatus(Forbidden);
