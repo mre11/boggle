@@ -10,12 +10,11 @@ namespace Boggle
         [DataMember(EmitDefaultValue = false)]
         public int GameID { get; set; }
 
-        [DataMember(EmitDefaultValue = false, Order = 1)]
         public string GameState
         {
             get
             {
-                if (gameState == "active" && TimeLeft == 0)
+                if (gameState == "active" && timeLeft == 0)
                 {
                     gameState = "completed";
                 }
@@ -24,10 +23,14 @@ namespace Boggle
             set { gameState = value; }
         }
 
+        [DataMember(EmitDefaultValue = false, Order = 1)]
         private string gameState;
 
-        [DataMember(EmitDefaultValue = false)]
+        //[DataMember(EmitDefaultValue = false)]
         public BoggleBoard Board { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string board;
 
         [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
@@ -96,7 +99,7 @@ namespace Boggle
         public int? Score { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public IList<BoggleWord> WordsPlayed { get; set; }
+        public List<BoggleWord> WordsPlayed { get; set; }
 
         public User()
         {

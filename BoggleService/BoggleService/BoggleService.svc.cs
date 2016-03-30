@@ -147,6 +147,7 @@ namespace Boggle
                         if (pendingGame.Player1 == null) // pending game has 0 players
                         {
                             pendingGame.Player1 = newPlayer;
+                            pendingGame.Player1.WordsPlayed = new List<BoggleWord>();
                             pendingGame.TimeLimit = requestBody.TimeLimit;
                             SetStatus(Accepted);
 
@@ -163,10 +164,10 @@ namespace Boggle
                         else // pending game has 1 player
                         {
                             pendingGame.Player2 = newPlayer;
+                            pendingGame.Player2.WordsPlayed = new List<BoggleWord>();
                             pendingGame.TimeLimit = (pendingGame.TimeLimit + requestBody.TimeLimit) / 2;
                             pendingGame.GameState = "active";
                             pendingGame.TimeStarted = Environment.TickCount;
-                            //pendingGame.Board = new BoggleBoard();
 
                             // Compose the response. It should only contain the GameID.
                             var response = new BoggleGame();
@@ -247,7 +248,7 @@ namespace Boggle
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
         public BoggleWord PlayWord(string gameID, BoggleWord word)
-        {   // TODO TestPlayWord5 is getting an exception somewhere in here...
+        { 
             try
             {
                 lock (sync)
@@ -370,6 +371,7 @@ namespace Boggle
                     }
 
                     SetStatus(OK);
+                    currentGame.timeLeft = currentGame.TimeLeft;
 
                     if (currentGame.GameState == null || currentGame.GameState == "pending" || (currentGame.Player1 == null || currentGame.Player2 == null)) 
                     {
@@ -377,20 +379,15 @@ namespace Boggle
                         response.GameState = "pending";
                         return response;
                     }
-                    else if (currentGame.TimeLeft == null || currentGame.TimeLeft == 0)
+                    else if (currentGame.timeLeft == null || currentGame.timeLeft == 0)
                     {
-                        currentGame.timeLeft = currentGame.TimeLeft;
                         currentGame.GameState = "completed";
                     }
-                    currentGame.timeLeft = currentGame.TimeLeft;
 
                     if (brief != null && brief == "yes")
                     {
-                        var briefGameStatus = new BoggleGame(intGameID);
+                        var briefGameStatus = new BoggleGame();
                         briefGameStatus.GameState = currentGame.GameState;
-                        // TimeLimit and TimeStarted are needed for correct computation of timeLeft
-                        briefGameStatus.TimeLimit = currentGame.TimeLimit;
-                        briefGameStatus.TimeStarted = currentGame.TimeStarted;
                         briefGameStatus.timeLeft = currentGame.timeLeft;                                             
                         briefGameStatus.Player1 = new User();
                         briefGameStatus.Player2 = new User();
@@ -405,6 +402,8 @@ namespace Boggle
 
                         regGameStatus.GameState = currentGame.GameState;
                         regGameStatus.Board = currentGame.Board;
+                        regGameStatus.board = regGameStatus.Board.ToString();
+
                         // TimeLimit and TimeStarted are needed for correct computation of timeLeft
                         regGameStatus.TimeLimit = currentGame.TimeLimit;
                         regGameStatus.TimeStarted = currentGame.TimeStarted;
@@ -415,14 +414,33 @@ namespace Boggle
                         regGameStatus.Player1 = new User();
                         regGameStatus.Player1.Nickname = currentGame.Player1.Nickname;
                         regGameStatus.Player1.Score = currentGame.Player1.Score;
-                        regGameStatus.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
 
-                        //regGameStatus.Player1.WordsPlayed = new List<BoggleWord>(currentGame.Player1.WordsPlayed);
                         regGameStatus.Player2 = new User();
                         regGameStatus.Player2.Nickname = currentGame.Player2.Nickname;
                         regGameStatus.Player2.Score = currentGame.Player2.Score;
-                        regGameStatus.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
 
+                        if (currentGame.GameState == "completed")
+                        {
+                            regGameStatus.Player1.WordsPlayed = new List<BoggleWord>();
+
+                            foreach (BoggleWord word in currentGame.Player1.WordsPlayed)
+                            {
+                                BoggleWord formattedWord = new BoggleWord();
+                                formattedWord.Word = word.Word;
+                                formattedWord.Score = word.Score;
+                                regGameStatus.Player1.WordsPlayed.Add(formattedWord);
+                            }
+
+                            regGameStatus.Player2.WordsPlayed = new List<BoggleWord>();
+
+                            foreach (BoggleWord word in currentGame.Player2.WordsPlayed)
+                            {
+                                BoggleWord formattedWord = new BoggleWord();
+                                formattedWord.Word = word.Word;
+                                formattedWord.Score = word.Score;
+                                regGameStatus.Player2.WordsPlayed.Add(formattedWord);
+                            }
+                        }
                         return regGameStatus;
                     }
                 }

@@ -415,8 +415,8 @@ namespace Boggle
             // Do the get request
             Response r = client.DoGetAsync("/games/" + gameID + "?Brief={0}", new string[] { "yes" }).Result;
             Assert.AreEqual(OK, r.Status);
-            Assert.AreEqual("active", r.Data.GameState.ToString());
-            Assert.AreNotEqual(null, r.Data.TimeLeft.ToString());
+            Assert.AreEqual("active", r.Data.gameState);
+            Assert.AreNotEqual(null, r.Data.timeLeft);
             Assert.AreEqual(0, (int)r.Data.Player1.Score);
             Assert.AreEqual(0, (int)r.Data.Player2.Score);
         }
