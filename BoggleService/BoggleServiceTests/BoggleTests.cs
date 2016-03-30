@@ -341,6 +341,8 @@ namespace Boggle
             Assert.AreEqual(-1, (int)r.Data.Score);
         }
 
+        // TODO need more PlayWord tests to test scoring
+
         /// <summary>
         /// Test when GameID is invalid
         /// </summary>
@@ -390,7 +392,7 @@ namespace Boggle
             string gameID = result[0];
 
             // Do the get request
-            Response r = client.DoGetAsync("/games/" + gameID, new string[] { "yes" }).Result;
+            Response r = client.DoGetAsync("/games/" + gameID + "?Brief={0}", new string[] { "yes" }).Result;
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual("active", r.Data.GameState.ToString());
             Assert.AreNotEqual(null, r.Data.TimeLeft.ToString());
@@ -411,7 +413,7 @@ namespace Boggle
             Thread.Sleep(6000); // make sure the game is completed
 
             // Do the get request
-            Response r = client.DoGetAsync("/games/" + gameID, new string[] { "yes" }).Result;
+            Response r = client.DoGetAsync("/games/" + gameID + "?Brief={0}", new string[] { "yes" }).Result;
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual("completed", r.Data.GameState.ToString());
             Assert.AreEqual(0, (int)r.Data.TimeLeft);
@@ -450,7 +452,7 @@ namespace Boggle
             // Join game with the second user
             data = new ExpandoObject();
             data.UserToken = userToken2;
-            data.TimeLimit = 5;
+            data.TimeLimit = timeLimit;
             r = client.DoPostAsync("/games", data).Result;
             Assert.AreEqual(Created, r.Status);
             Assert.AreEqual(gameID, (string)r.Data.GameID);

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System;
 
 namespace Boggle
 {
@@ -10,7 +11,20 @@ namespace Boggle
         public int GameID { get; set; }
 
         [DataMember(Order = 1)]
-        public string GameState { get; set; }
+        public string GameState
+        {
+            get
+            {
+                if (gameState == "active" && TimeLeft == 0)
+                {
+                    gameState = "completed";
+                }
+                return gameState;
+            }
+            set { gameState = value; }
+        }
+
+        private string gameState;
 
         [DataMember(EmitDefaultValue = false)]
         public BoggleBoard Board { get; set; }
@@ -18,10 +32,29 @@ namespace Boggle
         [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
 
-        public System.DateTime time { get; set; }
+        public int TimeStarted { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public int TimeLeft { get { return TimeLeft; } set { TimeLeft = (int)System.DateTime.Now.Subtract(time).TotalSeconds; } }
+        public int? TimeLeft
+        {
+            get
+            {
+                var timeElapsed = (Environment.TickCount - TimeStarted) / 1000;
+                var result = TimeLimit - timeElapsed;
+
+                if (result < 0)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return result;
+                }
+            }
+            set { timeLeft = value; }
+        }
+
+        private int? timeLeft;
 
         [DataMember(EmitDefaultValue = false)]
         public User Player1 { get; set; }
@@ -46,21 +79,33 @@ namespace Boggle
         public string UserToken { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public int Score { get; set; }
+        public int? Score { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
         public IList<BoggleWord> WordsPlayed { get; set; }
+
+        public User()
+        {
+            Nickname = null;
+            UserToken = null;
+            Score = 0;
+            WordsPlayed = null;
+        }
     }
 
+    [DataContract]
     public class BoggleWord
     {
         /// <summary>
         /// The user token of the user who played this BoggleWord.
         /// </summary>
+        [DataMember(EmitDefaultValue = false)]
         public string UserToken { get; set; }
 
+        [DataMember(EmitDefaultValue = false)]
         public string Word { get; set; }
 
+        [DataMember(EmitDefaultValue = false)]
         public int Score { get; set; }
     }
 
