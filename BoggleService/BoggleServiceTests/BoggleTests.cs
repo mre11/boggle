@@ -460,6 +460,6 @@ namespace Boggle
             return new string[3] { gameID, userToken1, userToken2 };
         }
 
-        // TODO still need more GameStatus tests, plus any others for code coverage
+        // TODO still need more GameStatus tests (especially for non-Brief), plus any others for code coverage
     }
 }

@@ -231,7 +231,7 @@ namespace Boggle
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
         public BoggleWord PlayWord(string gameID, BoggleWord word)
-        {
+        {   // TODO TestPlayWord5 is getting an exception somewhere in here...
             try
             {
                 lock (sync)
@@ -279,11 +279,10 @@ namespace Boggle
 
                     var result = new BoggleWord();  // this will be returned and hold only the score
                     int wordScore = 0;
-                    bool wordHasBeenPlayed = false; // TODO finish implementing PlayWord
 
                     if (game.Board.CanBeFormed(playedWord))
                     {
-                        if (wordHasBeenPlayed)
+                        if (game.wordsPlayed.Contains(playedWord))
                             wordScore = 0;
                         else if (playedWord.Length > 7)
                             wordScore = 11;
@@ -301,6 +300,7 @@ namespace Boggle
                         wordScore = -1;
                     }
 
+                    game.wordsPlayed.Add(playedWord);
                     playedBoggleWord.Score = result.Score = wordScore;
                     user.WordsPlayed.Add(playedBoggleWord);
                     return result;
@@ -324,8 +324,7 @@ namespace Boggle
         /// </summary>
         public BoggleGame GameStatus(string gameID, string brief)
         {
-            // TODO finish implementing GameStatus (non-brief is untested!)
-            // also need to make sure output is supressed where necessary
+            // TODO need to make sure output is supressed where necessary (i.e. null out some fields before returning)
             try
             {
                 lock (sync)
@@ -356,6 +355,7 @@ namespace Boggle
                     {
                         var briefGameStatus = new BoggleGame(intGameID);
                         briefGameStatus.GameState = currentGame.GameState;
+                        // TimeLimit and TimeStarted are needed for correct computation of TimeLeft
                         briefGameStatus.TimeLimit = currentGame.TimeLimit;
                         briefGameStatus.TimeStarted = currentGame.TimeStarted;
                         briefGameStatus.TimeLeft = currentGame.TimeLeft;                                             
@@ -371,6 +371,7 @@ namespace Boggle
                         var regGameStatus = new BoggleGame(intGameID);
                         regGameStatus.GameState = currentGame.GameState;
                         regGameStatus.Board = currentGame.Board;
+                        // TimeLimit and TimeStarted are needed for correct computation of TimeLeft
                         regGameStatus.TimeLimit = currentGame.TimeLimit;
                         regGameStatus.TimeStarted = currentGame.TimeStarted;
                         regGameStatus.TimeLeft = currentGame.TimeLeft;

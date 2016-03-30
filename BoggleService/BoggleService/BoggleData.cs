@@ -62,10 +62,16 @@ namespace Boggle
         [DataMember(EmitDefaultValue = false)]
         public User Player2 { get; set; }
 
+        /// <summary>
+        /// Keeps track of the string words played in this BoggleGame.
+        /// </summary>
+        public ISet<string> wordsPlayed;
+
         public BoggleGame(int gameID)
         {
             GameID = gameID;
             GameState = "pending";
+            wordsPlayed = new HashSet<string>();
         }
     }
 
