@@ -34,7 +34,7 @@ namespace Boggle
 
         public int TimeStarted { get; set; }
 
-        private int? TimeLeft
+        public int? TimeLeft
         {
             get
             {
@@ -71,6 +71,7 @@ namespace Boggle
         {
             GameID = gameID;
             GameState = "pending";
+
             // Initialize the boggle board so we have the letters.
             Board = new BoggleBoard();
             wordsPlayed = new HashSet<string>();            
