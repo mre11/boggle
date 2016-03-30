@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.ServiceModel.Web;
@@ -65,6 +66,7 @@ namespace Boggle
         {
             try
             {
+
                 lock (sync)
                 {
                     InitializePendingGame();
@@ -80,9 +82,14 @@ namespace Boggle
 
                     users.Add(requestedUser.UserToken, requestedUser);
 
+                    var response = new User();
+                    response.UserToken = userToken;
+
+                    // TODO User gets added to the list of users then we set the nickname to null? Gives correct format in response but the nickname cannot be
+                    // seen later because it is null.
                     SetStatus(Created);
-                    requestedUser.Nickname = null;
-                    return requestedUser;
+
+                    return response;
                 }
             }
             catch (Exception)
@@ -127,16 +134,24 @@ namespace Boggle
                     BoggleGame pendingGame;
                     if (games.TryGetValue(pendingGameID, out pendingGame))
                     {
+                        User newPlayer;
+
+                        // Haven't created the user yet.
+                        if (!users.TryGetValue(requestBody.UserToken, out newPlayer))
+                        {
+                            SetStatus(Conflict);
+                            return null;
+                        }
+
                         if (pendingGame.Player1 == null) // pending game has 0 players
                         {
-                            pendingGame.Player1 = new User();
-                            pendingGame.Player1.UserToken = requestBody.UserToken;
+                            pendingGame.Player1 = newPlayer;
                             pendingGame.TimeLimit = requestBody.TimeLimit;
                             SetStatus(Accepted);
 
                             // Compose the response. It should only contain the GameID.
-                            var response = new BoggleGame(pendingGameID);
-                            response.GameState = null;
+                            var response = new BoggleGame();
+                            response.GameID = pendingGameID;
                             return response;
                         }
                         else if (pendingGame.Player1.UserToken == requestBody.UserToken) // requested user token is already in the pending game
@@ -146,15 +161,14 @@ namespace Boggle
                         }
                         else // pending game has 1 player
                         {
-                            pendingGame.Player2 = new User();
-                            pendingGame.Player2.UserToken = requestBody.UserToken;
+                            pendingGame.Player2 = newPlayer;
                             pendingGame.TimeLimit = (pendingGame.TimeLimit + requestBody.TimeLimit) / 2;
                             pendingGame.GameState = "active";
                             pendingGame.TimeStarted = Environment.TickCount;
 
                             // Compose the response. It should only contain the GameID.
-                            var response = new BoggleGame(pendingGameID);
-                            response.GameState = null;
+                            var response = new BoggleGame();
+                            response.GameID = pendingGameID;
 
                             // Create the next pending game
                             pendingGameID++;
@@ -255,7 +269,7 @@ namespace Boggle
                         SetStatus(Forbidden);
                         return null;
                     }
-
+                    
                     // UserToken is not a player in this game
                     if (game.Player1.UserToken != word.UserToken && game.Player2.UserToken != word.UserToken)
                     {
@@ -306,10 +320,12 @@ namespace Boggle
                     return result;
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                BoggleWord test = new BoggleWord();
+                test.Word = e.Message;
                 SetStatus(InternalServerError);
-                return null;
+                return test;
             }
         }
 
@@ -346,7 +362,7 @@ namespace Boggle
                     {
                         return currentGame;
                     }
-                    else if (currentGame.TimeLeft == null || currentGame.TimeLeft == 0)
+                    else if (currentGame.timeLeft == null || currentGame.timeLeft == 0)
                     {
                         currentGame.GameState = "completed";
                     }
@@ -355,10 +371,10 @@ namespace Boggle
                     {
                         var briefGameStatus = new BoggleGame(intGameID);
                         briefGameStatus.GameState = currentGame.GameState;
-                        // TimeLimit and TimeStarted are needed for correct computation of TimeLeft
+                        // TimeLimit and TimeStarted are needed for correct computation of timeLeft
                         briefGameStatus.TimeLimit = currentGame.TimeLimit;
                         briefGameStatus.TimeStarted = currentGame.TimeStarted;
-                        briefGameStatus.TimeLeft = currentGame.TimeLeft;                                             
+                        briefGameStatus.timeLeft = currentGame.timeLeft;                                             
                         briefGameStatus.Player1 = new User();
                         briefGameStatus.Player2 = new User();
                         briefGameStatus.Player1.Score = currentGame.Player1.Score;
@@ -371,10 +387,10 @@ namespace Boggle
                         var regGameStatus = new BoggleGame(intGameID);
                         regGameStatus.GameState = currentGame.GameState;
                         regGameStatus.Board = currentGame.Board;
-                        // TimeLimit and TimeStarted are needed for correct computation of TimeLeft
+                        // TimeLimit and TimeStarted are needed for correct computation of timeLeft
                         regGameStatus.TimeLimit = currentGame.TimeLimit;
                         regGameStatus.TimeStarted = currentGame.TimeStarted;
-                        regGameStatus.TimeLeft = currentGame.TimeLeft;
+                        regGameStatus.timeLeft = currentGame.timeLeft;
                         regGameStatus.Player1 = new User();
                         regGameStatus.Player1.Nickname = currentGame.Player1.Nickname;
                         regGameStatus.Player1.Score = currentGame.Player1.Score;

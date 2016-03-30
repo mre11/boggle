@@ -309,7 +309,7 @@ namespace Boggle
             string[] result = StartBoggleGame(5);
             string gameID = result[0];
             string userToken1 = result[1];
-            Thread.Sleep(6000); // make sure the game is complated
+            Thread.Sleep(6000); // make sure the game is completed
 
             // Do the put request
             dynamic data = new ExpandoObject();
@@ -325,6 +325,27 @@ namespace Boggle
         /// </summary>
         [TestMethod]
         public void TestPlayWord5()
+        {
+            // Start a game
+            string[] result = StartBoggleGame(60);
+            string gameID = result[0];
+            string userToken1 = result[1];
+
+            // Do the put request
+            dynamic data = new ExpandoObject();
+            data.UserToken = userToken1;
+            data.Word = "asdf";
+
+            Response r = client.DoPutAsync(data, "/games/" + gameID).Result;
+            Assert.AreEqual(OK, r.Status);
+            Assert.AreEqual(-1, (int)r.Data.Score);
+        }
+
+        /// <summary>
+        /// Test a successful request
+        /// </summary>
+        [TestMethod]
+        public void TestPlayWord6()
         {
             // Start a game
             string[] result = StartBoggleGame(60);

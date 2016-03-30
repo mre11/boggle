@@ -10,7 +10,7 @@ namespace Boggle
         [DataMember(EmitDefaultValue = false)]
         public int GameID { get; set; }
 
-        [DataMember(Order = 1)]
+        [DataMember(EmitDefaultValue = false, Order = 1)]
         public string GameState
         {
             get
@@ -34,8 +34,7 @@ namespace Boggle
 
         public int TimeStarted { get; set; }
 
-        [DataMember(EmitDefaultValue = false)]
-        public int? TimeLeft
+        private int? TimeLeft
         {
             get
             {
@@ -54,7 +53,8 @@ namespace Boggle
             set { timeLeft = value; }
         }
 
-        private int? timeLeft;
+        [DataMember(EmitDefaultValue = false)]
+        public int? timeLeft;
 
         [DataMember(EmitDefaultValue = false)]
         public User Player1 { get; set; }
@@ -71,8 +71,15 @@ namespace Boggle
         {
             GameID = gameID;
             GameState = "pending";
-            wordsPlayed = new HashSet<string>();
+            // Initialize the boggle board so we have the letters.
+            Board = new BoggleBoard();
+            wordsPlayed = new HashSet<string>();            
         }
+        /// <summary>
+        /// Empty constructor so we can decide what information we want to respond
+        /// back to the client with.
+        /// </summary>
+        public BoggleGame() { }
     }
 
     [DataContract]
@@ -94,7 +101,7 @@ namespace Boggle
         {
             Nickname = null;
             UserToken = null;
-            Score = 0;
+            //Score = 0;
             WordsPlayed = null;
         }
     }
