@@ -460,12 +460,16 @@ namespace Boggle
             Assert.AreEqual(-1, (int)r.Data.Score);
         }
 
+        // TODO still need more GameStatus tests (especially for non-Brief), plus any others for code coverage
+
         /// <summary>
         /// Helper method that starts a Boggle game on the server.
         /// Returns an array containing GameID, Player1's UserToken, and Player2's UserToken.
         /// </summary>
         private string[] StartBoggleGame(int timeLimit)
         {
+            ClearPendingGame();
+
             // First create a user
             dynamic data = new ExpandoObject();
             data.Nickname = "Test";
@@ -499,6 +503,41 @@ namespace Boggle
             return new string[3] { gameID, userToken1, userToken2 };
         }
 
-        // TODO still need more GameStatus tests (especially for non-Brief), plus any others for code coverage
+        /// <summary>
+        /// Ensures that the pending game on the server has 0 players.
+        /// </summary>
+        private void ClearPendingGame()
+        {
+            int timeLimit = 5;
+
+            // First create a user
+            dynamic data = new ExpandoObject();
+            data.Nickname = "Test";
+            Response r = client.DoPostAsync("/users", data).Result;
+            string userToken1 = r.Data.UserToken;
+
+            // Join game with the first user
+            data = new ExpandoObject();
+            data.UserToken = userToken1;
+            data.TimeLimit = timeLimit;
+            r = client.DoPostAsync("/games", data).Result;
+
+            if (r.Status == Created)
+            {
+                return;
+            }
+
+            // Now create a second user
+            data = new ExpandoObject();
+            data.Nickname = "Test";
+            r = client.DoPostAsync("/users", data).Result;
+            string userToken2 = r.Data.UserToken;
+
+            // Join game with the second user
+            data = new ExpandoObject();
+            data.UserToken = userToken2;
+            data.TimeLimit = timeLimit;
+            r = client.DoPostAsync("/games", data).Result;
+        }
     }
 }
