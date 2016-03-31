@@ -77,6 +77,7 @@ namespace Boggle
                         return null;
                     }
 
+                    // Create new userToken for the player.
                     string userToken = Guid.NewGuid().ToString();
                     requestedUser.UserToken = userToken;
                     requestedUser.Score = 0;
@@ -85,7 +86,6 @@ namespace Boggle
 
                     var response = new User();
                     response.UserToken = userToken;
-                    //response.Score = null;
 
                     SetStatus(Created);
 
@@ -316,9 +316,7 @@ namespace Boggle
                         wordScore = -1;
                     }
 
-                    // TODO: need to add up score and save it in the user.
-
-                    //game.wordsPlayed.Add(playedWord);
+                    game.wordsPlayed.Add(playedWord);
 
                     var result = new BoggleWord();  // this will be returned and hold only the score
                     playedBoggleWord.Score = result.Score = wordScore;
@@ -400,6 +398,7 @@ namespace Boggle
                     {
                         var regGameStatus = new BoggleGame();
 
+                        // Set gamestate and board
                         regGameStatus.GameState = currentGame.GameState;
                         regGameStatus.Board = currentGame.Board;
                         regGameStatus.board = regGameStatus.Board.ToString();
@@ -408,13 +407,15 @@ namespace Boggle
                         regGameStatus.TimeLimit = currentGame.TimeLimit;
                         regGameStatus.TimeStarted = currentGame.TimeStarted;
 
-                        // Need to fix timeleft
+                        // TODO: Seems to be working but acts weird
                         regGameStatus.timeLeft = currentGame.timeLeft;
 
+                        // Set player 1 properties
                         regGameStatus.Player1 = new User();
                         regGameStatus.Player1.Nickname = currentGame.Player1.Nickname;
                         regGameStatus.Player1.Score = currentGame.Player1.Score;
 
+                        // Set player 2 properties
                         regGameStatus.Player2 = new User();
                         regGameStatus.Player2.Nickname = currentGame.Player2.Nickname;
                         regGameStatus.Player2.Score = currentGame.Player2.Score;
@@ -423,6 +424,7 @@ namespace Boggle
                         {
                             regGameStatus.Player1.WordsPlayed = new List<BoggleWord>();
 
+                            // Transfer the boggle words over from current game to the formatted response bogglegame for player 1.
                             foreach (BoggleWord word in currentGame.Player1.WordsPlayed)
                             {
                                 BoggleWord formattedWord = new BoggleWord();
@@ -433,6 +435,7 @@ namespace Boggle
 
                             regGameStatus.Player2.WordsPlayed = new List<BoggleWord>();
 
+                            // Transfer the boggle words over from current game to the formatted response bogglegame for player 2.
                             foreach (BoggleWord word in currentGame.Player2.WordsPlayed)
                             {
                                 BoggleWord formattedWord = new BoggleWord();

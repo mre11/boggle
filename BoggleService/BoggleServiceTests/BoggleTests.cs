@@ -436,10 +436,28 @@ namespace Boggle
             // Do the get request
             Response r = client.DoGetAsync("/games/" + gameID + "?Brief={0}", new string[] { "yes" }).Result;
             Assert.AreEqual(OK, r.Status);
-            Assert.AreEqual("completed", r.Data.GameState.ToString());
-            Assert.AreEqual(0, (int)r.Data.TimeLeft);
+            Assert.AreEqual("completed", r.Data.gameState.ToString());
+            Assert.AreEqual(0, (int)r.Data.timeLeft);
             Assert.AreEqual(0, (int)r.Data.Player1.Score);
             Assert.AreEqual(0, (int)r.Data.Player2.Score);
+        }
+
+        [TestMethod]
+        public void TestGameStatus5()
+        {
+            string[] result = StartBoggleGame(50);
+            string gameID = result[0];
+            string userToken1 = result[1];
+
+            // Do the put request
+            dynamic data = new ExpandoObject();
+            data.UserToken = userToken1;
+            data.Word = "asdf";
+
+            Response r = client.DoPutAsync(data, "/games/" + gameID).Result;
+
+            Assert.AreEqual(OK, r.Status);
+            Assert.AreEqual(-1, (int)r.Data.Score);
         }
 
         /// <summary>
