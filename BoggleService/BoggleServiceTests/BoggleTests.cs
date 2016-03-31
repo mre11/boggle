@@ -375,7 +375,7 @@ namespace Boggle
         public void TestPlayWord5()
         {
             // Start a game
-            string[] result = StartBoggleGame(60);
+            string[] result = StartBoggleGame(120);
             string gameID = result[0];
             string userToken1 = result[1];
 
@@ -408,11 +408,6 @@ namespace Boggle
             Response r = client.DoPutAsync(data, "/games/" + gameID).Result;
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual(-1, (int)r.Data.Score);
-        }
-
-        [TestMethod]
-        public void TestPlayWord7()
-        {
         }
 
         // TODO need more PlayWord tests to test scoring
@@ -453,6 +448,7 @@ namespace Boggle
             r = client.DoGetAsync("/games/" + gameID).Result;
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual("pending", r.Data.GameState.ToString());
+            Assert.AreEqual(null, r.Data.Board);
         }
 
         /// <summary>
@@ -472,6 +468,7 @@ namespace Boggle
             Assert.AreNotEqual(null, r.Data.TimeLeft);
             Assert.AreEqual(0, (int)r.Data.Player1.Score);
             Assert.AreEqual(0, (int)r.Data.Player2.Score);
+            Assert.AreEqual(null, r.Data.Board);
         }
 
         /// <summary>
@@ -494,8 +491,12 @@ namespace Boggle
             Assert.AreEqual(0, (int)r.Data.TimeLeft);
             Assert.AreEqual(0, (int)r.Data.Player1.Score);
             Assert.AreEqual(0, (int)r.Data.Player2.Score);
+            Assert.AreEqual(null, r.Data.Board);
         }
 
+        /// <summary>
+        /// Test an active game when Brief is null
+        /// </summary>
         [TestMethod]
         public void TestGameStatus5()
         {
@@ -503,15 +504,27 @@ namespace Boggle
             string gameID = result[0];
             string userToken1 = result[1];
 
-            // Do the put request
+            // Play a word
             dynamic data = new ExpandoObject();
             data.UserToken = userToken1;
             data.Word = "asdf";
 
             Response r = client.DoPutAsync(data, "/games/" + gameID).Result;
 
+            // Get game status
+            r = client.DoGetAsync("/games/" + gameID, new string[1] { "" }).Result;
+
             Assert.AreEqual(OK, r.Status);
-            Assert.AreEqual(-1, (int)r.Data.Score);
+            Assert.AreEqual("active", r.Data.GameState.ToString());
+            Assert.AreEqual(16, r.Data.Board.ToString().Length);
+            Assert.AreNotEqual(null, r.Data.TimeLimit);
+            Assert.AreNotEqual(null, r.Data.TimeLeft);
+            Assert.IsTrue((int)r.Data.TimeLeft > 0);
+            Assert.AreNotEqual(null, r.Data.Player1.Nickname);
+            Assert.AreNotEqual(null, r.Data.Player2.Nickname);
+            Assert.AreEqual(-1, (int)r.Data.Player1.Score);
+            Assert.AreEqual(null, r.Data.Player1.WordsPlayed);
+            Assert.AreEqual(null, r.Data.Player2.WordsPlayed);
         }
 
         /// <summary>
@@ -557,7 +570,7 @@ namespace Boggle
             Assert.AreEqual("sasdd", gameStatusResponse4.Data.Player1.WordsPlayed[0].Word.ToString());
         }
 
-        // TODO still need more GameStatus tests (especially for non-Brief), plus any others for code coverage
+        // TODO still need more GameStatus tests? Or add checks that unexpected things are null to existing?
 
         /// <summary>
         /// Helper method that starts a Boggle game on the server.

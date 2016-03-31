@@ -399,9 +399,6 @@ namespace Boggle
                         briefGameStatus.Player2.Score = currentGame.Player2.Score;
 
                         // TODO: Return the response with only timeleft and not timelimit.
-                        // TODO: Maybe see if we can make the repsonse have the same sequence that the API shows by using Order in BoggleData?
-
-
                         // Nulling out TimeLimit messes up TimeLeft, so just leave it in
                         // briefGameStatus.TimeLimit = null;
                         briefGameStatus.GameBoard = null;
@@ -415,7 +412,7 @@ namespace Boggle
                         // Set gamestate and board
                         regGameStatus.GameState = currentGame.GameState;
                         regGameStatus.GameBoard = currentGame.GameBoard;
-                        regGameStatus.Board = currentGame.GameBoard.ToString();
+                        regGameStatus.Board = currentGame.Board;
 
                         // TimeLimit and TimeStarted are needed for correct computation of TimeLeft
                         regGameStatus.TimeLimit = currentGame.TimeLimit;
