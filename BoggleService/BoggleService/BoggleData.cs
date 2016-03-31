@@ -35,7 +35,7 @@ namespace Boggle
         {
             get
             {
-                board = "";
+                board = null;
                 if (GameBoard != null)
                 {
                     board = GameBoard.ToString();

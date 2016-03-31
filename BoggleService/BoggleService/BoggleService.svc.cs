@@ -40,6 +40,9 @@ namespace Boggle
     //      "GameState": "pending"
     // }
 
+    // TODO Nice tests!  I made a couple tweaks so that Board isn't output when we don't want it.
+    // The only remaining problem with the response if TimeLimit, but I'd say we just leave it in.
+
 
 
 
@@ -180,6 +183,7 @@ namespace Boggle
 
                         var response = new BoggleGame();
                         response.GameID = pendingGameID;
+                        response.GameBoard = null;
 
                         if (pendingGame.Player1 == null) // pending game has 0 players
                         {
@@ -397,12 +401,12 @@ namespace Boggle
                     }
 
                     SetStatus(OK);
-                    //currentGame.timeLeft = currentGame.TimeLeft;
 
                     if (currentGame.GameState == null || currentGame.GameState == "pending" || (currentGame.Player1 == null || currentGame.Player2 == null))
                     {
                         var response = new BoggleGame();
                         response.GameState = "pending";
+                        response.GameBoard = null;
                         return response;
                     }
                     else if (currentGame.TimeLeft == null || currentGame.TimeLeft == 0)
@@ -427,6 +431,7 @@ namespace Boggle
 
                         // Nulling out TimeLimit messes up TimeLeft, so just leave it in
                         // briefGameStatus.TimeLimit = null;
+                        briefGameStatus.GameBoard = null;
 
                         return briefGameStatus;
                     }
