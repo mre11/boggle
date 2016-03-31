@@ -87,7 +87,6 @@ namespace Boggle
                     response.UserToken = userToken;
 
                     SetStatus(Created);
-
                     return response;
                 }
             }
@@ -143,17 +142,15 @@ namespace Boggle
                             return null;
                         }
 
+                        var response = new BoggleGame();
+                        response.GameID = pendingGameID;
+
                         if (pendingGame.Player1 == null) // pending game has 0 players
                         {
                             pendingGame.Player1 = newPlayer;
                             pendingGame.Player1.WordsPlayed = new List<BoggleWord>();
                             pendingGame.TimeLimit = requestBody.TimeLimit;
                             SetStatus(Accepted);
-
-                            // Compose the response. It should only contain the GameID.
-                            var response = new BoggleGame();
-                            response.GameID = pendingGameID;
-                            return response;
                         }
                         else if (pendingGame.Player1.UserToken == requestBody.UserToken) // requested user token is already in the pending game
                         {
@@ -168,19 +165,17 @@ namespace Boggle
                             pendingGame.GameState = "active";
                             pendingGame.TimeStarted = Environment.TickCount;
 
-                            // Compose the response. It should only contain the GameID.
-                            var response = new BoggleGame();
-                            response.GameID = pendingGameID;
-
                             // Create the next pending game
                             pendingGameID++;
                             games.Add(pendingGameID, new BoggleGame(pendingGameID));
 
-                            SetStatus(Created);
-                            return response;
+                            SetStatus(Created);                            
                         }
+
+                        return response;
                     }
 
+                    // Couldn't find the pending game (it should ALWAYS exist)
                     throw new Exception();
                 }
             }
@@ -349,7 +344,6 @@ namespace Boggle
         /// </summary>
         public BoggleGame GameStatus(string gameID, string brief)
         {
-            // TODO need to make sure output is supressed where necessary (i.e. null out some fields before returning)
             try
             {
                 lock (sync)
@@ -394,6 +388,9 @@ namespace Boggle
                         briefGameStatus.Player2 = new User();
                         briefGameStatus.Player1.Score = currentGame.Player1.Score;
                         briefGameStatus.Player2.Score = currentGame.Player2.Score;
+
+                        // Nulling out TimeLimit messes up TimeLeft, so just leave it in
+                        // briefGameStatus.TimeLimit = null;
 
                         return briefGameStatus;
                     }

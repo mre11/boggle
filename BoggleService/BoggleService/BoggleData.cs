@@ -2,6 +2,8 @@
 using System.Runtime.Serialization;
 using System;
 
+// TODO add doc comments everywhere
+
 namespace Boggle
 {
     [DataContract]
@@ -46,7 +48,7 @@ namespace Boggle
         private string board;
 
         [DataMember(EmitDefaultValue = false)]
-        public int TimeLimit { get; set; }
+        public int? TimeLimit { get; set; }
 
         public int TimeStarted { get; set; }
 
@@ -119,7 +121,6 @@ namespace Boggle
         {
             Nickname = null;
             UserToken = null;
-            //Score = 0;
             WordsPlayed = null;
         }
     }

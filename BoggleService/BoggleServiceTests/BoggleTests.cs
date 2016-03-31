@@ -437,6 +437,7 @@ namespace Boggle
             Response r = client.DoGetAsync("/games/" + gameID + "?Brief={0}", new string[] { "yes" }).Result;
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual("completed", r.Data.GameState.ToString());
+            Assert.AreNotEqual(null, r.Data.TimeLeft);
             Assert.AreEqual(0, (int)r.Data.TimeLeft);
             Assert.AreEqual(0, (int)r.Data.Player1.Score);
             Assert.AreEqual(0, (int)r.Data.Player2.Score);
