@@ -25,7 +25,7 @@ namespace Boggle
         }
 
         private string gameState;
-        
+
         public BoggleBoard GameBoard { get; set; }
 
         [DataMember(EmitDefaultValue = false)]

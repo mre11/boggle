@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.ServiceModel.Web;
@@ -248,7 +247,7 @@ namespace Boggle
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
         public BoggleWord PlayWord(string gameID, BoggleWord word)
-        { 
+        {
             try
             {
                 lock (sync)
@@ -272,7 +271,7 @@ namespace Boggle
                         SetStatus(Forbidden);
                         return null;
                     }
-                    
+
                     // UserToken is not a player in this game
                     if (game.Player1.UserToken != word.UserToken && game.Player2.UserToken != word.UserToken)
                     {
@@ -321,8 +320,7 @@ namespace Boggle
                     var result = new BoggleWord();  // this will be returned and hold only the score
                     playedBoggleWord.Score = result.Score = wordScore;
                     
-                    // Initialize user.WordsPlayed if it is null.
-                    if(user.WordsPlayed == null)
+                    if (user.WordsPlayed == null)
                     {
                         user.WordsPlayed = new List<BoggleWord>();
                     }
@@ -371,7 +369,7 @@ namespace Boggle
                     SetStatus(OK);
                     //currentGame.timeLeft = currentGame.TimeLeft;
 
-                    if (currentGame.GameState == null || currentGame.GameState == "pending" || (currentGame.Player1 == null || currentGame.Player2 == null)) 
+                    if (currentGame.GameState == null || currentGame.GameState == "pending" || (currentGame.Player1 == null || currentGame.Player2 == null))
                     {
                         var response = new BoggleGame();
                         response.GameState = "pending";
@@ -386,10 +384,12 @@ namespace Boggle
                     {
                         var briefGameStatus = new BoggleGame();
                         briefGameStatus.GameState = currentGame.GameState;
+
                         // TimeLimit and TimeStarted are needed for correct computation of TimeLeft
                         briefGameStatus.TimeLimit = currentGame.TimeLimit;
                         briefGameStatus.TimeStarted = currentGame.TimeStarted;
-                        briefGameStatus.TimeLeft = currentGame.TimeLeft;                                             
+                        briefGameStatus.TimeLeft = currentGame.TimeLeft;
+
                         briefGameStatus.Player1 = new User();
                         briefGameStatus.Player2 = new User();
                         briefGameStatus.Player1.Score = currentGame.Player1.Score;
