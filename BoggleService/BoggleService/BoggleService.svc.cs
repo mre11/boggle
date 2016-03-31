@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Braden Klunker, Morgan Empey, CS3500
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -104,11 +106,12 @@ namespace Boggle
         {
             try
             {
-
+                // Lock this code so aliasing doesn't occur.
                 lock (sync)
                 {
                     InitializePendingGame();
 
+                    // Error check the request.
                     if (requestedUser.Nickname == null || requestedUser.Nickname.Trim() == "")
                     {
                         SetStatus(Forbidden);
@@ -120,11 +123,14 @@ namespace Boggle
                     requestedUser.UserToken = userToken;
                     requestedUser.Score = 0;
 
+                    // Store this users info.
                     users.Add(requestedUser.UserToken, requestedUser);
 
+                    // Create formatted response to send back. 
                     var response = new User();
                     response.UserToken = userToken;
 
+                    // Successfully created a new user.
                     SetStatus(Created);
                     return response;
                 }
@@ -161,6 +167,7 @@ namespace Boggle
                 {
                     InitializePendingGame();
 
+                    // Make sure game is >= 5 and <= 120 and the user token is valid, otherwise setStatus to forbidden.
                     if (requestBody.UserToken == null || requestBody.UserToken == ""
                         || requestBody.TimeLimit < 5 || requestBody.TimeLimit > 120)
                     {
@@ -168,6 +175,7 @@ namespace Boggle
                         return null;
                     }
 
+                    // Retrieve the game from the games list with the gameID.
                     BoggleGame pendingGame;
                     if (games.TryGetValue(pendingGameID, out pendingGame))
                     {
@@ -181,12 +189,14 @@ namespace Boggle
                             return null;
                         }
 
+                        // Create formatted response to send back.
                         var response = new BoggleGame();
                         response.GameID = pendingGameID;
                         response.GameBoard = null;
 
                         if (pendingGame.Player1 == null) // pending game has 0 players
                         {
+                            // Link the pendingGames player1 with the user from the users list.
                             pendingGame.Player1 = newPlayer;
                             pendingGame.Player1.WordsPlayed = new List<BoggleWord>();
                             pendingGame.TimeLimit = requestBody.TimeLimit;
@@ -199,9 +209,12 @@ namespace Boggle
                         }
                         else // pending game has 1 player
                         {
+                            // Link the pendingGames player2 with the user from the users list.
                             pendingGame.Player2 = newPlayer;
                             pendingGame.Player2.WordsPlayed = new List<BoggleWord>();
                             pendingGame.TimeLimit = (pendingGame.TimeLimit + requestBody.TimeLimit) / 2;
+
+                            // Start the game with the average time limit from both users and record the time this game starts.
                             pendingGame.GameState = "active";
                             pendingGame.TimeStarted = Environment.TickCount;
 
@@ -424,6 +437,10 @@ namespace Boggle
                         briefGameStatus.Player1.Score = currentGame.Player1.Score;
                         briefGameStatus.Player2.Score = currentGame.Player2.Score;
 
+                        // TODO: Return the response with only timeleft and not timelimit.
+                        // TODO: Maybe see if we can make the repsonse have the same sequence that the API shows by using Order in BoggleData?
+
+
                         // Nulling out TimeLimit messes up TimeLeft, so just leave it in
                         // briefGameStatus.TimeLimit = null;
                         briefGameStatus.GameBoard = null;
@@ -436,7 +453,8 @@ namespace Boggle
 
                         // Set gamestate and board
                         regGameStatus.GameState = currentGame.GameState;
-                        regGameStatus.Board = currentGame.Board;
+                        regGameStatus.GameBoard = currentGame.GameBoard;
+                        regGameStatus.Board = currentGame.GameBoard.ToString();
 
                         // TimeLimit and TimeStarted are needed for correct computation of TimeLeft
                         regGameStatus.TimeLimit = currentGame.TimeLimit;
