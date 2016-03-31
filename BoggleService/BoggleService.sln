@@ -7,6 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleService", "BoggleServ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleServiceTests", "BoggleServiceTests\BoggleServiceTests.csproj", "{71936E2C-E15E-44DE-ABFF-B69805FAE163}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChromeRESTClientTester", "ChromeRESTClientTester", "{17C9BB40-4A60-47CC-BF5B-D3EAB1FDF7E1}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\Downloads\arc-2016 Mar 30 23-17-20.json = ..\..\..\..\Downloads\arc-2016 Mar 30 23-17-20.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

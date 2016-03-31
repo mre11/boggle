@@ -7,6 +7,42 @@ using static System.Net.HttpStatusCode;
 
 namespace Boggle
 {
+
+    // 1) Open chrome restclient app and click settings
+    // 2) click import/export
+    // 3) Drag the file I attached into the box and import.
+    // Here is file: Need to download.
+    // https://onedrive.live.com/redir?resid=4271A5614E021883!71653&authkey=!AO3qeWQJOL6Z6pE&ithint=file%2cjson
+    // https://onedrive.live.com/redir?resid=4271A5614E021883!71651&authkey=!AHSBAc9v-KsUYLA&ithint=file%2cdocx
+    // Join game now returns the wrong information.
+    //      {
+    //          "Board": ""
+    //          "GameID": 1
+    //      }
+
+    // Game status after two players joins in now wrong as well with brief = yes  
+    //  {
+    //      "Board": ""
+    //      "Player1": {
+    //          "Score": 0
+    //      }-
+    //      "Player2": {
+    //          "Score": -3
+    //      }-
+    //      "TimeLeft": 68
+    //      "TimeLimit": 120
+    //      "GameState": "active"
+    //  }
+
+    // Game status if there is only 1 pending game is incorrect as well
+    // {
+    //      "Board": ""
+    //      "GameState": "pending"
+    // }
+
+
+
+
     public class BoggleService : IBoggleService
     {
         /// <summary>
