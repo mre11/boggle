@@ -354,11 +354,6 @@ namespace Boggle
 
                     var result = new BoggleWord();  // this will be returned and hold only the score
                     playedBoggleWord.Score = result.Score = wordScore;
-                    
-                    if (user.WordsPlayed == null)
-                    {
-                        user.WordsPlayed = new List<BoggleWord>();
-                    }
 
                     user.WordsPlayed.Add(playedBoggleWord);
                     user.Score += wordScore;

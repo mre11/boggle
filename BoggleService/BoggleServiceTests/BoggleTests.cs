@@ -4,6 +4,7 @@ using System.Dynamic;
 using static System.Net.HttpStatusCode;
 using System.Diagnostics;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace Boggle
 {
@@ -98,6 +99,15 @@ namespace Boggle
             Assert.AreEqual(Forbidden, r.Status);
         }
 
+        [TestMethod]
+        public void TestCreateUser3()
+        {
+            dynamic data = new ExpandoObject();
+            data.Nickname = new FormatException();
+            Response r = client.DoPostAsync("/users", data).Result;
+
+        }
+
         /// <summary>
         /// Test when UserToken is invalid
         /// </summary>
@@ -182,6 +192,42 @@ namespace Boggle
         public void TestJoinGame5()
         {
             StartBoggleGame(10);
+        }
+
+        /// <summary>
+        /// Tests when a user tries to join a game before sending requests through to create a player
+        /// </summary>
+        [TestMethod]
+        public void TestJoinGame6()
+        {
+            dynamic data = new ExpandoObject();
+            data.UserToken = "invalidToken";
+            data.TimeLimit = 100;
+
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Conflict, r.Status);
+
+        }
+
+        [TestMethod]
+        public void TestJoinGame7()
+        {
+            string[] result = StartBoggleGame(15);
+            string gameID = result[0];
+
+            dynamic data = new ExpandoObject();
+            data.Nickname = "Yuk";
+
+            Response r = client.DoPostAsync("/users", data).Result;
+            string userToken = r.Data.UserToken;
+
+            dynamic playWord = new ExpandoObject();
+            playWord.UserToken = userToken;
+            playWord.Word = "work";
+            Response playWordResponse = client.DoPutAsync(playWord, "/games/1").Result;
+
+            Assert.AreEqual(Forbidden, playWordResponse.Status);
+
         }
 
         /// <summary>
@@ -362,6 +408,11 @@ namespace Boggle
             Assert.AreEqual(-1, (int)r.Data.Score);
         }
 
+        [TestMethod]
+        public void TestPlayWord7()
+        {
+        }
+
         // TODO need more PlayWord tests to test scoring
 
         /// <summary>
@@ -459,6 +510,49 @@ namespace Boggle
 
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual(-1, (int)r.Data.Score);
+        }
+
+        /// <summary>
+        /// Test successful gamestatus while the game is running.
+        /// Then play word for player 1 and check the game status.
+        /// Then play word for player 2 and check the game status.
+        /// Then wait for the gamestate to be completed and check that the 
+        /// game status correctly shows all words when the game is completed.
+        /// </summary>
+        [TestMethod]
+        public void TestGameStatus6()
+        {
+            string[] result = StartBoggleGame(7);
+            string gameID = result[0];
+            string userToken1 = result[1];
+            string userToken2 = result[2];
+
+            Response gameStatusResponse1 = client.DoGetAsync("/games/" + gameID).Result;
+            Assert.AreEqual("Test", gameStatusResponse1.Data.Player1.Nickname.ToString());
+            Assert.AreEqual("Test", gameStatusResponse1.Data.Player2.Nickname.ToString());
+
+            dynamic data1 = new ExpandoObject();
+            data1.UserToken = userToken1;
+            data1.Word = "sasdd";
+
+            Response playWord1 = client.DoPutAsync(data1, "/games/" + gameID).Result;
+            Response gameStatusResponse2 = client.DoGetAsync("/games/" + gameID).Result;
+            Assert.AreEqual(-1, (int)gameStatusResponse2.Data.Player1.Score);
+
+            dynamic data2 = new ExpandoObject();
+            data2.UserToken = userToken2;
+            data2.Word = "fsdfsd";
+
+            Response playWord2 = client.DoPutAsync(data2, "/games/" + gameID).Result;
+            Response gameStatusResponse3 = client.DoGetAsync("/games/" + gameID).Result;
+            Assert.AreEqual(-1, (int)gameStatusResponse3.Data.Player2.Score);
+
+            Thread.Sleep(7000);
+
+            Response gameStatusResponse4 = client.DoGetAsync("/games/" + gameID).Result;
+            Assert.AreEqual("completed", gameStatusResponse4.Data.GameState.ToString());
+            Assert.AreEqual("fsdfsd", gameStatusResponse4.Data.Player2.WordsPlayed[0].Word.ToString());
+            Assert.AreEqual("sasdd", gameStatusResponse4.Data.Player1.WordsPlayed[0].Word.ToString());
         }
 
         // TODO still need more GameStatus tests (especially for non-Brief), plus any others for code coverage
