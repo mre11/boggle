@@ -23,7 +23,7 @@ namespace Boggle
         /// <summary>
         /// Shows the game state of the game. Always comes first in the response.
         /// </summary>
-        [DataMember(EmitDefaultValue = false, Order = 1)]
+        [DataMember(EmitDefaultValue = false)]
         public string GameState
         {
             get
