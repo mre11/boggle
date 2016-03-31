@@ -296,7 +296,7 @@ namespace Boggle
 
                     int wordScore = 0;
 
-                    if (game.Board.CanBeFormed(playedWord))
+                    if (game.GameBoard.CanBeFormed(playedWord))
                     {
                         if (game.wordsPlayed.Contains(playedWord))
                             wordScore = 0;
@@ -369,7 +369,7 @@ namespace Boggle
                     }
 
                     SetStatus(OK);
-                    currentGame.timeLeft = currentGame.TimeLeft;
+                    //currentGame.timeLeft = currentGame.TimeLeft;
 
                     if (currentGame.GameState == null || currentGame.GameState == "pending" || (currentGame.Player1 == null || currentGame.Player2 == null)) 
                     {
@@ -377,7 +377,7 @@ namespace Boggle
                         response.GameState = "pending";
                         return response;
                     }
-                    else if (currentGame.timeLeft == null || currentGame.timeLeft == 0)
+                    else if (currentGame.TimeLeft == null || currentGame.TimeLeft == 0)
                     {
                         currentGame.GameState = "completed";
                     }
@@ -386,7 +386,10 @@ namespace Boggle
                     {
                         var briefGameStatus = new BoggleGame();
                         briefGameStatus.GameState = currentGame.GameState;
-                        briefGameStatus.timeLeft = currentGame.timeLeft;                                             
+                        // TimeLimit and TimeStarted are needed for correct computation of TimeLeft
+                        briefGameStatus.TimeLimit = currentGame.TimeLimit;
+                        briefGameStatus.TimeStarted = currentGame.TimeStarted;
+                        briefGameStatus.TimeLeft = currentGame.TimeLeft;                                             
                         briefGameStatus.Player1 = new User();
                         briefGameStatus.Player2 = new User();
                         briefGameStatus.Player1.Score = currentGame.Player1.Score;
@@ -401,14 +404,11 @@ namespace Boggle
                         // Set gamestate and board
                         regGameStatus.GameState = currentGame.GameState;
                         regGameStatus.Board = currentGame.Board;
-                        regGameStatus.board = regGameStatus.Board.ToString();
 
-                        // TimeLimit and TimeStarted are needed for correct computation of timeLeft
+                        // TimeLimit and TimeStarted are needed for correct computation of TimeLeft
                         regGameStatus.TimeLimit = currentGame.TimeLimit;
                         regGameStatus.TimeStarted = currentGame.TimeStarted;
-
-                        // TODO: Seems to be working but acts weird
-                        regGameStatus.timeLeft = currentGame.timeLeft;
+                        regGameStatus.TimeLeft = currentGame.TimeLeft;
 
                         // Set player 1 properties
                         regGameStatus.Player1 = new User();

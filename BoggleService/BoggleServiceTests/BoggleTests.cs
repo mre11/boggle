@@ -380,7 +380,7 @@ namespace Boggle
         [TestMethod]
         public void TestGameStatus2()
         {
-            // First create a pending game
+            // First create a user
             dynamic data = new ExpandoObject();
             data.Nickname = "Test";
             Response r = client.DoPostAsync("/users", data).Result;
@@ -415,8 +415,8 @@ namespace Boggle
             // Do the get request
             Response r = client.DoGetAsync("/games/" + gameID + "?Brief={0}", new string[] { "yes" }).Result;
             Assert.AreEqual(OK, r.Status);
-            Assert.AreEqual("active", r.Data.gameState);
-            Assert.AreNotEqual(null, r.Data.timeLeft);
+            Assert.AreEqual("active", r.Data.GameState.ToString());
+            Assert.AreNotEqual(null, r.Data.TimeLeft);
             Assert.AreEqual(0, (int)r.Data.Player1.Score);
             Assert.AreEqual(0, (int)r.Data.Player2.Score);
         }
@@ -436,8 +436,8 @@ namespace Boggle
             // Do the get request
             Response r = client.DoGetAsync("/games/" + gameID + "?Brief={0}", new string[] { "yes" }).Result;
             Assert.AreEqual(OK, r.Status);
-            Assert.AreEqual("completed", r.Data.gameState.ToString());
-            Assert.AreEqual(0, (int)r.Data.timeLeft);
+            Assert.AreEqual("completed", r.Data.GameState.ToString());
+            Assert.AreEqual(0, (int)r.Data.TimeLeft);
             Assert.AreEqual(0, (int)r.Data.Player1.Score);
             Assert.AreEqual(0, (int)r.Data.Player2.Score);
         }

@@ -10,11 +10,12 @@ namespace Boggle
         [DataMember(EmitDefaultValue = false)]
         public int GameID { get; set; }
 
+        [DataMember(EmitDefaultValue = false, Order = 1)]
         public string GameState
         {
             get
             {
-                if (gameState == "active" && timeLeft == 0)
+                if (gameState == "active" && TimeLeft == 0)
                 {
                     gameState = "completed";
                 }
@@ -23,20 +24,33 @@ namespace Boggle
             set { gameState = value; }
         }
 
-        [DataMember(EmitDefaultValue = false, Order = 1)]
         private string gameState;
-
-        //[DataMember(EmitDefaultValue = false)]
-        public BoggleBoard Board { get; set; }
+        
+        public BoggleBoard GameBoard { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public string board;
+        public string Board
+        {
+            get
+            {
+                board = "";
+                if (GameBoard != null)
+                {
+                    board = GameBoard.ToString();
+                }
+                return board;
+            }
+            set { board = value; }
+        }
+
+        private string board;
 
         [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
 
         public int TimeStarted { get; set; }
 
+        [DataMember(EmitDefaultValue = false)]
         public int? TimeLeft
         {
             get
@@ -46,18 +60,18 @@ namespace Boggle
 
                 if (result < 0)
                 {
-                    return 0;
+                    timeLeft = 0;
                 }
                 else
                 {
-                    return result;
+                    timeLeft = result;
                 }
+                return timeLeft;
             }
             set { timeLeft = value; }
         }
 
-        [DataMember(EmitDefaultValue = false)]
-        public int? timeLeft;
+        private int? timeLeft;
 
         [DataMember(EmitDefaultValue = false)]
         public User Player1 { get; set; }
@@ -76,8 +90,8 @@ namespace Boggle
             GameState = "pending";
 
             // Initialize the boggle board so we have the letters.
-            Board = new BoggleBoard();
-            wordsPlayed = new HashSet<string>();            
+            GameBoard = new BoggleBoard();
+            wordsPlayed = new HashSet<string>();
         }
         /// <summary>
         /// Empty constructor so we can decide what information we want to respond
