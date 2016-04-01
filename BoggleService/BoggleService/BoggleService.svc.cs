@@ -63,7 +63,7 @@ namespace Boggle
         /// Otherwise, creates a new user with a unique UserToken and the trimmed Nickname.The returned UserToken 
         /// should be used to identify the user in subsequent requests.Responds with status 201 (Created). 
         /// </summary>
-        public User CreateUser(User requestedUser)
+        public UserResponse CreateUser(User requestedUser)
         {
             try
             {
@@ -88,7 +88,7 @@ namespace Boggle
                     users.Add(requestedUser.UserToken, requestedUser);
 
                     // Create formatted response to send back. 
-                    var response = new User();
+                    var response = new UserResponse();
                     response.UserToken = userToken;
 
                     // Successfully created a new user.
@@ -120,7 +120,7 @@ namespace Boggle
         /// Otherwise, adds UserToken as the first player of the pending game, and the TimeLimit as the pending 
         /// game's requested time limit. Returns the pending game's GameID. Responds with status 202 (Accepted).
         /// </summary>
-        public BoggleGame JoinGame(JoinGameRequest requestBody)
+        public BoggleGameResponse JoinGame(JoinGameRequest requestBody)
         {
             try
             {
@@ -151,9 +151,8 @@ namespace Boggle
                         }
 
                         // Create formatted response to send back.
-                        var response = new BoggleGame();
+                        var response = new BoggleGameResponse();
                         response.GameID = pendingGameID;
-                        response.GameBoard = null;
 
                         if (pendingGame.Player1 == null) // pending game has 0 players
                         {
@@ -351,7 +350,7 @@ namespace Boggle
         /// returned depends on whether "Brief=yes" was included as a parameter as well as on the state of the game. 
         /// Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
         /// </summary>
-        public BoggleGame GameStatus(string gameID, string brief)
+        public BoggleGameResponse GameStatus(string gameID, string brief)
         {
             try
             {
@@ -373,9 +372,8 @@ namespace Boggle
 
                     if (currentGame.GameState == null || currentGame.GameState == "pending" || (currentGame.Player1 == null || currentGame.Player2 == null))
                     {
-                        var response = new BoggleGame();
+                        var response = new BoggleGameResponse();
                         response.GameState = "pending";
-                        response.GameBoard = null;
                         return response;
                     }
                     else if (currentGame.TimeLeft == null || currentGame.TimeLeft == 0)
@@ -385,47 +383,33 @@ namespace Boggle
 
                     if (brief != null && brief == "yes")
                     {
-                        var briefGameStatus = new BoggleGame();
-                        briefGameStatus.GameState = currentGame.GameState;
-
-                        // TimeLimit and TimeStarted are needed for correct computation of TimeLeft
-                        briefGameStatus.TimeLimit = currentGame.TimeLimit;
-                        briefGameStatus.TimeStarted = currentGame.TimeStarted;
+                        var briefGameStatus = new BoggleGameResponse();
+                        briefGameStatus.GameState = currentGame.GameState;                        
                         briefGameStatus.TimeLeft = currentGame.TimeLeft;
-
-                        briefGameStatus.Player1 = new User();
-                        briefGameStatus.Player2 = new User();
+                        briefGameStatus.Player1 = new UserResponse();
+                        briefGameStatus.Player2 = new UserResponse();
                         briefGameStatus.Player1.Score = currentGame.Player1.Score;
                         briefGameStatus.Player2.Score = currentGame.Player2.Score;
-
-                        // TODO: Return the response with only timeleft and not timelimit.
-                        // Nulling out TimeLimit messes up TimeLeft, so just leave it in
-                        // briefGameStatus.TimeLimit = null;
-                        briefGameStatus.GameBoard = null;
 
                         return briefGameStatus;
                     }
                     else
                     {
-                        var regGameStatus = new BoggleGame();
+                        var regGameStatus = new BoggleGameResponse();
 
-                        // Set gamestate and board
+                        // Set GameState, Board, and TimeLeft
                         regGameStatus.GameState = currentGame.GameState;
-                        regGameStatus.GameBoard = currentGame.GameBoard;
-                        regGameStatus.Board = currentGame.Board;
-
-                        // TimeLimit and TimeStarted are needed for correct computation of TimeLeft
+                        regGameStatus.Board = currentGame.GameBoard.ToString();
                         regGameStatus.TimeLimit = currentGame.TimeLimit;
-                        regGameStatus.TimeStarted = currentGame.TimeStarted;
                         regGameStatus.TimeLeft = currentGame.TimeLeft;
 
                         // Set player 1 properties
-                        regGameStatus.Player1 = new User();
+                        regGameStatus.Player1 = new UserResponse();
                         regGameStatus.Player1.Nickname = currentGame.Player1.Nickname;
                         regGameStatus.Player1.Score = currentGame.Player1.Score;
 
                         // Set player 2 properties
-                        regGameStatus.Player2 = new User();
+                        regGameStatus.Player2 = new UserResponse();
                         regGameStatus.Player2.Nickname = currentGame.Player2.Nickname;
                         regGameStatus.Player2.Score = currentGame.Player2.Score;
 

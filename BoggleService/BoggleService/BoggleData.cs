@@ -11,19 +11,16 @@ namespace Boggle
     /// <summary>
     /// Reprensents a BoggleGame that has a properties that describe the game, a BoggleBoard, and two Users.
     /// </summary>
-    [DataContract]
     public class BoggleGame
     {
         /// <summary>
         /// Represents the GameID. Initially not serialized
         /// </summary>
-        [DataMember(EmitDefaultValue = false)]
         public int GameID { get; set; }
 
         /// <summary>
         /// Shows the game state of the game. Always comes first in the response.
         /// </summary>
-        [DataMember(EmitDefaultValue = false)]
         public string GameState
         {
             get
@@ -42,32 +39,14 @@ namespace Boggle
         /// </summary>
         private string gameState;
 
-        public BoggleBoard GameBoard { get; set; }
-
         /// <summary>
-        /// Board represents the letters from the BoggleBoard.
+        /// Represents the boggle board being used in this game
         /// </summary>
-        [DataMember(EmitDefaultValue = false)]
-        public string Board
-        {
-            get
-            {
-                board = null;
-                if (GameBoard != null)
-                {
-                    board = GameBoard.ToString();
-                }
-                return board;
-            }
-            set { board = value; }
-        }
-
-        private string board;
+        public BoggleBoard GameBoard { get; set; }
 
         /// <summary>
         /// The time limit for the game. Integer average of the two players timelimit requests.
         /// </summary>
-        [DataMember(EmitDefaultValue = false)]
         public int? TimeLimit { get; set; }
 
         /// <summary>
@@ -79,7 +58,6 @@ namespace Boggle
         /// <summary>
         /// The amount of time left in a game.
         /// </summary>
-        [DataMember(EmitDefaultValue = false)]
         public int? TimeLeft
         {
             get
@@ -97,7 +75,6 @@ namespace Boggle
                 }
                 return timeLeft;
             }
-            set { timeLeft = value; }
         }
 
         private int? timeLeft;
@@ -105,13 +82,11 @@ namespace Boggle
         /// <summary>
         /// A User that is player1. First person to join a pending game.
         /// </summary>
-        [DataMember(EmitDefaultValue = false)]
         public User Player1 { get; set; }
 
         /// <summary>
         /// A User that is player2. Second person to join a pending game.
         /// </summary>
-        [DataMember(EmitDefaultValue = false)]
         public User Player2 { get; set; }
 
         /// <summary>
@@ -126,23 +101,99 @@ namespace Boggle
         {
             GameID = gameID;
             GameState = "pending";
-
-            // Initialize the boggle board so we have the letters.
             GameBoard = new BoggleBoard();
             wordsPlayed = new HashSet<string>();
         }
+    }
+
+    /// <summary>
+    /// Reprensents an HTTP response for a request about a BoggleGame
+    /// </summary>
+    [DataContract]
+    public class BoggleGameResponse
+    {
         /// <summary>
-        /// Empty constructor so we can decide what information we want to respond
-        /// back to the client with.
+        /// Represents the GameID. Initially not serialized
         /// </summary>
-        public BoggleGame() { }
+        [DataMember(EmitDefaultValue = false)]
+        public int GameID { get; set; }
+
+        /// <summary>
+        /// Shows the game state of the game. Always comes first in the response.
+        /// </summary>
+        [DataMember(EmitDefaultValue = false)]
+        public string GameState { get; set; }
+
+        /// <summary>
+        /// Represents the letters from the BoggleBoard.
+        /// </summary>
+        [DataMember(EmitDefaultValue = false)]
+        public string Board { get; set; }
+
+        /// <summary>
+        /// The time limit for the game. Integer average of the two players timelimit requests.
+        /// </summary>
+        [DataMember(EmitDefaultValue = false)]
+        public int? TimeLimit { get; set; }
+
+        /// <summary>
+        /// The amount of time left in a game.
+        /// </summary>
+        [DataMember(EmitDefaultValue = false)]
+        public int? TimeLeft { get; set; }
+
+        /// <summary>
+        /// A User that is player1. First person to join a pending game.
+        /// </summary>
+        [DataMember(EmitDefaultValue = false)]
+        public UserResponse Player1 { get; set; }
+
+        /// <summary>
+        /// A User that is player2. Second person to join a pending game.
+        /// </summary>
+        [DataMember(EmitDefaultValue = false)]
+        public UserResponse Player2 { get; set; }
     }
 
     /// <summary>
     /// Represents a user with a nickname, usertoken, total score, and the words that they have played.
     /// </summary>
-    [DataContract]
     public class User
+    {
+        /// <summary>
+        /// Nickname of the user.
+        /// </summary>
+        public string Nickname { get; set; }
+
+        /// <summary>
+        /// UserToken of the user. Allows them to communicate with the server.
+        /// </summary>
+        public string UserToken { get; set; }
+
+        /// <summary>
+        /// Total score of the user.
+        /// </summary>
+        public int Score { get; set; }
+
+        /// <summary>
+        /// List of all BoggleWords this user has played.
+        /// </summary>
+        public IList<BoggleWord> WordsPlayed { get; set; }
+
+        public User()
+        {
+            Nickname = "";
+            UserToken = "";
+            Score = 0;
+            WordsPlayed = new List<BoggleWord>();
+        }
+    }
+
+    /// <summary>
+    /// Represents an HTTP response for a request about a User.
+    /// </summary>
+    [DataContract]
+    public class UserResponse
     {
         /// <summary>
         /// Nickname of the user.
@@ -167,16 +218,6 @@ namespace Boggle
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
         public List<BoggleWord> WordsPlayed { get; set; }
-
-        /// <summary>
-        /// Constructs a new user with null properties.
-        /// </summary>
-        public User()
-        {
-            Nickname = null;
-            UserToken = null;
-            WordsPlayed = null;
-        }
     }
 
     /// <summary>
