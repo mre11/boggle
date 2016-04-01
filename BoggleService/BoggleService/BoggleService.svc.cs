@@ -143,13 +143,11 @@ namespace Boggle
                     BoggleGame pendingGame;
                     if (games.TryGetValue(pendingGameID, out pendingGame))
                     {
-                        // Create User newPlayer to act as reference to the user in the users list.
+                        // Get the user, or return if the user is not found
                         User newPlayer;
-
-                        // Haven't created the user yet.
                         if (!users.TryGetValue(requestBody.UserToken, out newPlayer))
                         {
-                            SetStatus(Conflict);
+                            SetStatus(Forbidden);
                             return null;
                         }
 

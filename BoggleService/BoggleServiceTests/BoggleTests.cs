@@ -70,7 +70,7 @@ namespace Boggle
         private RestTestClient client = new RestTestClient("http://localhost:60000/");
 
         // Use this to test against Joe's Azure service
-        // private RestTestClient client = new RestTestClient("http://bogglecs3500s16.azurewebsites.net/");
+        //private RestTestClient client = new RestTestClient("http://bogglecs3500s16.azurewebsites.net/");
 
         /// <summary>
         /// Test the API request
@@ -217,7 +217,7 @@ namespace Boggle
             data.UserToken = Guid.NewGuid();
             data.TimeLimit = 10;
             Response r = client.DoPostAsync("/games", data).Result;
-            Assert.AreEqual(Conflict, r.Status);
+            Assert.AreEqual(Forbidden, r.Status);
         }
 
         /// <summary>
