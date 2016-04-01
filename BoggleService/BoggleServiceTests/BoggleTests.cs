@@ -6,6 +6,7 @@ using System.Dynamic;
 using static System.Net.HttpStatusCode;
 using System.Diagnostics;
 using System.Threading;
+using System.Net.Http;
 
 namespace Boggle
 {
@@ -67,7 +68,28 @@ namespace Boggle
         }
 
         private RestTestClient client = new RestTestClient("http://localhost:60000/");
+
+        // Use this to test against Joe's Azure service
         // private RestTestClient client = new RestTestClient("http://bogglecs3500s16.azurewebsites.net/");
+
+        /// <summary>
+        /// Test the API request
+        /// </summary>
+        [TestMethod]
+        public void TestAPI1()
+        {
+            HttpClient httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri("http://localhost:60000/");
+
+            using (httpClient)
+            {
+                var url = "BoggleService.svc/api";
+                HttpResponseMessage response = httpClient.GetAsync(url).Result;
+
+                Assert.IsTrue(response.IsSuccessStatusCode);
+                Assert.AreEqual(OK, response.StatusCode);
+            }
+        }
 
         /// <summary>
         /// Test successful request
@@ -78,6 +100,14 @@ namespace Boggle
             dynamic data = new ExpandoObject();
             data.Nickname = "Test";
             Response r = client.DoPostAsync("/users", data).Result;
+
+            // Check that the right information was returned
+            Assert.AreEqual(null, r.Data.Nickname);
+            Assert.AreNotEqual(null, r.Data.UserToken);
+            Assert.AreEqual(null, r.Data.Score);
+            Assert.AreEqual(null, r.Data.WordsPlayed);
+
+            // Check that the response is correct
             Assert.AreEqual(Created, r.Status);
 
             string token = r.Data.UserToken;
@@ -418,6 +448,7 @@ namespace Boggle
 
             // Check that the right information was returned
             Assert.AreNotEqual(null, r.Data.GameState);
+            Assert.AreEqual(null, r.Data.GameID);
             Assert.AreEqual(null, r.Data.Board);
             Assert.AreEqual(null, r.Data.TimeLimit);
             Assert.AreEqual(null, r.Data.TimeLeft);
@@ -445,6 +476,7 @@ namespace Boggle
 
             // Check that the right information was returned
             Assert.AreNotEqual(null, r.Data.GameState);
+            Assert.AreEqual(null, r.Data.GameID);
             Assert.AreEqual(null, r.Data.Board);
             Assert.AreEqual(null, r.Data.TimeLimit);
             Assert.AreNotEqual(null, r.Data.TimeLeft);
@@ -485,6 +517,7 @@ namespace Boggle
 
             // Check that the right information was returned
             Assert.AreNotEqual(null, r.Data.GameState);
+            Assert.AreEqual(null, r.Data.GameID);
             Assert.AreEqual(null, r.Data.Board);
             Assert.AreEqual(null, r.Data.TimeLimit);
             Assert.AreNotEqual(null, r.Data.TimeLeft);
@@ -529,6 +562,7 @@ namespace Boggle
 
             // Check that the right information was returned
             Assert.AreNotEqual(null, r.Data.GameState);
+            Assert.AreEqual(null, r.Data.GameID);
             Assert.AreNotEqual(null, r.Data.Board);
             Assert.AreNotEqual(null, r.Data.TimeLimit);
             Assert.AreNotEqual(null, r.Data.TimeLeft);
@@ -600,8 +634,6 @@ namespace Boggle
             Assert.AreEqual("sasdd", gameStatusResponse4.Data.Player1.WordsPlayed[0].Word.ToString());
         }
 
-        // TODO still need more GameStatus tests? Or add checks that unexpected things are null to existing?
-
         /// <summary>
         /// Helper method that starts a Boggle game on the server.
         /// Returns an array containing GameID, Player1's UserToken, and Player2's UserToken.
@@ -621,6 +653,17 @@ namespace Boggle
             data.UserToken = userToken1;
             data.TimeLimit = timeLimit;
             r = client.DoPostAsync("/games", data).Result;
+
+            // Check that the right information was returned
+            Assert.AreEqual(null, r.Data.GameState);
+            Assert.AreNotEqual(null, r.Data.GameID);
+            Assert.AreEqual(null, r.Data.Board);
+            Assert.AreEqual(null, r.Data.TimeLimit);
+            Assert.AreEqual(null, r.Data.TimeLeft);
+            Assert.AreEqual(null, r.Data.Player1);
+            Assert.AreEqual(null, r.Data.Player2);
+
+            // Check that the response is correct
             Assert.AreEqual(Accepted, r.Status);
 
             string gameID = r.Data.GameID;
@@ -637,6 +680,17 @@ namespace Boggle
             data.UserToken = userToken2;
             data.TimeLimit = timeLimit;
             r = client.DoPostAsync("/games", data).Result;
+
+            // Check that the right information was returned
+            Assert.AreEqual(null, r.Data.GameState);
+            Assert.AreNotEqual(null, r.Data.GameID);
+            Assert.AreEqual(null, r.Data.Board);
+            Assert.AreEqual(null, r.Data.TimeLimit);
+            Assert.AreEqual(null, r.Data.TimeLeft);
+            Assert.AreEqual(null, r.Data.Player1);
+            Assert.AreEqual(null, r.Data.Player2);
+
+            // Check that the response is correct
             Assert.AreEqual(Created, r.Status);
             Assert.AreEqual(gameID, (string)r.Data.GameID);
 
