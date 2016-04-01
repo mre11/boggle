@@ -415,9 +415,18 @@ namespace Boggle
 
             // Do the get request
             r = client.DoGetAsync("/games/" + gameID).Result;
+
+            // Check that the right information was returned
+            Assert.AreNotEqual(null, r.Data.GameState);
+            Assert.AreEqual(null, r.Data.Board);
+            Assert.AreEqual(null, r.Data.TimeLimit);
+            Assert.AreEqual(null, r.Data.TimeLeft);
+            Assert.AreEqual(null, r.Data.Player1);
+            Assert.AreEqual(null, r.Data.Player2);
+
+            // Check that the response is correct
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual("pending", r.Data.GameState.ToString());
-            Assert.AreEqual(null, r.Data.Board);
         }
 
         /// <summary>
@@ -431,13 +440,32 @@ namespace Boggle
             string gameID = result[0];
 
             // Do the get request
+            Thread.Sleep(1000); // make sure some time has passed
             Response r = client.DoGetAsync("/games/" + gameID + "?Brief={0}", new string[] { "yes" }).Result;
+
+            // Check that the right information was returned
+            Assert.AreNotEqual(null, r.Data.GameState);
+            Assert.AreEqual(null, r.Data.Board);
+            Assert.AreEqual(null, r.Data.TimeLimit);
+            Assert.AreNotEqual(null, r.Data.TimeLeft);
+            Assert.AreNotEqual(null, r.Data.Player1);
+            Assert.AreNotEqual(null, r.Data.Player2);
+            Assert.AreEqual(null, r.Data.Player1.Nickname);
+            Assert.AreEqual(null, r.Data.Player2.Nickname);
+            Assert.AreEqual(null, r.Data.Player1.UserToken);
+            Assert.AreEqual(null, r.Data.Player2.UserToken);
+            Assert.AreNotEqual(null, r.Data.Player1.Score);
+            Assert.AreNotEqual(null, r.Data.Player2.Score);
+            Assert.AreEqual(null, r.Data.Player1.WordsPlayed);
+            Assert.AreEqual(null, r.Data.Player2.WordsPlayed);
+
+            // Check that the response is correct
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual("active", r.Data.GameState.ToString());
-            Assert.AreNotEqual(null, r.Data.TimeLeft);
+            Assert.IsTrue((int)r.Data.TimeLeft > 0);
+            Assert.IsTrue((int)r.Data.TimeLeft < 60);
             Assert.AreEqual(0, (int)r.Data.Player1.Score);
             Assert.AreEqual(0, (int)r.Data.Player2.Score);
-            Assert.AreEqual(null, r.Data.Board);
         }
 
         /// <summary>
@@ -454,17 +482,33 @@ namespace Boggle
 
             // Do the get request
             Response r = client.DoGetAsync("/games/" + gameID + "?Brief={0}", new string[] { "yes" }).Result;
+
+            // Check that the right information was returned
+            Assert.AreNotEqual(null, r.Data.GameState);
+            Assert.AreEqual(null, r.Data.Board);
+            Assert.AreEqual(null, r.Data.TimeLimit);
+            Assert.AreNotEqual(null, r.Data.TimeLeft);
+            Assert.AreNotEqual(null, r.Data.Player1);
+            Assert.AreNotEqual(null, r.Data.Player2);
+            Assert.AreEqual(null, r.Data.Player1.Nickname);
+            Assert.AreEqual(null, r.Data.Player2.Nickname);
+            Assert.AreEqual(null, r.Data.Player1.UserToken);
+            Assert.AreEqual(null, r.Data.Player2.UserToken);
+            Assert.AreNotEqual(null, r.Data.Player1.Score);
+            Assert.AreNotEqual(null, r.Data.Player2.Score);
+            Assert.AreEqual(null, r.Data.Player1.WordsPlayed);
+            Assert.AreEqual(null, r.Data.Player2.WordsPlayed);
+
+            // Check that the response is correct
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual("completed", r.Data.GameState.ToString());
-            Assert.AreNotEqual(null, r.Data.TimeLeft);
             Assert.AreEqual(0, (int)r.Data.TimeLeft);
             Assert.AreEqual(0, (int)r.Data.Player1.Score);
             Assert.AreEqual(0, (int)r.Data.Player2.Score);
-            Assert.AreEqual(null, r.Data.Board);
         }
 
         /// <summary>
-        /// Test an active game when Brief is null
+        /// Test an active game when Brief is not yes
         /// </summary>
         [TestMethod]
         public void TestGameStatus5()
@@ -477,23 +521,40 @@ namespace Boggle
             dynamic data = new ExpandoObject();
             data.UserToken = userToken1;
             data.Word = "asdf";
-
             Response r = client.DoPutAsync(data, "/games/" + gameID).Result;
 
             // Get game status
+            Thread.Sleep(1000); // make sure some time has passed
             r = client.DoGetAsync("/games/" + gameID, new string[1] { "" }).Result;
 
+            // Check that the right information was returned
+            Assert.AreNotEqual(null, r.Data.GameState);
+            Assert.AreNotEqual(null, r.Data.Board);
+            Assert.AreNotEqual(null, r.Data.TimeLimit);
+            Assert.AreNotEqual(null, r.Data.TimeLeft);
+            Assert.AreNotEqual(null, r.Data.Player1);
+            Assert.AreNotEqual(null, r.Data.Player2);
+            Assert.AreNotEqual(null, r.Data.Player1.Nickname);
+            Assert.AreNotEqual(null, r.Data.Player2.Nickname);
+            Assert.AreEqual(null, r.Data.Player1.UserToken);
+            Assert.AreEqual(null, r.Data.Player2.UserToken);
+            Assert.AreNotEqual(null, r.Data.Player1.Score);
+            Assert.AreNotEqual(null, r.Data.Player2.Score);
+            Assert.AreEqual(null, r.Data.Player1.WordsPlayed);
+            Assert.AreEqual(null, r.Data.Player2.WordsPlayed);
+
+            // Check that the response is correct
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual("active", r.Data.GameState.ToString());
             Assert.AreEqual(16, r.Data.Board.ToString().Length);
-            Assert.AreNotEqual(null, r.Data.TimeLimit);
-            Assert.AreNotEqual(null, r.Data.TimeLeft);
+            Assert.AreEqual(50, (int)r.Data.TimeLimit);
             Assert.IsTrue((int)r.Data.TimeLeft > 0);
-            Assert.AreNotEqual(null, r.Data.Player1.Nickname);
-            Assert.AreNotEqual(null, r.Data.Player2.Nickname);
+            Assert.IsTrue((int)r.Data.TimeLeft < 50);
+            Assert.AreEqual("tester1", r.Data.Player1.Nickname.ToString());
+            Assert.AreEqual("tester2", r.Data.Player2.Nickname.ToString());
             Assert.AreEqual(-1, (int)r.Data.Player1.Score);
-            Assert.AreEqual(null, r.Data.Player1.WordsPlayed);
-            Assert.AreEqual(null, r.Data.Player2.WordsPlayed);
+            Assert.AreEqual(0, (int)r.Data.Player2.Score);
+
         }
 
         /// <summary>
@@ -506,14 +567,14 @@ namespace Boggle
         [TestMethod]
         public void TestGameStatus6()
         {
-            string[] result = StartBoggleGame(7);
+            string[] result = StartBoggleGame(6);
             string gameID = result[0];
             string userToken1 = result[1];
             string userToken2 = result[2];
 
             Response gameStatusResponse1 = client.DoGetAsync("/games/" + gameID).Result;
-            Assert.AreEqual("Test", gameStatusResponse1.Data.Player1.Nickname.ToString());
-            Assert.AreEqual("Test", gameStatusResponse1.Data.Player2.Nickname.ToString());
+            Assert.AreEqual("tester1", gameStatusResponse1.Data.Player1.Nickname.ToString());
+            Assert.AreEqual("tester2", gameStatusResponse1.Data.Player2.Nickname.ToString());
 
             dynamic data1 = new ExpandoObject();
             data1.UserToken = userToken1;
@@ -551,7 +612,7 @@ namespace Boggle
 
             // First create a user
             dynamic data = new ExpandoObject();
-            data.Nickname = "Test";
+            data.Nickname = "tester1";
             Response r = client.DoPostAsync("/users", data).Result;
             string userToken1 = r.Data.UserToken;
 
@@ -567,7 +628,7 @@ namespace Boggle
 
             // Now create a second user
             data = new ExpandoObject();
-            data.Nickname = "Test";
+            data.Nickname = "tester2";
             r = client.DoPostAsync("/users", data).Result;
             string userToken2 = r.Data.UserToken;
 
