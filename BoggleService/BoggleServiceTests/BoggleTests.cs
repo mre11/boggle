@@ -380,14 +380,20 @@ namespace Boggle
             dynamic data = new ExpandoObject();
             data.UserToken = userToken1;
             data.Word = "asdf";
-
             Response r = client.DoPutAsync(data, "/games/" + gameID).Result;
+
+            // Check that the right information was returned
+            Assert.AreEqual(null, r.Data.UserToken);
+            Assert.AreEqual(null, r.Data.Word);
+            Assert.AreNotEqual(null, r.Data.Score);
+
+            // Check that the response is correct
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual(-1, (int)r.Data.Score);
         }
 
         /// <summary>
-        /// Test for a valid user playing a word without first joining a game
+        /// Test for Forbidden response when a valid user plays a word without first joining a game
         /// </summary>
         [TestMethod]
         public void TestPlayWord6()
