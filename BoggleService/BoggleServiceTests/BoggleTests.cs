@@ -66,8 +66,8 @@ namespace Boggle
             IISAgent.Stop();
         }
 
-        //private RestTestClient client = new RestTestClient("http://localhost:60000/");
-        private RestTestClient client = new RestTestClient("http://bogglecs3500s16.azurewebsites.net/");
+        private RestTestClient client = new RestTestClient("http://localhost:60000/");
+        // private RestTestClient client = new RestTestClient("http://bogglecs3500s16.azurewebsites.net/");
 
         /// <summary>
         /// Test successful request
@@ -178,10 +178,23 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Test a successful request
+        /// Test for a UserToken conflict
         /// </summary>
         [TestMethod]
         public void TestJoinGame5()
+        {
+            dynamic data = new ExpandoObject();
+            data.UserToken = Guid.NewGuid();
+            data.TimeLimit = 10;
+            Response r = client.DoPostAsync("/games", data).Result;
+            Assert.AreEqual(Conflict, r.Status);
+        }
+
+        /// <summary>
+        /// Test a successful request
+        /// </summary>
+        [TestMethod]
+        public void TestJoinGame6()
         {
             StartBoggleGame(10);
         }

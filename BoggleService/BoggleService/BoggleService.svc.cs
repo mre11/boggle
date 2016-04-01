@@ -400,7 +400,6 @@ namespace Boggle
                     {
                         var regGameStatus = new BoggleGameResponse();
 
-                        // Set GameState, Board, and TimeLeft
                         regGameStatus.GameState = currentGame.GameState;
                         regGameStatus.Board = currentGame.GameBoard.ToString();
                         regGameStatus.TimeLimit = currentGame.TimeLimit;
@@ -420,7 +419,7 @@ namespace Boggle
                         {
                             regGameStatus.Player1.WordsPlayed = new List<BoggleWordResponse>();
 
-                            // Transfer the boggle words over from current game to the formatted response bogglegame for player 1.
+                            // Transfer the boggle words over from current game to the response
                             foreach (BoggleWord word in currentGame.Player1.WordsPlayed)
                             {
                                 var formattedWord = new BoggleWordResponse();
@@ -431,7 +430,6 @@ namespace Boggle
 
                             regGameStatus.Player2.WordsPlayed = new List<BoggleWordResponse>();
 
-                            // Transfer the boggle words over from current game to the formatted response bogglegame for player 2.
                             foreach (BoggleWord word in currentGame.Player2.WordsPlayed)
                             {
                                 var formattedWord = new BoggleWordResponse();

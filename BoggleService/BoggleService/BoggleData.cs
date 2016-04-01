@@ -12,12 +12,12 @@ namespace Boggle
     public class BoggleGame
     {
         /// <summary>
-        /// Represents the GameID. Initially not serialized
+        /// Represents the GameID.
         /// </summary>
         public int GameID { get; set; }
 
         /// <summary>
-        /// Shows the game state of the game.
+        /// The game state can be pending, active, or completed.
         /// </summary>
         public string GameState
         {
@@ -43,33 +43,31 @@ namespace Boggle
         public BoggleBoard GameBoard { get; set; }
 
         /// <summary>
-        /// The time limit for the game. Integer average of the two players timelimit requests.
+        /// The time limit in seconds for the game. Integer average of the two players timelimit requests.
         /// </summary>
         public int? TimeLimit { get; set; }
 
         /// <summary>
-        /// Once the second player joins a game, this keeps track of the time it started
-        /// so we can correctly calculate the time left.
+        /// The time this game started, represented as a tick count in milliseconds.
         /// </summary>
         public int TimeStarted { get; set; }
 
         /// <summary>
-        /// The amount of time left in a game.
+        /// The amount of time left in this game in seconds.
         /// </summary>
         public int? TimeLeft
         {
             get
             {
                 var timeElapsed = (Environment.TickCount - TimeStarted) / 1000;
-                var result = TimeLimit - timeElapsed;
 
-                if (result < 0)
+                if (TimeLimit < timeElapsed)
                 {
                     timeLeft = 0;
                 }
                 else
                 {
-                    timeLeft = result;
+                    timeLeft = TimeLimit - timeElapsed;
                 }
                 return timeLeft;
             }
@@ -81,17 +79,17 @@ namespace Boggle
         private int? timeLeft;
 
         /// <summary>
-        /// A User that is player1. First person to join a pending game.
+        /// First user to join a pending game.
         /// </summary>
         public User Player1 { get; set; }
 
         /// <summary>
-        /// A User that is player2. Second person to join a pending game.
+        /// Second user to join a pending game.
         /// </summary>
         public User Player2 { get; set; }
 
         /// <summary>
-        /// Keeps track of the string words played in this BoggleGame.
+        /// Keeps track of the words played in this game.
         /// </summary>
         public ISet<string> wordsPlayed;
 
@@ -114,13 +112,13 @@ namespace Boggle
     public class BoggleGameResponse
     {
         /// <summary>
-        /// Represents the GameID. Initially not serialized
+        /// The ID number of this game.
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
         public int GameID { get; set; }
 
         /// <summary>
-        /// Shows the game state of the game. Always comes first in the response.
+        /// The game state can be pending, active, or completed.
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
         public string GameState { get; set; }
@@ -132,25 +130,25 @@ namespace Boggle
         public string Board { get; set; }
 
         /// <summary>
-        /// The time limit for the game. Integer average of the two players timelimit requests.
+        /// The time limit in seconds for the game. Integer average of the two players timelimit requests.
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
         public int? TimeLimit { get; set; }
 
         /// <summary>
-        /// The amount of time left in a game.
+        /// The amount of time left in a game in seconds.
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
         public int? TimeLeft { get; set; }
 
         /// <summary>
-        /// A User that is player1. First person to join a pending game.
+        /// First user to join a pending game.
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
         public UserResponse Player1 { get; set; }
 
         /// <summary>
-        /// A User that is player2. Second person to join a pending game.
+        /// Second user to join a pending game.
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
         public UserResponse Player2 { get; set; }
@@ -167,7 +165,7 @@ namespace Boggle
         public string Nickname { get; set; }
 
         /// <summary>
-        /// UserToken of the user. Allows them to communicate with the server.
+        /// A unique GUID for this user.
         /// </summary>
         public string UserToken { get; set; }
 
@@ -237,10 +235,13 @@ namespace Boggle
         public string Word { get; set; }
 
         /// <summary>
-        /// The score for this word. Score is calculated inside the boggleboard.
+        /// The score for this word.
         /// </summary>
         public int Score { get; set; }
 
+        /// <summary>
+        /// Creates an empty BoggleWord.
+        /// </summary>
         public BoggleWord()
         {
             UserToken = "";
