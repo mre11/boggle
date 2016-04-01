@@ -6,7 +6,6 @@ using System.Dynamic;
 using static System.Net.HttpStatusCode;
 using System.Diagnostics;
 using System.Threading;
-using Newtonsoft.Json;
 
 namespace Boggle
 {
@@ -67,8 +66,8 @@ namespace Boggle
             IISAgent.Stop();
         }
 
-        private RestTestClient client = new RestTestClient("http://localhost:60000/");
-        //private RestTestClient client = new RestTestClient("http://bogglecs3500s16.azurewebsites.net/");
+        //private RestTestClient client = new RestTestClient("http://localhost:60000/");
+        private RestTestClient client = new RestTestClient("http://bogglecs3500s16.azurewebsites.net/");
 
         /// <summary>
         /// Test successful request
@@ -99,15 +98,6 @@ namespace Boggle
             data.Nickname = null;
             r = client.DoPostAsync("/users", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
-        }
-
-        [TestMethod]
-        public void TestCreateUser3()
-        {
-            dynamic data = new ExpandoObject();
-            data.Nickname = new FormatException();
-            Response r = client.DoPostAsync("/users", data).Result;
-
         }
 
         /// <summary>
@@ -194,42 +184,6 @@ namespace Boggle
         public void TestJoinGame5()
         {
             StartBoggleGame(10);
-        }
-
-        /// <summary>
-        /// Tests when a user tries to join a game before sending requests through to create a player
-        /// </summary>
-        [TestMethod]
-        public void TestJoinGame6()
-        {
-            dynamic data = new ExpandoObject();
-            data.UserToken = "invalidToken";
-            data.TimeLimit = 100;
-
-            Response r = client.DoPostAsync("/games", data).Result;
-            Assert.AreEqual(Conflict, r.Status);
-
-        }
-
-        [TestMethod]
-        public void TestJoinGame7()
-        {
-            string[] result = StartBoggleGame(15);
-            string gameID = result[0];
-
-            dynamic data = new ExpandoObject();
-            data.Nickname = "Yuk";
-
-            Response r = client.DoPostAsync("/users", data).Result;
-            string userToken = r.Data.UserToken;
-
-            dynamic playWord = new ExpandoObject();
-            playWord.UserToken = userToken;
-            playWord.Word = "work";
-            Response playWordResponse = client.DoPutAsync(playWord, "/games/1").Result;
-
-            Assert.AreEqual(Forbidden, playWordResponse.Status);
-
         }
 
         /// <summary>
@@ -390,24 +344,26 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Test a successful request
+        /// Test for a valid user playing a word without first joining a game
         /// </summary>
         [TestMethod]
         public void TestPlayWord6()
         {
-            // Start a game
-            string[] result = StartBoggleGame(60);
+            string[] result = StartBoggleGame(15);
             string gameID = result[0];
-            string userToken1 = result[1];
 
-            // Do the put request
             dynamic data = new ExpandoObject();
-            data.UserToken = userToken1;
-            data.Word = "asdf";
+            data.Nickname = "Yuk";
 
-            Response r = client.DoPutAsync(data, "/games/" + gameID).Result;
-            Assert.AreEqual(OK, r.Status);
-            Assert.AreEqual(-1, (int)r.Data.Score);
+            Response r = client.DoPostAsync("/users", data).Result;
+            string userToken = r.Data.UserToken;
+
+            dynamic playWord = new ExpandoObject();
+            playWord.UserToken = userToken;
+            playWord.Word = "work";
+            Response playWordResponse = client.DoPutAsync(playWord, "/games/1").Result;
+
+            Assert.AreEqual(Forbidden, playWordResponse.Status);
         }
 
         // TODO need more PlayWord tests to test scoring

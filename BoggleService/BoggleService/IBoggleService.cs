@@ -6,6 +6,9 @@ using System.ServiceModel.Web;
 
 namespace Boggle
 {
+    /// <summary>
+    /// Provides a RESTful API for a Boggle game service
+    /// </summary>
     [ServiceContract]
     public interface IBoggleService
     {
@@ -69,7 +72,7 @@ namespace Boggle
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{gameID}")]
-        BoggleWord PlayWord(string gameID, BoggleWord word);
+        BoggleWordResponse PlayWord(string gameID, BoggleWord word);
 
         /// <summary>
         /// Get game status information.

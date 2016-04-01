@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System;
 
-// TODO add doc comments everywhere
-
 namespace Boggle
 {
     /// <summary>
@@ -19,7 +17,7 @@ namespace Boggle
         public int GameID { get; set; }
 
         /// <summary>
-        /// Shows the game state of the game. Always comes first in the response.
+        /// Shows the game state of the game.
         /// </summary>
         public string GameState
         {
@@ -35,7 +33,7 @@ namespace Boggle
         }
 
         /// <summary>
-        /// String version of gamestate.
+        /// Private memeber variable corresponsing to GameState
         /// </summary>
         private string gameState;
 
@@ -77,6 +75,9 @@ namespace Boggle
             }
         }
 
+        /// <summary>
+        /// Private memeber variable corresponsing to TimeLeft
+        /// </summary>
         private int? timeLeft;
 
         /// <summary>
@@ -217,14 +218,42 @@ namespace Boggle
         /// List of all BoggleWords this user has played.
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
-        public List<BoggleWord> WordsPlayed { get; set; }
+        public List<BoggleWordResponse> WordsPlayed { get; set; }
     }
 
     /// <summary>
     /// A Boggle Word is a word that also has a score.
     /// </summary>
-    [DataContract]
     public class BoggleWord
+    {
+        /// <summary>
+        /// The user token of the user who played this BoggleWord.
+        /// </summary>
+        public string UserToken { get; set; }
+
+        /// <summary>
+        /// Represents the word for this boggleword.
+        /// </summary>
+        public string Word { get; set; }
+
+        /// <summary>
+        /// The score for this word. Score is calculated inside the boggleboard.
+        /// </summary>
+        public int Score { get; set; }
+
+        public BoggleWord()
+        {
+            UserToken = "";
+            Word = "";
+            Score = 0;
+        }
+    }
+
+    /// <summary>
+    /// Represents an HTTP response for a BoggleWord
+    /// </summary>
+    [DataContract]
+    public class BoggleWordResponse
     {
         /// <summary>
         /// The user token of the user who played this BoggleWord.

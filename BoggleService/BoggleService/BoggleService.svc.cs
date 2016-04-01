@@ -9,6 +9,9 @@ using static System.Net.HttpStatusCode;
 
 namespace Boggle
 {
+    /// <summary>
+    /// Implements a RESTful service for a Boggle game
+    /// </summary>
     public class BoggleService : IBoggleService
     {
         /// <summary>
@@ -158,7 +161,6 @@ namespace Boggle
                         {
                             // Link the pendingGames player1 with the user from the users list.
                             pendingGame.Player1 = newPlayer;
-                            pendingGame.Player1.WordsPlayed = new List<BoggleWord>();
                             pendingGame.TimeLimit = requestBody.TimeLimit;
                             SetStatus(Accepted);
                         }
@@ -171,7 +173,6 @@ namespace Boggle
                         {
                             // Link the pendingGames player2 with the user from the users list.
                             pendingGame.Player2 = newPlayer;
-                            pendingGame.Player2.WordsPlayed = new List<BoggleWord>();
                             pendingGame.TimeLimit = (pendingGame.TimeLimit + requestBody.TimeLimit) / 2;
 
                             // Start the game with the average time limit from both users and record the time this game starts.
@@ -182,7 +183,7 @@ namespace Boggle
                             pendingGameID++;
                             games.Add(pendingGameID, new BoggleGame(pendingGameID));
 
-                            SetStatus(Created);                            
+                            SetStatus(Created);
                         }
 
                         return response;
@@ -254,7 +255,7 @@ namespace Boggle
         /// the score for Word in the context of the game(e.g. if Word has been played before the score is zero). 
         /// Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
-        public BoggleWord PlayWord(string gameID, BoggleWord word)
+        public BoggleWordResponse PlayWord(string gameID, BoggleWord word)
         {
             try
             {
@@ -323,15 +324,17 @@ namespace Boggle
                         wordScore = -1;
                     }
 
+                    // Update the state of the game
                     game.wordsPlayed.Add(playedWord);
-
-                    var result = new BoggleWord();  // this will be returned and hold only the score
-                    playedBoggleWord.Score = result.Score = wordScore;
-
+                    playedBoggleWord.Score = wordScore;
                     user.WordsPlayed.Add(playedBoggleWord);
                     user.Score += wordScore;
 
-                    return result;
+                    // Compose and return the response
+                    var response = new BoggleWordResponse();
+                    response.Score = wordScore;
+
+                    return response;
                 }
             }
             catch (Exception)
@@ -384,7 +387,7 @@ namespace Boggle
                     if (brief != null && brief == "yes")
                     {
                         var briefGameStatus = new BoggleGameResponse();
-                        briefGameStatus.GameState = currentGame.GameState;                        
+                        briefGameStatus.GameState = currentGame.GameState;
                         briefGameStatus.TimeLeft = currentGame.TimeLeft;
                         briefGameStatus.Player1 = new UserResponse();
                         briefGameStatus.Player2 = new UserResponse();
@@ -415,23 +418,23 @@ namespace Boggle
 
                         if (currentGame.GameState == "completed")
                         {
-                            regGameStatus.Player1.WordsPlayed = new List<BoggleWord>();
+                            regGameStatus.Player1.WordsPlayed = new List<BoggleWordResponse>();
 
                             // Transfer the boggle words over from current game to the formatted response bogglegame for player 1.
                             foreach (BoggleWord word in currentGame.Player1.WordsPlayed)
                             {
-                                BoggleWord formattedWord = new BoggleWord();
+                                var formattedWord = new BoggleWordResponse();
                                 formattedWord.Word = word.Word;
                                 formattedWord.Score = word.Score;
                                 regGameStatus.Player1.WordsPlayed.Add(formattedWord);
                             }
 
-                            regGameStatus.Player2.WordsPlayed = new List<BoggleWord>();
+                            regGameStatus.Player2.WordsPlayed = new List<BoggleWordResponse>();
 
                             // Transfer the boggle words over from current game to the formatted response bogglegame for player 2.
                             foreach (BoggleWord word in currentGame.Player2.WordsPlayed)
                             {
-                                BoggleWord formattedWord = new BoggleWord();
+                                var formattedWord = new BoggleWordResponse();
                                 formattedWord.Word = word.Word;
                                 formattedWord.Score = word.Score;
                                 regGameStatus.Player2.WordsPlayed.Add(formattedWord);
