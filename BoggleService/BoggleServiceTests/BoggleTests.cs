@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Net.Http;
 
-namespace Boggle
+namespace PS10
 {
     /// <summary>
     /// Provides a way to start and stop the IIS web server from within the test
@@ -28,7 +28,7 @@ namespace Boggle
         {
             if (process == null)
             {
-                ProcessStartInfo info = new ProcessStartInfo(Properties.Resources.IIS_EXECUTABLE, arguments);
+                ProcessStartInfo info = new ProcessStartInfo(Boggle.Properties.Resources.IIS_EXECUTABLE, arguments);
                 info.WindowStyle = ProcessWindowStyle.Minimized;
                 info.UseShellExecute = false;
                 process = Process.Start(info);

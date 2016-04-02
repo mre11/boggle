@@ -1,0 +1,1 @@
+﻿<%@ ServiceHost Language="C#" Debug="true" Service="PS10.Service1" CodeBehind="BoggleService.svc.cs" %>
