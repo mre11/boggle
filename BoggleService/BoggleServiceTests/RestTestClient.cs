@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Net;
 using Newtonsoft.Json;
 
-namespace PS10
+namespace BoggleServiceDB
 {
     /// <summary>
     /// The struct that is returned by the RestClient methods below

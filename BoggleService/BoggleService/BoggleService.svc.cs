@@ -7,7 +7,7 @@ using System.Net;
 using System.ServiceModel.Web;
 using static System.Net.HttpStatusCode;
 
-namespace Boggle
+namespace BoggleServiceDB
 {
     /// <summary>
     /// Implements a RESTful service for a Boggle game

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleService", "BoggleServ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleServiceTests", "BoggleServiceTests\BoggleServiceTests.csproj", "{71936E2C-E15E-44DE-ABFF-B69805FAE163}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleServiceDB", "BoggleServiceDB\BoggleServiceDB.csproj", "{DDD838AC-8894-421C-952E-9F73B05AFB9C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{71936E2C-E15E-44DE-ABFF-B69805FAE163}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71936E2C-E15E-44DE-ABFF-B69805FAE163}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71936E2C-E15E-44DE-ABFF-B69805FAE163}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDD838AC-8894-421C-952E-9F73B05AFB9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDD838AC-8894-421C-952E-9F73B05AFB9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDD838AC-8894-421C-952E-9F73B05AFB9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDD838AC-8894-421C-952E-9F73B05AFB9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

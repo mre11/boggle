@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Net.Http;
 
-namespace PS10
+namespace BoggleServiceDB
 {
     /// <summary>
     /// Provides a way to start and stop the IIS web server from within the test
