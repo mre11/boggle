@@ -1,1 +1,1 @@
-﻿<%@ ServiceHost Language="C#" Debug="true" Service="BoggleServiceDB.Service1" CodeBehind="BoggleService.svc.cs" %>
+﻿<%@ ServiceHost Language="C#" Debug="true" Service="Boggle.Service1" CodeBehind="BoggleService.svc.cs" %>
