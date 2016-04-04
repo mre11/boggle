@@ -116,6 +116,7 @@ namespace BoggleService
         public BoggleGameResponse JoinGame(JoinGameRequest requestBody)
         {
             // Initialize pending game
+            InitializePendingGame();
 
             // Make sure game is >= 5 and <= 120 and the user token is valid, otherwise setStatus to forbidden.
             if (requestBody.UserToken == null || requestBody.UserToken == ""
@@ -130,10 +131,61 @@ namespace BoggleService
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
+                    using(SqlCommand cmd = new SqlCommand("SELECT GameID, Player1, Player2, GameState FROM Game WHERE GameState = 'pending'", conn, trans))
+                    {
 
+                    }
                 }
             }
 
+
+            //// Retrieve the game from the games list with the gameID.
+            //BoggleGame pendingGame;
+            //if (games.TryGetValue(pendingGameID, out pendingGame))
+            //{
+            //    // Get the user, or return if the user is not found
+            //    User newPlayer;
+            //    if (!users.TryGetValue(requestBody.UserToken, out newPlayer))
+            //    {
+            //        SetStatus(Forbidden);
+            //        return null;
+            //    }
+
+            //    // Create formatted response to send back.
+            //    var response = new BoggleGameResponse();
+            //    response.GameID = pendingGameID;
+
+            //    if (pendingGame.Player1 == null) // pending game has 0 players
+            //    {
+            //        // Link the pendingGames player1 with the user from the users list.
+            //        pendingGame.Player1 = newPlayer;
+            //        pendingGame.TimeLimit = requestBody.TimeLimit;
+            //        SetStatus(Accepted);
+            //    }
+            //    else if (pendingGame.Player1.UserToken == requestBody.UserToken) // requested user token is already in the pending game
+            //    {
+            //        SetStatus(Conflict);
+            //        return null;
+            //    }
+            //    else // pending game has 1 player
+            //    {
+            //        // Link the pendingGames player2 with the user from the users list.
+            //        pendingGame.Player2 = newPlayer;
+            //        pendingGame.TimeLimit = (pendingGame.TimeLimit + requestBody.TimeLimit) / 2;
+
+            //        // Start the game with the average time limit from both users and record the time this game starts.
+            //        pendingGame.GameState = "active";
+            //        pendingGame.TimeStarted = Environment.TickCount;
+
+            //        // Create the next pending game
+            //        pendingGameID++;
+            //        games.Add(pendingGameID, new BoggleGame(pendingGameID));
+
+            //        SetStatus(Created);
+            //    }
+
+            //    return response;
+            //}
             throw new NotImplementedException();
         }
         // Put
@@ -170,8 +222,11 @@ namespace BoggleService
                         // I changed the database so player1 can be null and only game state is populated with
                         // default value 'pending'. However we may want to change player1 to not be null. Still
                         // unsure at the moment.
-                        using (SqlCommand cmd = new SqlCommand("INSERT INTO Game DEFAULT VALUES", conn, trans))
+                        using (SqlCommand cmd = new SqlCommand("INSERT INTO Game(Board) VALUES (@Board)", conn, trans))
                         {
+                            // Insert a pending game and initialize the BoggleBoard.
+                            BoggleBoard temp = new BoggleBoard();
+                            cmd.Parameters.AddWithValue("@Board", temp.ToString());
                             trans.Commit();
                         }
                     }
