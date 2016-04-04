@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
+using System.Configuration;
 using System.IO;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.ServiceModel;
+using static System.Net.HttpStatusCode;
 using System.ServiceModel.Web;
 using System.Net;
-using static System.Net.HttpStatusCode;
-using System.Configuration;
+using System.Data.SqlClient;
 
-namespace BoggleService
+namespace PS10
 {
-    // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "BoggleService" in code, svc and config file together.
-    // NOTE: In order to launch WCF Test Client for testing this service, please select BoggleService.svc or BoggleService.svc.cs at the Solution Explorer and start debugging.
+    // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service1" in code, svc and config file together.
+    // NOTE: In order to launch WCF Test Client for testing this service, please select Service1.svc or Service1.svc.cs at the Solution Explorer and start debugging.
     public class BoggleService : IBoggleService
     {
         // Boggle Service Connection String
@@ -47,7 +43,6 @@ namespace BoggleService
         // Post
         public UserResponse CreateUser(User requestedUser)
         {
-            InitializePendingGame();
             // Error check users information before setting up SQL connection.
             if (requestedUser.Nickname == null || requestedUser.Nickname.Trim() == "")
             {
@@ -56,7 +51,7 @@ namespace BoggleService
             }
 
             // Open SQL connection to BoggleDB
-            using (SqlConnection conn = new SqlConnection(BoggleServiceCS))
+            using(SqlConnection conn = new SqlConnection(BoggleServiceCS))
             {
                 conn.Open();
 
@@ -64,7 +59,7 @@ namespace BoggleService
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
                     // Open SQL command with SQL code
-                    using (SqlCommand command = new SqlCommand("insert into Users(UserToken, Nickname) values(@UserToken, @Nickname)", conn, trans))
+                    using (SqlCommand command = new SqlCommand("insert into Users(UserToken, Nickname) values(@UserToken, @Nickname)",conn,trans))
                     {
                         string userToken = Guid.NewGuid().ToString();
                         // Set command parameters with AddWithValue
@@ -115,69 +110,12 @@ namespace BoggleService
         // Post
         public BoggleGameResponse JoinGame(JoinGameRequest requestBody)
         {
-            // Initialize pending game
-
-            // Make sure game is >= 5 and <= 120 and the user token is valid, otherwise setStatus to forbidden.
-            if (requestBody.UserToken == null || requestBody.UserToken == ""
-                || requestBody.TimeLimit < 5 || requestBody.TimeLimit > 120)
-            {
-                SetStatus(Forbidden);
-                return null;
-            }
-
-            using (SqlConnection conn = new SqlConnection(BoggleServiceCS))
-            {
-                conn.Open();
-                using (SqlTransaction trans = conn.BeginTransaction())
-                {
-
-                }
-            }
-
             throw new NotImplementedException();
         }
         // Put
         public BoggleWordResponse PlayWord(string gameID, BoggleWord word)
         {
             throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// If the games record is empty, add a game as the first pending game.
-        /// </summary>
-        private void InitializePendingGame()
-        {
-            using(SqlConnection conn = new SqlConnection())
-            {
-                conn.Open();
-                bool createPendingGame = false;
-
-                using(SqlTransaction trans = conn.BeginTransaction())
-                {
-                    using(SqlCommand cmd = new SqlCommand("SELECT GameState FROM Game WHERE GameState = 'pending'", conn, trans))
-                    {
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if(!reader.HasRows)
-                            {
-                                createPendingGame = true;
-                            }
-                        }
-                    }
-
-                    if (createPendingGame)
-                    {
-                        // I changed the database so player1 can be null and only game state is populated with
-                        // default value 'pending'. However we may want to change player1 to not be null. Still
-                        // unsure at the moment.
-                        using (SqlCommand cmd = new SqlCommand("INSERT INTO Game DEFAULT VALUES", conn, trans))
-                        {
-                            trans.Commit();
-                        }
-                    }
-
-                }
-            }
         }
     }
 }
