@@ -131,9 +131,34 @@ namespace BoggleService
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    using(SqlCommand cmd = new SqlCommand("SELECT GameID, Player1, Player2, GameState FROM Game WHERE GameState = 'pending'", conn, trans))
+                    String query = "UPDATE Game SET";
+
+                    using(SqlCommand cmd = new SqlCommand("SELECT GameID, Player1, Player2, TimeLimit FROM Game WHERE GameState = 'pending'", conn, trans))
                     {
 
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            // SqlValue 0 = GameID, SqlValue 1 = Player1, SqlValue 2 = Player2, SqlValue 3 = TimeLimit
+                            if(reader.GetSqlValue(1) == null)
+                            {
+                                // TODO: Figure out how to add the players to the games table. 
+                                // Do we want to add the players token to the games table?
+                                // "UPDATE Game SET Player1 = @Player1 WHERE GameState = 'pending'"; 
+                                query += "Player1 = @Player1 WHERE GameState = 'pending'";
+                                SetStatus(Accepted);
+                            }
+                            else if(reader.GetSqlValue(1).ToString() == requestBody.UserToken)
+                            {
+                                SetStatus(Conflict);
+                                return null;
+                            }
+                            // TODO: Check the Users table to make sure the UserToken isn't the same as
+                            // the requested users token.
+                            else if(reader.GetSqlValue(2) == null) 
+                            {
+                                SetStatus(Accepted);
+                            }
+                        }
                     }
                 }
             }
