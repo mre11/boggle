@@ -64,7 +64,7 @@ namespace BoggleService
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
                     // Open SQL command with SQL code
-                    using (SqlCommand command = new SqlCommand("insert into Users(UserToken, Nickname) values(@UserToken, @Nickname)", conn, trans))
+                    using (SqlCommand command = new SqlCommand("INSERT INTO Users(UserToken, Nickname) VALUES(@UserToken, @Nickname)", conn, trans))
                     {
                         string userToken = Guid.NewGuid().ToString();
                         // Set command parameters with AddWithValue
