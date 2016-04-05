@@ -129,6 +129,7 @@ namespace Boggle
             }
 
             var pendingGameID = -1;
+            bool createNewPendingGame = false;
 
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
@@ -136,7 +137,9 @@ namespace Boggle
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {                    
                     var readPending = "SELECT GameID, Player1, Player2, TimeLimit FROM Game WHERE GameState = 'pending'";
-                    var updatePending = "UPDATE Game SET ";                    
+                    var updatePending = "UPDATE Game SET ";
+                    bool activeGame = false;
+                    
 
                     using (SqlCommand command = new SqlCommand(readPending, conn, trans))
                     {
@@ -149,7 +152,8 @@ namespace Boggle
 
                                 if (reader["Player1"] == DBNull.Value)
                                 {
-                                    updatePending += "Player1 = @Player WHERE Game.GameState = 'pending'";
+
+                                    updatePending += "Player1 = @Player, TimeLimit = @TimeLimit WHERE Game.GameState = 'pending'";
                                     SetStatus(Accepted);                                    
                                 }
                                 else if ((string)reader["Player1"] == requestBody.UserToken)
@@ -159,9 +163,14 @@ namespace Boggle
                                 }
                                 else if (reader["Player2"] == DBNull.Value)
                                 {
-                                    updatePending += "Player2 = @Player WHERE Game.GameState = 'pending'";
+                                    activeGame = createNewPendingGame = true;
+                                    
+                                    // Calculate the average timelimit between the two players.
+                                    int averageTimeLimit = ((int)reader["TimeLimit"] + requestBody.TimeLimit)/ 2;
+                                    
+                                    updatePending += "Player2 = @Player, TimeLimit = " + averageTimeLimit + ", StartTime = @StartTime, GameState = 'active' WHERE Game.GameState = 'pending'";
                                     SetStatus(Created);
-
+                                    //jfds
                                     // TODO also need to create a new pending game and set this one to active
                                 }
                             }
@@ -170,13 +179,30 @@ namespace Boggle
 
                     using (SqlCommand command = new SqlCommand(updatePending, conn, trans))
                     {
-                        // Set command parameters and execute query
                         command.Parameters.AddWithValue("@Player", requestBody.UserToken);
+
+                        // If a game only has 1 player, it will not be an active game.
+                        // Otherwise the game now has 2 players and needs TimeLimit = (TimeLimit1 + TimeLimit2)/2,
+                        // TimeStarted = Current Time, and GameState = 'active'.
+                        if (!activeGame)
+                        {
+                            // Set command parameters and execute query
+                            command.Parameters.AddWithValue("@TimeLimit", requestBody.TimeLimit);
+                        }
+                        else
+                        {
+                            command.Parameters.AddWithValue("@StartTime", Environment.TickCount);
+                        }
                         command.ExecuteNonQuery();
                     }
 
                     trans.Commit();
                 }
+            }
+
+            if(createNewPendingGame)
+            {
+                InitializePendingGame();
             }
 
             // Return the response
