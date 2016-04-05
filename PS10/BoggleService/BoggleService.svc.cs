@@ -1,16 +1,12 @@
 ﻿// Braden Klunker, Morgan Empey, CS3500
 
 using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Net;
-using static System.Net.HttpStatusCode;
 using System.Configuration;
+using static System.Net.HttpStatusCode;
 
 namespace Boggle
 {
@@ -22,11 +18,11 @@ namespace Boggle
         /// <summary>
         /// Database connection string
         /// </summary>
-        private static string BoggleServiceCS;
+        private static string BoggleDB;
 
         static BoggleService()
         {
-            BoggleServiceCS = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
+            BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
         }
 
         /// <summary>
@@ -60,6 +56,7 @@ namespace Boggle
         public UserResponse CreateUser(User requestedUser)
         {
             InitializePendingGame();
+
             // Error check users information before setting up SQL connection.
             if (requestedUser.Nickname == null || requestedUser.Nickname.Trim() == "")
             {
@@ -68,7 +65,7 @@ namespace Boggle
             }
 
             // Open SQL connection to BoggleDB
-            using (SqlConnection conn = new SqlConnection(BoggleServiceCS))
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
 
@@ -76,7 +73,8 @@ namespace Boggle
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
                     // Open SQL command with SQL code
-                    using (SqlCommand command = new SqlCommand("INSERT INTO Users(UserToken, Nickname) VALUES(@UserToken, @Nickname)", conn, trans))
+                    var cmd = "INSERT INTO Users(UserToken, Nickname) VALUES(@UserToken, @Nickname)";
+                    using (SqlCommand command = new SqlCommand(cmd, conn, trans))
                     {
                         string userToken = Guid.NewGuid().ToString();
                         // Set command parameters with AddWithValue
@@ -130,41 +128,61 @@ namespace Boggle
                 return null;
             }
 
-            using (SqlConnection conn = new SqlConnection(BoggleServiceCS))
+            var pendingGameID = -1;
+
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
-                {
-                    String query = "UPDATE Game SET";
+                {                    
+                    var readPending = "SELECT GameID, Player1, Player2, TimeLimit FROM Game WHERE GameState = 'pending'";
+                    var updatePending = "UPDATE Game SET ";                    
 
-                    using (SqlCommand cmd = new SqlCommand("SELECT GameID, Player1, Player2, TimeLimit FROM Game WHERE GameState = 'pending'", conn, trans))
+                    using (SqlCommand command = new SqlCommand(readPending, conn, trans))
                     {
 
-                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        using (SqlDataReader reader = command.ExecuteReader())
                         {
-                            // SqlValue 0 = GameID, SqlValue 1 = Player1, SqlValue 2 = Player2, SqlValue 3 = TimeLimit
-                            if (reader.GetSqlValue(1) == null)
+                            while (reader.Read())
                             {
-                                // TODO: Figure out how to add the players to the games table. 
-                                // Do we want to add the players token to the games table?
-                                // "UPDATE Game SET Player1 = @Player1 WHERE GameState = 'pending'"; 
-                                query += "Player1 = @Player1 WHERE GameState = 'pending'";
-                                SetStatus(Accepted);
-                            }
-                            else if (reader.GetSqlValue(1).ToString() == requestBody.UserToken)
-                            {
-                                SetStatus(Conflict);
-                                return null;
-                            }
-                            // TODO: Check the Users table to make sure the UserToken isn't the same as the requested users token.
-                            else if (reader.GetSqlValue(2) == null)
-                            {
-                                SetStatus(Accepted);
+                                pendingGameID = (int)reader["GameID"];
+
+                                if (reader["Player1"] == DBNull.Value)
+                                {
+                                    updatePending += "Player1 = @Player WHERE Game.GameState = 'pending'";
+                                    SetStatus(Accepted);                                    
+                                }
+                                else if ((string)reader["Player1"] == requestBody.UserToken)
+                                {
+                                    SetStatus(Conflict);
+                                    return null;
+                                }
+                                else if (reader["Player2"] == DBNull.Value)
+                                {
+                                    updatePending += "Player2 = @Player WHERE Game.GameState = 'pending'";
+                                    SetStatus(Created);
+
+                                    // TODO also need to create a new pending game and set this one to active
+                                }
                             }
                         }
                     }
+
+                    using (SqlCommand command = new SqlCommand(updatePending, conn, trans))
+                    {
+                        // Set command parameters and execute query
+                        command.Parameters.AddWithValue("@Player", requestBody.UserToken);
+                        command.ExecuteNonQuery();
+                    }
+
+                    trans.Commit();
                 }
             }
+
+            // Return the response
+            var response = new BoggleGameResponse();
+            response.GameID = pendingGameID;
+            return response;
 
 
             //// Retrieve the game from the games list with the gameID.
@@ -214,7 +232,6 @@ namespace Boggle
 
             //    return response;
             //}
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -493,7 +510,7 @@ namespace Boggle
         /// </summary>
         private void InitializePendingGame()
         {
-            using (SqlConnection conn = new SqlConnection())
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
                 bool createPendingGame = false;
@@ -513,18 +530,13 @@ namespace Boggle
 
                     if (createPendingGame)
                     {
-                        // I changed the database so player1 can be null and only game state is populated with
-                        // default value 'pending'. However we may want to change player1 to not be null. Still
-                        // unsure at the moment.
-                        using (SqlCommand cmd = new SqlCommand("INSERT INTO Game(Board) VALUES (@Board)", conn, trans))
+                        using (SqlCommand cmd = new SqlCommand("INSERT INTO Game(GameState) VALUES ('pending')", conn, trans))
                         {
-                            // Insert a pending game and initialize the BoggleBoard.
-                            BoggleBoard temp = new BoggleBoard();
-                            cmd.Parameters.AddWithValue("@Board", temp.ToString());
-                            trans.Commit();
+                            cmd.ExecuteScalar();
                         }
                     }
 
+                    trans.Commit();
                 }
             }
         }

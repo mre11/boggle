@@ -189,6 +189,8 @@ namespace BoggleServiceDB
         [TestMethod]
         public void TestJoinGame4()
         {
+            ClearPendingGame();
+
             // First create a user
             dynamic data = new ExpandoObject();
             data.Nickname = "Test";
