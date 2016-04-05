@@ -135,11 +135,11 @@ namespace Boggle
             {
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
-                {                    
+                {
                     var readPending = "SELECT GameID, Player1, Player2, TimeLimit FROM Game WHERE GameState = 'pending'";
                     var updatePending = "UPDATE Game SET ";
                     bool activeGame = false;
-                    
+
 
                     using (SqlCommand command = new SqlCommand(readPending, conn, trans))
                     {
@@ -154,7 +154,7 @@ namespace Boggle
                                 {
 
                                     updatePending += "Player1 = @Player, TimeLimit = @TimeLimit WHERE Game.GameState = 'pending'";
-                                    SetStatus(Accepted);                                    
+                                    SetStatus(Accepted);
                                 }
                                 else if ((string)reader["Player1"] == requestBody.UserToken)
                                 {
@@ -164,10 +164,10 @@ namespace Boggle
                                 else if (reader["Player2"] == DBNull.Value)
                                 {
                                     activeGame = createNewPendingGame = true;
-                                    
+
                                     // Calculate the average timelimit between the two players.
-                                    int averageTimeLimit = ((int)reader["TimeLimit"] + requestBody.TimeLimit)/ 2;
-                                    
+                                    int averageTimeLimit = ((int)reader["TimeLimit"] + requestBody.TimeLimit) / 2;
+
                                     updatePending += "Player2 = @Player, TimeLimit = " + averageTimeLimit + ", StartTime = @StartTime, GameState = 'active' WHERE Game.GameState = 'pending'";
                                     SetStatus(Created);
                                     //jfds
@@ -200,7 +200,7 @@ namespace Boggle
                 }
             }
 
-            if(createNewPendingGame)
+            if (createNewPendingGame)
             {
                 InitializePendingGame();
             }
@@ -556,13 +556,17 @@ namespace Boggle
 
                     if (createPendingGame)
                     {
-                        using (SqlCommand cmd = new SqlCommand("INSERT INTO Game(GameState) VALUES ('pending')", conn, trans))
+                        using (SqlCommand cmd = new SqlCommand("INSERT INTO Game(Board) VALUES (@Board)", conn, trans))
                         {
-                            cmd.ExecuteScalar();
+                            BoggleBoard temp = new BoggleBoard();
+                            cmd.Parameters.AddWithValue("@Board", temp.ToString());
+                            cmd.ExecuteNonQuery();
+                            //cmd.ExecuteScalar();
                         }
+                        // Only need to commit if we made a new pending game. Otherwise 
+                        // just let it flow through.
+                        trans.Commit();
                     }
-
-                    trans.Commit();
                 }
             }
         }
