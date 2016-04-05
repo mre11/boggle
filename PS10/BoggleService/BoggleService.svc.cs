@@ -170,8 +170,6 @@ namespace Boggle
 
                                     updatePending += "Player2 = @Player, TimeLimit = " + averageTimeLimit + ", StartTime = @StartTime, GameState = 'active' WHERE Game.GameState = 'pending'";
                                     SetStatus(Created);
-                                    //jfds
-                                    // TODO also need to create a new pending game and set this one to active
                                 }
                             }
                         }
@@ -209,55 +207,6 @@ namespace Boggle
             var response = new BoggleGameResponse();
             response.GameID = pendingGameID;
             return response;
-
-
-            //// Retrieve the game from the games list with the gameID.
-            //BoggleGame pendingGame;
-            //if (games.TryGetValue(pendingGameID, out pendingGame))
-            //{
-            //    // Get the user, or return if the user is not found
-            //    User newPlayer;
-            //    if (!users.TryGetValue(requestBody.UserToken, out newPlayer))
-            //    {
-            //        SetStatus(Forbidden);
-            //        return null;
-            //    }
-
-            //    // Create formatted response to send back.
-            //    var response = new BoggleGameResponse();
-            //    response.GameID = pendingGameID;
-
-            //    if (pendingGame.Player1 == null) // pending game has 0 players
-            //    {
-            //        // Link the pendingGames player1 with the user from the users list.
-            //        pendingGame.Player1 = newPlayer;
-            //        pendingGame.TimeLimit = requestBody.TimeLimit;
-            //        SetStatus(Accepted);
-            //    }
-            //    else if (pendingGame.Player1.UserToken == requestBody.UserToken) // requested user token is already in the pending game
-            //    {
-            //        SetStatus(Conflict);
-            //        return null;
-            //    }
-            //    else // pending game has 1 player
-            //    {
-            //        // Link the pendingGames player2 with the user from the users list.
-            //        pendingGame.Player2 = newPlayer;
-            //        pendingGame.TimeLimit = (pendingGame.TimeLimit + requestBody.TimeLimit) / 2;
-
-            //        // Start the game with the average time limit from both users and record the time this game starts.
-            //        pendingGame.GameState = "active";
-            //        pendingGame.TimeStarted = Environment.TickCount;
-
-            //        // Create the next pending game
-            //        pendingGameID++;
-            //        games.Add(pendingGameID, new BoggleGame(pendingGameID));
-
-            //        SetStatus(Created);
-            //    }
-
-            //    return response;
-            //}
         }
 
         /// <summary>
@@ -271,6 +220,26 @@ namespace Boggle
         {
             throw new NotImplementedException();
 
+            InitializePendingGame();
+
+            using(SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                using (SqlTransaction trans = conn.BeginTransaction())
+                {
+                    string pendingUserToken = "";
+
+                    using(SqlCommand command = new SqlCommand("SELECT Player1 FROM Game WHERE GameState = 'pending'", conn, trans))
+                    {
+                        using(SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if(reader["Player1"] != DBNull.Value)
+                            {
+
+                            }
+                        }
+                    }
+                }
+            }
             //try
             //{
             //    lock (sync)
