@@ -4,7 +4,7 @@ using System.IO;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 
-namespace BoggleService
+namespace Boggle
 {
     /// <summary>
     /// Provides a RESTful API for a Boggle game service

@@ -2,7 +2,7 @@
 
 using System;
 
-namespace BoggleService
+namespace Boggle
 {
     /// <summary>
     /// Represents a Boggle board.

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System;
 
-namespace BoggleService
+namespace Boggle
 {
     /// <summary>
     /// Reprensents a BoggleGame that has a properties that describe the game, a BoggleBoard, and two Users.
