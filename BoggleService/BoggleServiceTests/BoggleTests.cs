@@ -217,7 +217,7 @@ namespace BoggleServiceDB
             data.UserToken = Guid.NewGuid();
             data.TimeLimit = 10;
             Response r = client.DoPostAsync("/games", data).Result;
-            Assert.AreEqual(Conflict, r.Status);
+            Assert.AreEqual(Forbidden, r.Status);
         }
 
         /// <summary>
