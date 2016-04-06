@@ -293,8 +293,6 @@ namespace Boggle
         {
             InitializePendingGame();
 
-            // TODO implement PlayWord
-
             // Word or UserToken is invalid
             int intGameID;
             if (word.Word == null || word.UserToken == null|| word.Word.Trim() == ""
@@ -422,7 +420,8 @@ namespace Boggle
             throw new NotImplementedException();
 
             // TODO implement GameStatus
-            // TODO I removed Score from the Users table.  We should just compute it on the fly here from the Words table.
+            // TODO I removed Score from the Users table.  We should just compute it on the fly within GameStatus from the Words table.
+            // TODO (last) Joe's DB doesn't have Game.GameState, we should consider removing ours (that info can be computed from the time left)
 
             // Error check gameID and Brief information before setting up SQL connection.
 
