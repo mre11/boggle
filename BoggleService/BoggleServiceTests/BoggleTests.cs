@@ -417,8 +417,6 @@ namespace BoggleServiceDB
             Assert.AreEqual(Forbidden, playWordResponse.Status);
         }
 
-        // TODO need more PlayWord tests to test scoring
-
         /// <summary>
         /// Test when GameID is invalid
         /// </summary>

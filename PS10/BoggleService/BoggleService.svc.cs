@@ -134,6 +134,7 @@ namespace Boggle
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
+
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
                     // Check that the user has been created
@@ -231,8 +232,6 @@ namespace Boggle
         /// </summary>
         public void CancelJoin(User user)
         {
-            // TODO implement CancelJoin
-
             InitializePendingGame();
 
             // Validate user token
@@ -244,6 +243,8 @@ namespace Boggle
 
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
+                conn.Open();
+
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
                     // Get Player1 user token out of the pending game
@@ -251,13 +252,14 @@ namespace Boggle
                     {
                         using(SqlDataReader reader = command.ExecuteReader())
                         {
-                            string pendingUserToken = (string)reader["Player1"];
-
-                            // User token is not a player in the pending game
-                            if (pendingUserToken != null && pendingUserToken != user.UserToken)
+                            while (reader.Read())
                             {
-                                SetStatus(Forbidden);
-                                return;
+                                // User token is not a player in the pending game
+                                if (reader["Player1"] == DBNull.Value || (string)reader["Player1"] != user.UserToken)
+                                {
+                                    SetStatus(Forbidden);
+                                    return;
+                                }
                             }
                         }
                     }
@@ -265,45 +267,15 @@ namespace Boggle
                     // Set Player1 in pending game to null
                     using (SqlCommand command = new SqlCommand("UPDATE Game SET Player1 = @Player WHERE Game.GameState = 'pending'", conn, trans))
                     {
-                        command.Parameters.AddWithValue("@Player", null);
+                        command.Parameters.AddWithValue("@Player", DBNull.Value);
                         command.ExecuteNonQuery();
                     }
 
                     trans.Commit();
                 }
             }
-            //try
-            //{
-            //    lock (sync)
-            //    {
-            //        InitializePendingGame();
 
-            //        BoggleGame pendingGame;
-            //        string pendingUserToken = "";
-            //        if (games.TryGetValue(pendingGameID, out pendingGame) && pendingGame.Player1 != null)
-            //        {
-            //            if (pendingGame.Player1.UserToken != null)
-            //            {
-            //                pendingUserToken = pendingGame.Player1.UserToken;
-            //            }
-            //        }
-
-            //        User existingUser;
-            //        if (user.UserToken == null || !users.TryGetValue(user.UserToken, out existingUser)
-            //            || user.UserToken != pendingUserToken)
-            //        {
-            //            SetStatus(Forbidden);
-            //            return;
-            //        }
-
-            //        pendingGame.Player1 = null;
-            //        SetStatus(OK);
-            //    }
-            //}
-            //catch (Exception)
-            //{
-            //    SetStatus(InternalServerError);
-            //}
+            SetStatus(OK);
         }
 
         /// <summary>
@@ -320,6 +292,10 @@ namespace Boggle
         /// </summary>
         public BoggleWordResponse PlayWord(string gameID, BoggleWord word)
         {
+            InitializePendingGame();
+
+            // TODO implement PlayWord
+
             throw new NotImplementedException();
             //try
             //{
@@ -419,6 +395,10 @@ namespace Boggle
         /// </summary>
         public BoggleGameResponse GameStatus(string gameID, string brief)
         {
+            InitializePendingGame();
+            throw new NotImplementedException();
+
+            // TODO implement GameStatus
 
             // Error check gameID and Brief information before setting up SQL connection.
 
@@ -436,7 +416,6 @@ namespace Boggle
 
             // Commit the transaction and return the UserResponse.
 
-            throw new NotImplementedException();
 
             //try
             //{
