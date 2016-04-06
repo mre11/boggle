@@ -218,7 +218,6 @@ namespace Boggle
         /// </summary>
         public void CancelJoin(User user)
         {
-            throw new NotImplementedException();
 
             InitializePendingGame();
 
