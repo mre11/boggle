@@ -296,43 +296,88 @@ namespace Boggle
 
             // TODO implement PlayWord
 
-            throw new NotImplementedException();
-            //try
-            //{
-            //    lock (sync)
-            //    {
-            //        InitializePendingGame();
+            // Word or UserToken is invalid
+            int intGameID;
+            if (word.Word == null || word.UserToken == null|| word.Word.Trim() == ""
+                || word.UserToken == "" || !int.TryParse(gameID, out intGameID))
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
 
-            //        // Word or UserToken is invalid
-            //        User user;
-            //        if (word.Word == null || word.UserToken == null || word.Word.Trim() == ""
-            //            || !users.TryGetValue(word.UserToken, out user))
-            //        {
-            //            SetStatus(Forbidden);
-            //            return null;
-            //        }
+            // Game doesn't exist (Forbidden)
+            // User does not exist or is not a player in this game (Forbidden)
+            // Game state isn't active (Conflict)
 
-            //        // GameID is invalid or we couldn't find the game
-            //        int intGameID;
-            //        BoggleGame game;
-            //        if (!int.TryParse(gameID, out intGameID) || !games.TryGetValue(intGameID, out game))
-            //        {
-            //            SetStatus(Forbidden);
-            //            return null;
-            //        }
 
-            //        // UserToken is not a player in this game
-            //        if (game.Player1.UserToken != word.UserToken && game.Player2.UserToken != word.UserToken)
-            //        {
-            //            SetStatus(Forbidden);
-            //            return null;
-            //        }
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                conn.Open();
+                
+                using (SqlTransaction trans = conn.BeginTransaction())
+                {
+                    var cmd = "SELECT * FROM Users WHERE UserToken = @UserToken";
+                    using (SqlCommand command = new SqlCommand(cmd, conn, trans))
+                    {                        
+                        command.Parameters.AddWithValue("@UserToken", word.UserToken);
 
-            //        if (game.GameState != "active")
-            //        {
-            //            SetStatus(Conflict);
-            //            return null;
-            //        }
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (!reader.HasRows) // User does not exist
+                            {
+                                SetStatus(Forbidden);
+                                return null;
+                            }
+                        }                          
+                        
+                    }
+
+                    cmd = "SELECT * FROM Game WHERE GameID = @GameID";
+                    using (SqlCommand command = new SqlCommand(cmd, conn, trans))
+                    {
+                        command.Parameters.AddWithValue("@GameID", gameID);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                while (reader.Read())
+                                {
+                                    if (word.UserToken != (string)reader["Player1"] &&
+                                        word.UserToken != (string)reader["Player2"])
+                                    {
+                                        SetStatus(Forbidden);
+                                        return null;
+                                    }
+
+                                    if ((string)reader["GameState"] != "active"
+                                        || GameIsCompleted((int)reader["StartTime"], (int)reader["TimeLimit"]))
+                                    {
+                                        SetStatus(Conflict);
+                                        return null;
+                                    }
+
+                                    // Save off information about the game (board, etc.) here
+
+                                }
+                            }
+                            else // Game does not exist
+                            {
+                                SetStatus(Forbidden);
+                                return null;
+                            }
+                        }
+                    }
+
+                    trans.Commit();
+                }
+            }
+
+
+
+
+            SetStatus(InternalServerError);
+            return null;
 
             //        var playedWord = word.Word;
             //        playedWord = playedWord.Trim();
@@ -375,13 +420,6 @@ namespace Boggle
             //        response.Score = wordScore;
 
             //        return response;
-            //    }
-            //}
-            //catch (Exception)
-            //{
-            //    SetStatus(InternalServerError);
-            //    return null;
-            //}
         }
 
         /// <summary>
@@ -549,6 +587,15 @@ namespace Boggle
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns true if more time has elapsed than the time limit since the start time.
+        /// The start time is expected in milliseconds, while the time limit is expected in seconds.
+        /// </summary>
+        private bool GameIsCompleted(int startTime, int timeLimit)
+        {
+            return (Environment.TickCount - startTime) / 1000 - timeLimit > 0;
         }
     }
 }
