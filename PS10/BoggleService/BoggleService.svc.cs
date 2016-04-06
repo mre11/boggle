@@ -428,15 +428,102 @@ namespace Boggle
                 return null;
             }
 
-            BoggleGame currentGame;
-            try
+            BoggleGame currentGame = new BoggleGame(intGameID);
+
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
-                 currentGame = ExtractBoggleGameData(intGameID);
-            }
-            catch (InvalidDataException)
-            {
-                SetStatus(Forbidden);
-                return null;
+                conn.Open();
+
+                using (SqlTransaction trans = conn.BeginTransaction())
+                {
+                    string player1Token = "";
+                    string player2Token = "";
+
+                    using (SqlCommand command = new SqlCommand("SELECT * FROM Game WHERE GameID=@GameID", conn, trans))
+                    {
+                        // Make sure the gameID exists in the BoggleDB
+                        command.Parameters.AddWithValue("@GameID", gameID);
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                if (!reader.HasRows)
+                                {
+                                    SetStatus(Forbidden);
+                                    return null;
+                                }
+                                else
+                                {
+                                    // Save the current games information.
+                                    currentGame = new BoggleGame(intGameID);
+                                    var board = "";
+                                    string data = reader.ToString();
+                                    board = (string)reader["Board"];
+                                    currentGame.GameBoard = new BoggleBoard(board);
+                                    currentGame.GameState = (string)reader["GameState"];
+                                    currentGame.TimeStarted = (int)reader["StartTime"];
+                                    currentGame.TimeLimit = (int)reader["TimeLimit"];
+                                    player1Token = (string)reader["Player1"];
+                                    player2Token = (string)reader["Player2"];
+                                }
+                            }
+                        }
+                    }
+
+                    using (SqlCommand command = new SqlCommand("SELECT * FROM Users WHERE UserToken=@UserToken1 OR UserToken=@UserToken2", conn, trans))
+                    {
+                        command.Parameters.AddWithValue("@UserToken1", player1Token);
+                        command.Parameters.AddWithValue("@UserToken2", player2Token);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            User one = new User();
+                            one.UserToken = player1Token;
+                            User two = new User();
+                            two.UserToken = player2Token;
+
+                            while (reader.Read())
+                            {
+                                one.Nickname = (string)reader["Nickname"];
+
+                                reader.Read();
+
+                                two.Nickname = (string)reader["Nickname"];
+                            }
+
+                            // Save the current games players information.
+                            currentGame.Player1 = one;
+                            currentGame.Player2 = two;
+
+                        }
+                    }
+
+                    using (SqlCommand command = new SqlCommand("SELECT Player, Word, Score FROM Words WHERE Words.GameID=@GameID", conn, trans))
+                    {
+                        command.Parameters.AddWithValue("@GameID", gameID);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                BoggleWord temp = new BoggleWord();
+                                temp.Word = (string)reader["Word"];
+                                temp.Score = (int)reader["Score"];
+
+                                if ((string)reader["Player"] == currentGame.Player1.UserToken)
+                                {
+                                    currentGame.Player1.WordsPlayed.Add(temp);
+                                }
+                                else
+                                {
+                                    currentGame.Player2.WordsPlayed.Add(temp);
+                                }
+                            }
+                        }
+                    }
+
+                    trans.Commit();
+                }
             }
 
             SetStatus(OK);
@@ -554,8 +641,11 @@ namespace Boggle
                             else
                             {
                                 // Save the current games information.
-                                currentGame = new BoggleGame((int)reader["GameID"]);
-                                currentGame.GameBoard = new BoggleBoard((string)reader["Board"]);
+                                currentGame = new BoggleGame(gameID);
+                                var board = "";
+                                string data = reader.ToString();
+                                board = (string)reader["Board"];
+                                currentGame.GameBoard = new BoggleBoard(board);
                                 currentGame.GameState = (string)reader["GameState"];
                                 currentGame.TimeStarted = (int)reader["StartTime"];
                                 currentGame.TimeLimit = (int)reader["TimeLimit"];
