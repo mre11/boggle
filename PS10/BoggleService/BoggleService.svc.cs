@@ -96,7 +96,6 @@ namespace Boggle
                         return response;
                     }
                 }
-
             }
         }
 
@@ -305,10 +304,7 @@ namespace Boggle
                 return null;
             }
 
-            // Game doesn't exist (Forbidden)
-            // User does not exist or is not a player in this game (Forbidden)
-            // Game state isn't active (Conflict)
-
+            var board = "";
 
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
@@ -346,6 +342,7 @@ namespace Boggle
                                     if (word.UserToken != (string)reader["Player1"] &&
                                         word.UserToken != (string)reader["Player2"])
                                     {
+                                        // User token isn't a player in the game
                                         SetStatus(Forbidden);
                                         return null;
                                     }
@@ -353,12 +350,13 @@ namespace Boggle
                                     if ((string)reader["GameState"] != "active"
                                         || GameIsCompleted((int)reader["StartTime"], (int)reader["TimeLimit"]))
                                     {
+                                        // Game state isn't active
                                         SetStatus(Conflict);
                                         return null;
                                     }
 
-                                    // Save off information about the game (board, etc.) here
-
+                                    // Save off the value of the game board to use for scoring
+                                    board = (string)reader["Board"];
                                 }
                             }
                             else // Game does not exist
@@ -373,53 +371,40 @@ namespace Boggle
                 }
             }
 
+            int wordScore = 0;
+            var gameBoard = new BoggleBoard(board);
 
+            var playedWord = word.Word;
+            playedWord = playedWord.Trim();
+            playedWord = playedWord.ToLower();
 
+            if (gameBoard.CanBeFormed(playedWord))
+            {
+                if (WordHasBeenPlayed(intGameID, playedWord))
+                    wordScore = 0;
+                else if (playedWord.Length > 7)
+                    wordScore = 11;
+                else if (playedWord.Length > 6)
+                    wordScore = 5;
+                else if (playedWord.Length > 5)
+                    wordScore = 3;
+                else if (playedWord.Length > 4)
+                    wordScore = 2;
+                else if (playedWord.Length > 2)
+                    wordScore = 1;
+            }
+            else
+            {
+                wordScore = -1;
+            }
 
-            SetStatus(InternalServerError);
-            return null;
+            AddWordRecord(playedWord, intGameID, word.UserToken, wordScore);
 
-            //        var playedWord = word.Word;
-            //        playedWord = playedWord.Trim();
-            //        playedWord = playedWord.ToLower();
+            // Compose and return the response            
+            var response = new BoggleWordResponse();
+            response.Score = wordScore;
 
-            //        var playedBoggleWord = new BoggleWord();
-            //        playedBoggleWord.Word = playedWord;
-            //        playedBoggleWord.UserToken = user.UserToken;
-
-            //        int wordScore = 0;
-
-            //        if (game.GameBoard.CanBeFormed(playedWord))
-            //        {
-            //            if (game.wordsPlayed.Contains(playedWord))
-            //                wordScore = 0;
-            //            else if (playedWord.Length > 7)
-            //                wordScore = 11;
-            //            else if (playedWord.Length > 6)
-            //                wordScore = 5;
-            //            else if (playedWord.Length > 5)
-            //                wordScore = 3;
-            //            else if (playedWord.Length > 4)
-            //                wordScore = 2;
-            //            else if (playedWord.Length > 2)
-            //                wordScore = 1;
-            //        }
-            //        else
-            //        {
-            //            wordScore = -1;
-            //        }
-
-            //        // Update the state of the game
-            //        game.wordsPlayed.Add(playedWord);
-            //        playedBoggleWord.Score = wordScore;
-            //        user.WordsPlayed.Add(playedBoggleWord);
-            //        user.Score += wordScore;
-
-            //        // Compose and return the response
-            //        var response = new BoggleWordResponse();
-            //        response.Score = wordScore;
-
-            //        return response;
+            return response;
         }
 
         /// <summary>
@@ -437,13 +422,12 @@ namespace Boggle
             throw new NotImplementedException();
 
             // TODO implement GameStatus
+            // TODO I removed Score from the Users table.  We should just compute it on the fly here from the Words table.
 
             // Error check gameID and Brief information before setting up SQL connection.
 
             // Open SQL connection to BoggleDB
-
             // Open SQL transaction and begin transaction
-
             // Open SQL command with SQL code
 
             // Set command parameters with AddWithValue
@@ -596,6 +580,60 @@ namespace Boggle
         private bool GameIsCompleted(int startTime, int timeLimit)
         {
             return (Environment.TickCount - startTime) / 1000 - timeLimit > 0;
+        }
+
+        /// <summary>
+        /// Returns true if the specified word has already been played in the game specified by GameID.
+        /// </summary>
+        private bool WordHasBeenPlayed(int intGameID, string word)
+        {
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                conn.Open();
+                
+                using (SqlTransaction trans = conn.BeginTransaction())
+                {
+                    var cmd = "SELECT * FROM Words WHERE GameID = @GameID AND Word = @Word";
+                    using (SqlCommand command = new SqlCommand(cmd, conn, trans))
+                    {
+                        command.Parameters.AddWithValue("@GameID", intGameID);
+                        command.Parameters.AddWithValue("@Word", word);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if(reader.HasRows)
+                            {
+                                return true;
+                            }
+                        }
+                        trans.Commit();
+                    }
+                }
+
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Adds a row to the Words table with the given data
+        /// </summary>
+        private void AddWordRecord(string word, int gameID, string userToken, int score)
+        {
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                conn.Open();
+                
+                var cmd = "INSERT INTO Words(Word, GameID, Player, Score) VALUES(@Word, @GameID, @Player, @Score)";
+                using (SqlCommand command = new SqlCommand(cmd, conn))
+                {
+                    command.Parameters.AddWithValue("@Word", word);
+                    command.Parameters.AddWithValue("@GameID", gameID);
+                    command.Parameters.AddWithValue("@Player", userToken);
+                    command.Parameters.AddWithValue("@Score", score);
+
+                    command.ExecuteNonQuery();
+                }                
+            }
         }
     }
 }
