@@ -460,7 +460,7 @@ namespace Boggle
                                     string data = reader.ToString();
                                     board = (string)reader["Board"];
                                     currentGame.GameBoard = new BoggleBoard(board);
-                                    currentGame.GameState = (string)reader["GameState"];
+                                    currentGame.GameState = reader["GameState"] == DBNull.Value ? null : (string)reader["GameState"];
                                     currentGame.TimeStarted = (int)reader["StartTime"];
                                     currentGame.TimeLimit = (int)reader["TimeLimit"];
                                     player1Token = (string)reader["Player1"];
@@ -646,7 +646,7 @@ namespace Boggle
                                 string data = reader.ToString();
                                 board = (string)reader["Board"];
                                 currentGame.GameBoard = new BoggleBoard(board);
-                                currentGame.GameState = (string)reader["GameState"];
+                                currentGame.GameState = reader["GameState"] == DBNull.Value? null: (string)reader["GameState"];
                                 currentGame.TimeStarted = (int)reader["StartTime"];
                                 currentGame.TimeLimit = (int)reader["TimeLimit"];
                                 player1Token = (string)reader["Player1"];
