@@ -7,6 +7,7 @@ using System.ServiceModel.Web;
 using System.Net;
 using System.Configuration;
 using static System.Net.HttpStatusCode;
+using System.Collections.Generic;
 
 namespace Boggle
 {
@@ -427,9 +428,19 @@ namespace Boggle
                 return null;
             }
 
+            BoggleGame currentGame;
+            try
+            {
+                 currentGame = ExtractBoggleGameData(intGameID);
+            }
+            catch (InvalidDataException)
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+
             SetStatus(OK);
 
-            BoggleGame currentgame = ExtractBoggleGameData(intGameID);
 
             // Error check gameID and Brief information before setting up SQL connection.
 
@@ -445,72 +456,72 @@ namespace Boggle
 
             // Commit the transaction and return the UserResponse.
 
-            if (currentgame.gamestate == null || currentgame.gamestate == "pending" || (currentgame.player1 == null || currentgame.player2 == null))
+            if (currentGame.GameState == null || currentGame.GameState == "pending" || (currentGame.Player1 == null || currentGame.Player2 == null))
             {
                 var response = new BoggleGameResponse();
-                response.gamestate = "pending";
+                response.GameState = "pending";
                 return response;
             }
-            else if (currentgame.timeleft == null || currentgame.timeleft == 0)
+            else if (currentGame.TimeLeft == null || currentGame.TimeLeft == 0)
             {
-                currentgame.gamestate = "completed";
+                currentGame.GameState = "completed";
             }
 
             if (brief != null && brief == "yes")
             {
-                var briefgamestatus = new bogglegameresponse();
-                briefgamestatus.gamestate = currentgame.gamestate;
-                briefgamestatus.timeleft = currentgame.timeleft;
-                briefgamestatus.player1 = new userresponse();
-                briefgamestatus.player2 = new userresponse();
-                briefgamestatus.player1.score = currentgame.player1.score;
-                briefgamestatus.player2.score = currentgame.player2.score;
+                var briefGameStatus = new BoggleGameResponse();
+                briefGameStatus.GameState = currentGame.GameState;
+                briefGameStatus.TimeLeft = currentGame.TimeLeft;
+                briefGameStatus.Player1 = new UserResponse();
+                briefGameStatus.Player2 = new UserResponse();
+                briefGameStatus.Player1.Score = currentGame.Player1.Score;
+                briefGameStatus.Player2.Score = currentGame.Player2.Score;
 
-                return briefgamestatus;
+                return briefGameStatus;
             }
             else
             {
-                var reggamestatus = new bogglegameresponse();
+                var regGameStatus = new BoggleGameResponse();
 
-                reggamestatus.gamestate = currentgame.gamestate;
-                reggamestatus.board = currentgame.gameboard.tostring();
-                reggamestatus.timelimit = currentgame.timelimit;
-                reggamestatus.timeleft = currentgame.timeleft;
+                regGameStatus.GameState = currentGame.GameState;
+                regGameStatus.Board = currentGame.GameBoard.ToString();
+                regGameStatus.TimeLimit = currentGame.TimeLimit;
+                regGameStatus.TimeLeft = currentGame.TimeLeft;
 
-                // set player 1 properties
-                reggamestatus.player1 = new userresponse();
-                reggamestatus.player1.nickname = currentgame.player1.nickname;
-                reggamestatus.player1.score = currentgame.player1.score;
+                // Set player 1 properties
+                regGameStatus.Player1 = new UserResponse();
+                regGameStatus.Player1.Nickname = currentGame.Player1.Nickname;
+                regGameStatus.Player1.Score = currentGame.Player1.Score;
 
-                // set player 2 properties
-                reggamestatus.player2 = new userresponse();
-                reggamestatus.player2.nickname = currentgame.player2.nickname;
-                reggamestatus.player2.score = currentgame.player2.score;
+                // Set player 2 properties
+                regGameStatus.Player2 = new UserResponse();
+                regGameStatus.Player2.Nickname = currentGame.Player2.Nickname;
+                regGameStatus.Player2.Score = currentGame.Player2.Score;
 
-                if (currentgame.gamestate == "completed")
+                if (currentGame.GameState == "completed")
                 {
-                    reggamestatus.player1.wordsplayed = new list<bogglewordresponse>();
+                    regGameStatus.Player1.WordsPlayed = new List<BoggleWordResponse>();
 
-                    // transfer the boggle words over from current game to the response
-                    foreach (boggleword word in currentgame.player1.wordsplayed)
+                    // Transfer the boggle words over from current game to the response
+                    foreach (BoggleWord word in currentGame.Player1.WordsPlayed)
                     {
-                        var formattedword = new bogglewordresponse();
-                        formattedword.word = word.word;
-                        formattedword.score = word.score;
-                        reggamestatus.player1.wordsplayed.add(formattedword);
+                        var formattedWord = new BoggleWordResponse();
+                        formattedWord.Word = word.Word;
+                        formattedWord.Score = word.Score;
+                        regGameStatus.Player1.WordsPlayed.Add(formattedWord);
                     }
 
-                    reggamestatus.player2.wordsplayed = new list<bogglewordresponse>();
+                    regGameStatus.Player2.WordsPlayed = new List<BoggleWordResponse>();
 
-                    foreach (boggleword word in currentgame.player2.wordsplayed)
+                    foreach (BoggleWord word in currentGame.Player2.WordsPlayed)
                     {
-                        var formattedword = new bogglewordresponse();
-                        formattedword.word = word.word;
-                        formattedword.score = word.score;
-                        reggamestatus.player2.wordsplayed.add(formattedword);
+                        var formattedWord = new BoggleWordResponse();
+                        formattedWord.Word = word.Word;
+                        formattedWord.Score = word.Score;
+                        regGameStatus.Player2.WordsPlayed.Add(formattedWord);
                     }
                 }
-                return reggamestatus;
+                return regGameStatus;
             }
 
         }
@@ -522,7 +533,7 @@ namespace Boggle
         {
             BoggleGame currentGame;
 
-            using (SqlConnection conn = new SqlConnection())
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
 
@@ -538,10 +549,7 @@ namespace Boggle
                         {
                             if (!reader.HasRows)
                             {
-                                // TODO: If we return without exiting the using statement does it close the 
-                                // connection, transaction?
-                                SetStatus(Forbidden);
-                                return null;
+                                throw new InvalidDataException();
                             }
                             else
                             {
