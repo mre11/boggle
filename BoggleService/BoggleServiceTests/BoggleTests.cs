@@ -210,7 +210,7 @@ namespace BoggleServiceDB
         }
 
         /// <summary>
-        /// Test for a UserToken conflict
+        /// Test when UserToken is not a created user
         /// </summary>
         [TestMethod]
         public void TestJoinGame5()
@@ -416,8 +416,6 @@ namespace BoggleServiceDB
 
             Assert.AreEqual(Forbidden, playWordResponse.Status);
         }
-
-        // TODO need more PlayWord tests to test scoring
 
         /// <summary>
         /// Test when GameID is invalid
