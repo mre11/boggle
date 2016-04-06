@@ -120,7 +120,7 @@ namespace Boggle
         {
             InitializePendingGame();
 
-            // Make sure game is >= 5 and <= 120 and the user token is valid, otherwise setStatus to forbidden.
+            // Make sure game is >= 5 and <= 120 and the user token is valid
             if (requestBody.UserToken == null || requestBody.UserToken == ""
                 || requestBody.TimeLimit < 5 || requestBody.TimeLimit > 120)
             {
@@ -136,14 +136,27 @@ namespace Boggle
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
+                    // Check that the user has been created
+                    using (SqlCommand command = new SqlCommand("SELECT * FROM Users WHERE UserToken = @Player", conn, trans))
+                    {
+                        command.Parameters.AddWithValue("@Player", requestBody.UserToken);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (!reader.HasRows)
+                            {
+                                SetStatus(Forbidden);
+                                return null;
+                            }
+                        }
+                    }
+
                     var readPending = "SELECT GameID, Player1, Player2, TimeLimit FROM Game WHERE GameState = 'pending'";
                     var updatePending = "UPDATE Game SET ";
                     bool activeGame = false;
 
-
                     using (SqlCommand command = new SqlCommand(readPending, conn, trans))
                     {
-
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             while (reader.Read())
@@ -218,26 +231,45 @@ namespace Boggle
         /// </summary>
         public void CancelJoin(User user)
         {
-            throw new NotImplementedException();
+            // TODO implement CancelJoin
 
             InitializePendingGame();
 
-            using(SqlConnection conn = new SqlConnection(BoggleDB))
+            // Validate user token
+            if (user.UserToken == null || user.UserToken == "")
+            {
+                SetStatus(Forbidden);
+                return;
+            }
+
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    string pendingUserToken = "";
-
+                    // Get Player1 user token out of the pending game
                     using(SqlCommand command = new SqlCommand("SELECT Player1 FROM Game WHERE GameState = 'pending'", conn, trans))
                     {
                         using(SqlDataReader reader = command.ExecuteReader())
                         {
-                            if(reader["Player1"] != DBNull.Value)
-                            {
+                            string pendingUserToken = (string)reader["Player1"];
 
+                            // User token is not a player in the pending game
+                            if (pendingUserToken != null && pendingUserToken != user.UserToken)
+                            {
+                                SetStatus(Forbidden);
+                                return;
                             }
                         }
                     }
+
+                    // Set Player1 in pending game to null
+                    using (SqlCommand command = new SqlCommand("UPDATE Game SET Player1 = @Player WHERE Game.GameState = 'pending'", conn, trans))
+                    {
+                        command.Parameters.AddWithValue("@Player", null);
+                        command.ExecuteNonQuery();
+                    }
+
+                    trans.Commit();
                 }
             }
             //try
@@ -530,8 +562,8 @@ namespace Boggle
                             BoggleBoard temp = new BoggleBoard();
                             cmd.Parameters.AddWithValue("@Board", temp.ToString());
                             cmd.ExecuteNonQuery();
-                            //cmd.ExecuteScalar();
                         }
+
                         // Only need to commit if we made a new pending game. Otherwise 
                         // just let it flow through.
                         trans.Commit();
