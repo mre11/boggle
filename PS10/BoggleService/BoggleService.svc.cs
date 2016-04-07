@@ -127,7 +127,6 @@ namespace Boggle
             }
 
             var pendingGameID = -1;
-            bool createNewPendingGame = false;
 
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
@@ -175,7 +174,7 @@ namespace Boggle
                                 }
                                 else if (reader["Player2"] == DBNull.Value)
                                 {
-                                    activeGame = createNewPendingGame = true;
+                                    activeGame = true;
 
                                     // Calculate the average timelimit between the two players.
                                     int averageTimeLimit = ((int)reader["TimeLimit"] + requestBody.TimeLimit) / 2;
@@ -208,11 +207,6 @@ namespace Boggle
 
                     trans.Commit();
                 }
-            }
-
-            if (createNewPendingGame)
-            {
-                InitializePendingGame(); // TODO redundant?
             }
 
             // Return the response
@@ -375,11 +369,13 @@ namespace Boggle
             playedWord = playedWord.Trim();
             playedWord = playedWord.ToLower();
 
-            if (gameBoard.CanBeFormed(playedWord))
+            if (WordHasBeenPlayed(intGameID, playedWord))
             {
-                if (WordHasBeenPlayed(intGameID, playedWord))
-                    wordScore = 0;
-                else if (playedWord.Length > 7)
+                wordScore = 0;
+            }
+            else if (gameBoard.CanBeFormed(playedWord))
+            {
+                if (playedWord.Length > 7)
                     wordScore = 11;
                 else if (playedWord.Length > 6)
                     wordScore = 5;
@@ -397,11 +393,13 @@ namespace Boggle
 
             AddWordRecord(playedWord, intGameID, word.UserToken, wordScore);
 
-            // Compose and return the response            
+            // Compose and return the response
+            SetStatus(OK);
             var response = new BoggleWordResponse();
             response.Score = wordScore;
 
             return response;
+            // TODO Joe's tests reveal some kind of bugs in PlayWord; we need to investigate.  Other stuff looks good.
         }
 
         /// <summary>
@@ -417,9 +415,6 @@ namespace Boggle
         {
             InitializePendingGame();
 
-            // TODO implement GameStatus
-            // TODO I removed Score from the Users table.  We should just compute it on the fly within GameStatus from the Words table.
-            // TODO (last) Joe's DB doesn't have Game.GameState, we should consider removing ours (that info can be computed from the time left)
             int intGameID;
 
             if(!int.TryParse(gameID, out intGameID))
