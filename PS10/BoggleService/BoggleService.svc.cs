@@ -404,6 +404,8 @@ namespace Boggle
 
             // Compose and return the response
             SetStatus(OK);
+
+            // TODO: when it returns 0 it returns an empty json object.
             var response = new BoggleWordResponse();
             response.Score = wordScore;
 
