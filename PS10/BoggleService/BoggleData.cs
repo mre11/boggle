@@ -272,7 +272,7 @@ namespace Boggle
         /// The score for this word. Score is calculated inside the boggleboard.
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
-        public int Score { get; set; }
+        public int ?Score { get; set; }
     }
 
     /// <summary>

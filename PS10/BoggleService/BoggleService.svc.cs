@@ -347,7 +347,6 @@ namespace Boggle
                                         SetStatus(Conflict);
                                         return null;
                                     }
-                                    // TODO: Error came up here
                                     else if (GameIsCompleted((int)reader["StartTime"], (int)reader["TimeLimit"]))
                                     {
                                         // Game state isn't active
@@ -376,7 +375,6 @@ namespace Boggle
 
             var playedWord = word.Word;
             playedWord = playedWord.Trim();
-            playedWord = playedWord.ToLower();
 
             if (WordHasBeenPlayed(intGameID, word.UserToken, playedWord))
             {
@@ -395,6 +393,10 @@ namespace Boggle
                 else if (playedWord.Length > 2)
                     wordScore = 1;
             }
+            else if(!gameBoard.CanBeFormed(playedWord) && playedWord.Length < 2)
+            {
+                wordScore = 0;
+            }
             else
             {
                 wordScore = -1;
@@ -405,12 +407,10 @@ namespace Boggle
             // Compose and return the response
             SetStatus(OK);
 
-            // TODO: when it returns 0 it returns an empty json object.
             var response = new BoggleWordResponse();
             response.Score = wordScore;
 
             return response;
-            // TODO Joe's tests reveal some kind of bugs in PlayWord; we need to investigate.  Other stuff looks good.
         }
 
         /// <summary>
@@ -640,9 +640,7 @@ namespace Boggle
         /// </summary>
         private bool GameIsCompleted(int startTime, int timeLimit)
         {
-            int result = (Environment.TickCount - startTime) / 1000;
-            return result > timeLimit || result == timeLimit;
-            //return (Environment.TickCount - startTime) / 1000 - timeLimit > 0;
+            return (Environment.TickCount - startTime) / 1000 - timeLimit > 0;
         }
 
         /// <summary>
@@ -650,7 +648,6 @@ namespace Boggle
         /// </summary>
         private bool WordHasBeenPlayed(int intGameID, string playerToken, string word)
         {
-            // TODO: Should check if that player has played the word before. Not if either player has played it. 
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
