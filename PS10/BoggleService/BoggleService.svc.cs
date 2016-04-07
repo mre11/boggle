@@ -200,9 +200,9 @@ namespace Boggle
                         }
                         else
                         {
-                            DateTime startTime = DateTime.Now;
-                            command.Parameters.AddWithValue("@StartTime", startTime);
-                            //command.Parameters.AddWithValue("@StartTime", Environment.TickCount);
+                            //DateTime startTime = DateTime.Now;
+                            //command.Parameters.AddWithValue("@StartTime", startTime);
+                            command.Parameters.AddWithValue("@StartTime", Environment.TickCount);
                         }
                         command.ExecuteNonQuery();
                     }
