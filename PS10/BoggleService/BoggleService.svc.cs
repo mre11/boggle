@@ -58,7 +58,7 @@ namespace Boggle
         {
             InitializePendingGame();
 
-            // Error check users information before setting up SQL connection.
+            // Error check users information before setting up SQL connection
             if (requestedUser.Nickname == null || requestedUser.Nickname.Trim() == "")
             {
                 SetStatus(Forbidden);
@@ -70,29 +70,23 @@ namespace Boggle
             {
                 conn.Open();
 
-                // Open SQL transaction and begin transaction
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    // Open SQL command with SQL code
                     var cmd = "INSERT INTO Users(UserToken, Nickname) VALUES(@UserToken, @Nickname)";
                     using (SqlCommand command = new SqlCommand(cmd, conn, trans))
                     {
                         string userToken = Guid.NewGuid().ToString();
-                        // Set command parameters with AddWithValue
+
                         command.Parameters.AddWithValue("@UserToken", userToken);
                         command.Parameters.AddWithValue("@Nickname", requestedUser.Nickname.Trim());
 
-                        // Execute a non query and if successful set status code
                         command.ExecuteNonQuery();
                         SetStatus(Created);
 
-                        // Create formatted response to send back
-                        var response = new UserResponse();
-                        response.UserToken = userToken;
-
                         // Commit users information into the database
                         trans.Commit();
-                        return response;
+
+                        return new UserResponse { UserToken = userToken };
                     }
                 }
             }
@@ -118,7 +112,7 @@ namespace Boggle
         {
             InitializePendingGame();
 
-            // Make sure game is >= 5 and <= 120 and the user token is valid
+            // Make sure user token and time limit are valid
             if (requestBody.UserToken == null || requestBody.UserToken == ""
                 || requestBody.TimeLimit < 5 || requestBody.TimeLimit > 120)
             {
@@ -174,13 +168,12 @@ namespace Boggle
                                 }
                                 else if (reader["Player2"] == DBNull.Value)
                                 {
-                                    activeGame = true;
-
                                     // Calculate the average timelimit between the two players.
                                     int averageTimeLimit = ((int)reader["TimeLimit"] + requestBody.TimeLimit) / 2;
 
                                     updatePending += "Player2 = @Player, TimeLimit = " + averageTimeLimit + ", StartTime = @StartTime, GameState = 'active' WHERE Game.GameState = 'pending'";
                                     SetStatus(Created);
+                                    activeGame = true;
                                 }
                             }
                         }
@@ -195,15 +188,13 @@ namespace Boggle
                         // TimeStarted = Current Time, and GameState = 'active'.
                         if (!activeGame)
                         {
-                            // Set command parameters and execute query
                             command.Parameters.AddWithValue("@TimeLimit", requestBody.TimeLimit);
                         }
                         else
                         {
-                            //DateTime startTime = DateTime.Now;
-                            //command.Parameters.AddWithValue("@StartTime", startTime);
                             command.Parameters.AddWithValue("@StartTime", Environment.TickCount);
                         }
+
                         command.ExecuteNonQuery();
                     }
 
@@ -211,10 +202,7 @@ namespace Boggle
                 }
             }
 
-            // Return the response
-            var response = new BoggleGameResponse();
-            response.GameID = pendingGameID;
-            return response;
+            return new BoggleGameResponse { GameID = pendingGameID };
         }
 
         /// <summary>
@@ -242,9 +230,10 @@ namespace Boggle
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
                     // Get Player1 user token out of the pending game
-                    using(SqlCommand command = new SqlCommand("SELECT Player1 FROM Game WHERE GameState = 'pending'", conn, trans))
+                    var cmd = "SELECT Player1 FROM Game WHERE GameState = 'pending'";
+                    using (SqlCommand command = new SqlCommand(cmd, conn, trans))
                     {
-                        using(SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = command.ExecuteReader())
                         {
                             while (reader.Read())
                             {
@@ -259,7 +248,8 @@ namespace Boggle
                     }
 
                     // Set Player1 in pending game to null
-                    using (SqlCommand command = new SqlCommand("UPDATE Game SET Player1 = @Player WHERE Game.GameState = 'pending'", conn, trans))
+                    cmd = "UPDATE Game SET Player1 = @Player WHERE Game.GameState = 'pending'";
+                    using (SqlCommand command = new SqlCommand(cmd, conn, trans))
                     {
                         command.Parameters.AddWithValue("@Player", DBNull.Value);
                         command.ExecuteNonQuery();
@@ -288,9 +278,9 @@ namespace Boggle
         {
             InitializePendingGame();
 
-            // Word or UserToken is invalid
+            // Validate word and user token
             int intGameID;
-            if (word.Word == null || word.UserToken == null|| word.Word.Trim() == ""
+            if (word.Word == null || word.UserToken == null || word.Word.Trim() == ""
                 || word.UserToken == "" || !int.TryParse(gameID, out intGameID))
             {
                 SetStatus(Forbidden);
@@ -302,12 +292,12 @@ namespace Boggle
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
-                
+
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
                     var cmd = "SELECT * FROM Users WHERE UserToken = @UserToken";
                     using (SqlCommand command = new SqlCommand(cmd, conn, trans))
-                    {                        
+                    {
                         command.Parameters.AddWithValue("@UserToken", word.UserToken);
 
                         using (SqlDataReader reader = command.ExecuteReader())
@@ -317,8 +307,8 @@ namespace Boggle
                                 SetStatus(Forbidden);
                                 return null;
                             }
-                        }                          
-                        
+                        }
+
                     }
 
                     cmd = "SELECT * FROM Game WHERE GameID = @GameID";
@@ -340,14 +330,8 @@ namespace Boggle
                                         return null;
                                     }
 
-                                    
-                                    if ((string)reader["GameState"] != "active")
-                                    {
-                                        // Game state isn't active
-                                        SetStatus(Conflict);
-                                        return null;
-                                    }
-                                    else if (GameIsCompleted((int)reader["StartTime"], (int)reader["TimeLimit"]))
+                                    if ((string)reader["GameState"] != "active"
+                                        || GameIsCompleted((int)reader["StartTime"], (int)reader["TimeLimit"]))
                                     {
                                         // Game state isn't active
                                         SetStatus(Conflict);
@@ -393,7 +377,7 @@ namespace Boggle
                 else if (playedWord.Length > 2)
                     wordScore = 1;
             }
-            else if(!gameBoard.CanBeFormed(playedWord) && playedWord.Length < 2)
+            else if (playedWord.Length < 2) //(!gameBoard.CanBeFormed(playedWord) && playedWord.Length < 2)
             {
                 wordScore = 0;
             }
@@ -404,13 +388,8 @@ namespace Boggle
 
             AddWordRecord(playedWord, intGameID, word.UserToken, wordScore);
 
-            // Compose and return the response
             SetStatus(OK);
-
-            var response = new BoggleWordResponse();
-            response.Score = wordScore;
-
-            return response;
+            return new BoggleWordResponse { Score = wordScore };
         }
 
         /// <summary>
@@ -426,9 +405,9 @@ namespace Boggle
         {
             InitializePendingGame();
 
+            // gameID must be an int
             int intGameID;
-
-            if(!int.TryParse(gameID, out intGameID))
+            if (!int.TryParse(gameID, out intGameID))
             {
                 SetStatus(Forbidden);
                 return null;
@@ -438,12 +417,13 @@ namespace Boggle
             string player1Token = "";
             string player2Token = "";
 
+            // Get information from the Game table
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
-                conn.Open();                   
+                conn.Open();
 
-                // Get information from the Game table
-                using (SqlCommand command = new SqlCommand("SELECT * FROM Game WHERE GameID=@GameID", conn))
+                var cmd = "SELECT * FROM Game WHERE GameID=@GameID";
+                using (SqlCommand command = new SqlCommand(cmd, conn))
                 {
                     command.Parameters.AddWithValue("@GameID", gameID);
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -457,7 +437,7 @@ namespace Boggle
                             }
                             else
                             {
-                                // Save the current games information.
+                                // Save the current game's information.
                                 currentGame = new BoggleGame(intGameID);
                                 var board = "";
                                 string data = reader.ToString();
@@ -478,7 +458,7 @@ namespace Boggle
                         }
                     }
                 }
-                
+
             }
 
             // Get information from the Users table
@@ -491,12 +471,10 @@ namespace Boggle
                 currentGame.Player2 = GetUserRecord(player2Token);
             }
 
-            // Go no further if game is pending
+            // Go no further if game is pending or it doesn't have two players
             if (currentGame.GameState == null || currentGame.GameState == "pending" || (currentGame.Player1 == null || currentGame.Player2 == null))
             {
-                var response = new BoggleGameResponse();
-                response.GameState = "pending";
-                return response;
+                return new BoggleGameResponse { GameState = "pending" };
             }
 
             // Get information from the Words table
@@ -651,7 +629,7 @@ namespace Boggle
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
-                
+
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
                     var cmd = "SELECT * FROM Words WHERE GameID = @GameID AND Player = @Player AND Word = @Word";
@@ -660,11 +638,11 @@ namespace Boggle
                         command.Parameters.AddWithValue("@GameID", intGameID);
                         command.Parameters.AddWithValue("@Player", playerToken);
                         command.Parameters.AddWithValue("@Word", word);
-                        
+
 
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
-                            if(reader.HasRows)
+                            if (reader.HasRows)
                             {
                                 return true;
                             }
@@ -685,7 +663,7 @@ namespace Boggle
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
-                
+
                 var cmd = "INSERT INTO Words(Word, GameID, Player, Score) VALUES(@Word, @GameID, @Player, @Score)";
                 using (SqlCommand command = new SqlCommand(cmd, conn))
                 {
@@ -695,7 +673,7 @@ namespace Boggle
                     command.Parameters.AddWithValue("@Score", score);
 
                     command.ExecuteNonQuery();
-                }                
+                }
             }
         }
 
