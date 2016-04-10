@@ -28,7 +28,7 @@ namespace BoggleServiceDB
         {
             if (process == null)
             {
-                ProcessStartInfo info = new ProcessStartInfo(Boggle.Properties.Resources.IIS_EXECUTABLE, arguments);
+                ProcessStartInfo info = new ProcessStartInfo("C:/Users/Braden/Source/Repos/boggle/PS10/BoggleService/BoggleWebServer.cs", arguments);
                 info.WindowStyle = ProcessWindowStyle.Minimized;
                 info.UseShellExecute = false;
                 process = Process.Start(info);
