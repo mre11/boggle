@@ -1,1 +1,0 @@
-﻿insert into Users (UserToken, Nickname) values('fjfjlds-dfjdk', 'en')

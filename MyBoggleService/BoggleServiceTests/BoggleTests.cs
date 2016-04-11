@@ -16,7 +16,7 @@ namespace BoggleServiceDB
     /// subsequent tests may not work properly until the stray process is killed
     /// manually.
     /// </summary>
-    public static class IISAgent
+    public static class BoggleWebServer
     {
         // Reference to the running process
         private static Process process = null;
@@ -55,16 +55,16 @@ namespace BoggleServiceDB
         [ClassInitialize()]
         public static void StartIIS(TestContext testContext)
         {
-            IISAgent.Start(@"/site:""BoggleService"" /apppool:""Clr4IntegratedAppPool"" /config:""..\..\..\.vs\config\applicationhost.config""");
+            BoggleWebServer.Start(@"/site:""BoggleService"" /apppool:""Clr4IntegratedAppPool"" /config:""..\..\..\.vs\config\applicationhost.config""");
         }
 
         /// <summary>
         /// This is automatically run when all tests have completed to stop the server
         /// </summary>
         [ClassCleanup()]
-        public static void StopIIS()
+        public static void StopBoggleWebServer()
         {
-            IISAgent.Stop();
+            BoggleWebServer.Stop();
         }
 
         private RestTestClient client = new RestTestClient("http://localhost:60000/");
