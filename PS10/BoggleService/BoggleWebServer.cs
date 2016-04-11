@@ -77,7 +77,11 @@ namespace Boggle
                     }
                     else if (url.Contains("/games")) // TODO maybe check a regex here for the gameID?
                     {
+                        Regex r = new Regex("([1-9]+[0-9]*)");
+                        Match m = r.Match(url);
 
+                        if (!url.Contains("Brief")) { SendGameStatus(m.Value, null); }
+                        else { SendGameStatus(m.Value, "yes"); }
                     }
                 }
 
@@ -169,6 +173,18 @@ namespace Boggle
             ss.BeginSend("HTTP/1.1" + BoggleWebServer.StatusCode.ToString() + "\n", Ignore, null);
             ss.BeginSend("Content-Type: text/html\n", Ignore, null); // TODO make content type a property of the server like status code?
             ss.BeginSend("Content-Length: " + stream.ToString().Length + "\n", (ex, py) => { ss.Shutdown(); }, null);
+        }
+
+        private void SendGameStatus(string gameID, string brief)
+        {
+            BoggleGameResponse response = service.GameStatus(gameID, brief);
+            string result = JsonConvert.SerializeObject( response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+            ss.BeginSend("HTTP/1.1" + BoggleWebServer.StatusCode.ToString() + "\n", Ignore, null);
+            ss.BeginSend("Content-Type: application/json\n", Ignore, null);
+            ss.BeginSend("Content-Length: " + result.Length + "\n", Ignore, null);
+            ss.BeginSend("\r\n", Ignore, null);
+            ss.BeginSend(result, (ex, py) => { ss.Shutdown(); }, null);
+
         }
 
         private void Ignore(Exception e, object payload)
