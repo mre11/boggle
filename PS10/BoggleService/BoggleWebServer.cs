@@ -39,10 +39,12 @@ namespace Boggle
         private StringSocket ss;
         private int lineCount;
         private int contentLength;
+        private BoggleService service;
 
         public HttpRequest(StringSocket stringSocket)
         {
-            this.ss = stringSocket;
+            ss = stringSocket;
+            service = new BoggleService();
             ss.BeginReceive(LineReceived, null);
         }
 
@@ -52,16 +54,30 @@ namespace Boggle
             Console.WriteLine(s);
             if (s != null)
             {
+                var method = "";
+                var url = "";
+
+                // Reading the first line of the request
                 if (lineCount == 1)
                 {
                     Regex r = new Regex(@"^(\S+)\s+(\S+)");
                     Match m = r.Match(s);
-                    Console.WriteLine("Method: " + m.Groups[1].Value);
-                    Console.WriteLine("URL: " + m.Groups[2].Value);
+                    method = m.Groups[1].Value;
+                    url = m.Groups[2].Value;
                 }
+
+                if (method == "GET")
+                {
+                    if (url == "/api")
+                    {
+                        SendAPI();
+                    }
+                }
+
+                // Content-Length line tells how many chars long the content is
                 if (s.StartsWith("Content-Length:"))
                 {
-                    contentLength = Int32.Parse(s.Substring(16).Trim());
+                    contentLength = int.Parse(s.Substring(16).Trim());
                 }
                 if (s == "\r")
                 {
@@ -94,6 +110,16 @@ namespace Boggle
                 ss.BeginSend("\r\n", Ignore, null);
                 ss.BeginSend(result, (ex, py) => { ss.Shutdown(); }, null);
             }
+        }
+
+        private void SendAPI()
+        {
+            var stream = service.API();
+
+            // TODO we need a mechanism for passing the status code through from the service to here
+            ss.BeginSend("HTTP/1.1 200 OK\n", Ignore, null);
+            ss.BeginSend("Content-Type: text/html\n", Ignore, null);
+            ss.BeginSend("Content-Length: " + stream.ToString().Length + "\n", (ex, py) => { ss.Shutdown(); }, null);
         }
 
         private void Ignore(Exception e, object payload)
