@@ -43,6 +43,7 @@ namespace Boggle
         private BoggleService service;
         private string method;
         private string url;
+        private Regex finder = new Regex(@"(.games|.users)$|(.games.)([1-9]+[0-9]*)$|(.games.)([1-9]+[0-9]*)(.Brief.)(yes|no)$");
 
         public HttpRequest(StringSocket stringSocket)
         {
@@ -65,6 +66,7 @@ namespace Boggle
                     Match m = r.Match(s);
                     method = m.Groups[1].Value;
                     url = m.Groups[2].Value;
+                    string[] matches = finder.GetGroupNames();
                 }
 
                 // Do GET requests here since they have no content
@@ -74,7 +76,7 @@ namespace Boggle
                     {
                         SendAPI();
                     }
-                    else if (url.Contains("/games")) // TODO maybe check a regex here for the gameID?
+                    else if (finder.Match(url).Groups[0].Value == "/games") // TODO maybe check a regex here for the gameID?
                     {
                         Regex r = new Regex("([1-9]+[0-9]*)");
                         Match m = r.Match(url);
@@ -189,11 +191,5 @@ namespace Boggle
         private void Ignore(Exception e, object payload)
         {
         }
-    }
-
-    public class Person
-    {
-        public String Name { get; set; }
-        public String Eyes { get; set; }
     }
 }
