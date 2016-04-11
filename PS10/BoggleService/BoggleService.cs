@@ -26,15 +26,42 @@ namespace Boggle
             BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
         }
 
+        private string statusCode = "";
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
         /// </summary>
         /// <param name="status"></param>
-        private static void SetStatus(HttpStatusCode status)
+        public void SetStatus(HttpStatusCode status)
         {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = status;
+            switch (status)
+            {
+                case HttpStatusCode.Accepted:
+                    statusCode = "Accepted";
+                    break;
+                case HttpStatusCode.OK:
+                    statusCode = "OK";
+                    break;
+                case HttpStatusCode.Forbidden:
+                    statusCode = "Forbidden";
+                    break;
+                case HttpStatusCode.Conflict:
+                    statusCode = "Conflict";
+                    break;
+                case HttpStatusCode.Created:
+                    statusCode = "Created";
+                    break;
+            }
         }
+
+        public string StatusCode
+        {
+            get
+            {
+                return statusCode;
+            }
+        }
+
 
         /// <summary>
         /// Returns a Stream version of index.html.

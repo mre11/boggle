@@ -83,18 +83,28 @@ namespace Boggle
             }
         }
 
-        private void ContentReceived(string s, Exception e, object payload)
+        private void ContentReceived(string contentBody, Exception e, object payload)
         {
-            if (s != null)
+            if (contentBody != null)
             {
                 // TODO: Not sure if this is what we need to do. I'm kinda lost on
                 // what we need to do at this moment. Just playing around to figure
                 // out what we need to do.
+                BoggleService service = new BoggleService();
+                string result = "";
+
                 if(method == "POST")
                 {
                     if (url.Contains("users"))
                     {
                         // CreateUser
+                        User requestedUser = JsonConvert.DeserializeObject<User>(contentBody);
+                        Console.Write(requestedUser.Nickname);
+                        UserResponse response = service.CreateUser(requestedUser);
+                        if(service.StatusCode == "Created")
+                        {
+                            result = JsonConvert.SerializeObject( response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                        }
                     }
                     else
                     {
@@ -120,16 +130,17 @@ namespace Boggle
                 }
 
 
-                Person p = JsonConvert.DeserializeObject<Person>(s);
-                Console.WriteLine(p.Name + " " + p.Eyes);
-                BoggleService n = new BoggleService();
+                //Person p = JsonConvert.DeserializeObject<Person>(s);
+                //Console.WriteLine(p.Name + " " + p.Eyes);
+                //BoggleService n = new BoggleService();
                 // Call service method
-                string result =
-                    JsonConvert.SerializeObject(
-                            new Person { Name = "June", Eyes = "Blue" },
-                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                //string result =
+                //    JsonConvert.SerializeObject(
+                //            new Person { Name = "June", Eyes = "Blue" },
+                //            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
 
-                ss.BeginSend("HTTP/1.1 200 OK\n", Ignore, null);
+                ss.BeginSend("HTTP/1.1", Ignore, HttpStatusCode.Forbidden);
+                ss.BeginSend("HTTP/1.1" + service.StatusCode + "\n", Ignore, null);
                 ss.BeginSend("Content-Type: application/json\n", Ignore, null);
                 ss.BeginSend("Content-Length: " + result.Length + "\n", Ignore, null);
                 ss.BeginSend("\r\n", Ignore, null);
