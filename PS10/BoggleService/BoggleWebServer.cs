@@ -1,8 +1,6 @@
 ﻿using CustomNetworking;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Dynamic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -77,7 +75,7 @@ namespace Boggle
                     {
                         SendAPI();
                     }
-                    else if (url.Contains("/games"))
+                    else if (url.Contains("/games")) // TODO maybe check a regex here for the gameID?
                     {
 
                     }
@@ -106,7 +104,7 @@ namespace Boggle
                 // TODO: Not sure if this is what we need to do. I'm kinda lost on
                 // what we need to do at this moment. Just playing around to figure
                 // out what we need to do.
-                BoggleService service = new BoggleService();
+                // TODO looks good to me.  we may need to refine the logic to be finer that url.Contains.
                 string result = "";
 
                 if(method == "POST")
@@ -155,7 +153,7 @@ namespace Boggle
                 //            new Person { Name = "June", Eyes = "Blue" },
                 //            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
 
-                ss.BeginSend("HTTP/1.1", Ignore, HttpStatusCode.Forbidden);
+                //ss.BeginSend("HTTP/1.1", Ignore, HttpStatusCode.Forbidden);
                 ss.BeginSend("HTTP/1.1" + BoggleWebServer.StatusCode + "\n", Ignore, null);
                 ss.BeginSend("Content-Type: application/json\n", Ignore, null);
                 ss.BeginSend("Content-Length: " + result.Length + "\n", Ignore, null);

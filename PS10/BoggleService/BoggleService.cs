@@ -26,7 +26,6 @@ namespace Boggle
             BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
         }
 
-        private string statusCode = "";
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
