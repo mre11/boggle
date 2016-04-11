@@ -31,8 +31,8 @@ namespace ServerGrader
         private static HttpClient CreateClient()
         {
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("http://localhost:60000");
-            //client.BaseAddress = new Uri("http://bogglecs3500s16db.azurewebsites.net");
+            //client.BaseAddress = new Uri("http://localhost:60000");
+            client.BaseAddress = new Uri("http://bogglecs3500s16db.azurewebsites.net");
             return client;
         }
 
@@ -631,7 +631,7 @@ namespace ServerGrader
             JoinGame(player1, 10).Wait();
             string game2 = JoinGame(player2, 10).Result;
             int score = PlayWord(player1, game2, "be").Result;
-            Assert.AreEqual(0, score);
+            Assert.IsTrue(score == -1 || score == 0);
         }
 
         // Too short correct score for player 2
@@ -644,7 +644,7 @@ namespace ServerGrader
             JoinGame(player1, 10).Wait();
             string game2 = JoinGame(player2, 10).Result;
             int score = PlayWord(player2, game2, "be").Result;
-            Assert.AreEqual(0, score);
+            Assert.IsTrue(score == -1 || score == 0);
         }
 
         // Good word correct status for player 1
@@ -912,7 +912,7 @@ namespace ServerGrader
             JoinGame(player1, 6).Wait();
             string game2 = JoinGame(player2, 6).Result;
             PlayWord(player1, game2, "XYZZY").Wait();
-            PlayWord(player1, game2, "IS").Wait();
+            //PlayWord(player1, game2, "IS").Wait();
             string board = GetStatus(game2, "no").Result.Board;
             List<string> words = DifferentLengthWords(board);
             PlayWord(player1, game2, words[0]).Wait();
@@ -932,7 +932,7 @@ namespace ServerGrader
             JoinGame(player1, 6).Wait();
             string game2 = JoinGame(player2, 6).Result;
             PlayWord(player2, game2, "XYZZY").Wait();
-            PlayWord(player2, game2, "IS").Wait();
+            //PlayWord(player2, game2, "IS").Wait();
             string board = GetStatus(game2, "no").Result.Board;
             List<string> words = DifferentLengthWords(board);
             PlayWord(player2, game2, words[0]).Wait();
@@ -952,7 +952,7 @@ namespace ServerGrader
             JoinGame(player1, 6).Wait();
             string game2 = JoinGame(player2, 6).Result;
             PlayWord(player1, game2, "XYZZY").Wait();
-            PlayWord(player1, game2, "IS").Wait();
+            //PlayWord(player1, game2, "IS").Wait();
             string board = GetStatus(game2, "no").Result.Board;
             List<string> allWords = DifferentLengthWords(board);
             foreach (string w in DifferentLengthWords(board))
@@ -963,7 +963,7 @@ namespace ServerGrader
             List<dynamic> wordscores = new List<dynamic>(GetStatus(game2, "no").Result.Player1.WordsPlayed);
             wordscores.Sort((x, y) => x.Word.CompareTo(y.Word));
             allWords.Add("XYZZY");
-            allWords.Add("IS");
+            //allWords.Add("IS");
             allWords.Sort();
             for (int i = 0; i < allWords.Count; i++)
             {
@@ -981,7 +981,7 @@ namespace ServerGrader
             JoinGame(player1, 6).Wait();
             string game2 = JoinGame(player2, 6).Result;
             PlayWord(player2, game2, "XYZZY").Wait();
-            PlayWord(player2, game2, "IS").Wait();
+            PlayWord(player2, game2, "XZYYX").Wait();
             string board = GetStatus(game2, "no").Result.Board;
             List<string> allWords = DifferentLengthWords(board);
             foreach (string w in DifferentLengthWords(board))
@@ -992,7 +992,7 @@ namespace ServerGrader
             List<dynamic> wordscores = new List<dynamic>(GetStatus(game2, "no").Result.Player2.WordsPlayed);
             wordscores.Sort((x, y) => x.Word.CompareTo(y.Word));
             allWords.Add("XYZZY");
-            allWords.Add("IS");
+            allWords.Add("XZYYX");
             allWords.Sort();
             for (int i = 0; i < allWords.Count; i++)
             {
@@ -1010,7 +1010,7 @@ namespace ServerGrader
             JoinGame(player1, 6).Wait();
             string game2 = JoinGame(player2, 6).Result;
             PlayWord(player1, game2, "XYZZY").Wait();
-            PlayWord(player1, game2, "IS").Wait();
+            PlayWord(player1, game2, "XZYYX").Wait();
             string board = GetStatus(game2, "no").Result.Board;
             List<string> allWords = DifferentLengthWords(board);
             foreach (string w in DifferentLengthWords(board))
@@ -1021,7 +1021,7 @@ namespace ServerGrader
             List<dynamic> wordscores = new List<dynamic>(GetStatus(game2, "no").Result.Player1.WordsPlayed);
             wordscores.Sort((x, y) => x.Word.CompareTo(y.Word));
             allWords.Add("XYZZY");
-            allWords.Add("IS");
+            allWords.Add("XZYYX");
             allWords.Sort();
             for (int i = 0; i < allWords.Count; i++)
             {
@@ -1039,7 +1039,7 @@ namespace ServerGrader
             JoinGame(player1, 6).Wait();
             string game2 = JoinGame(player2, 6).Result;
             PlayWord(player2, game2, "XYZZY").Wait();
-            PlayWord(player2, game2, "IS").Wait();
+            PlayWord(player2, game2, "XZYYX").Wait();
             string board = GetStatus(game2, "no").Result.Board;
             List<string> allWords = DifferentLengthWords(board);
             foreach (string w in DifferentLengthWords(board))
@@ -1050,7 +1050,7 @@ namespace ServerGrader
             List<dynamic> wordscores = new List<dynamic>(GetStatus(game2, "no").Result.Player2.WordsPlayed);
             wordscores.Sort((x, y) => x.Word.CompareTo(y.Word));
             allWords.Add("XYZZY");
-            allWords.Add("IS");
+            allWords.Add("XZYYX");
             allWords.Sort();
             for (int i = 0; i < allWords.Count; i++)
             {
