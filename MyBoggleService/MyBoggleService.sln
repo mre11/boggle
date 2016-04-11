@@ -10,7 +10,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F8E505D2-CCCC-4934-A467-B6A27D36E6D0}"
 	ProjectSection(SolutionItems) = preProject
 		Net45\Newtonsoft.Json.dll = Net45\Newtonsoft.Json.dll
+		Net45\Newtonsoft.Json.xml = Net45\Newtonsoft.Json.xml
 		StringSocket.dll = StringSocket.dll
+		StringSocket.XML = StringSocket.XML
 	EndProjectSection
 EndProject
 Global
