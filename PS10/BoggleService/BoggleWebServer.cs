@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using static System.Net.HttpStatusCode;
 
 namespace Boggle
@@ -52,6 +53,7 @@ namespace Boggle
             ss = stringSocket;
             //service = new BoggleService(); // TODO I'm thinking we might not want this at all (it's a static constructor)
             ss.BeginReceive(LineReceived, null);
+            
         }
 
         private void LineReceived(string s, Exception e, object payload)
@@ -148,7 +150,6 @@ namespace Boggle
 
                 }
 
-
                 //Person p = JsonConvert.DeserializeObject<Person>(s);
                 //Console.WriteLine(p.Name + " " + p.Eyes);
                 //BoggleService n = new BoggleService();
@@ -190,6 +191,15 @@ namespace Boggle
 
         private void Ignore(Exception e, object payload)
         {
+        }
+    }
+    
+    // TODO: Maybe we need to create an HttpResponse class? 
+    class HttpResponse
+    {
+        public HttpResponse(StringSocket socket)
+        {
+
         }
     }
 }
