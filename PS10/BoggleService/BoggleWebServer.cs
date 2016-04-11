@@ -99,7 +99,7 @@ namespace Boggle
                     {
                         // CreateUser
                         User requestedUser = JsonConvert.DeserializeObject<User>(contentBody);
-                        Console.Write(requestedUser.Nickname);
+                        Console.WriteLine(requestedUser.Nickname);
                         UserResponse response = service.CreateUser(requestedUser);
                         if(service.StatusCode == "Created")
                         {
@@ -109,6 +109,10 @@ namespace Boggle
                     else
                     {
                         // JoinGame
+                        JoinGameRequest requestBody = JsonConvert.DeserializeObject<JoinGameRequest>(contentBody);
+                        Console.WriteLine("UserToken: " + requestBody.UserToken + " TimeLimit: " + requestBody.TimeLimit);
+                        BoggleGameResponse response = service.JoinGame(requestBody);
+                        result = JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                     }
 
                 }
