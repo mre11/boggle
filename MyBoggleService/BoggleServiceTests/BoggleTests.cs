@@ -7,8 +7,9 @@ using static System.Net.HttpStatusCode;
 using System.Diagnostics;
 using System.Threading;
 using System.Net.Http;
+using System.Threading.Tasks;
 
-namespace BoggleServiceDB
+namespace Boggle
 {
     /// <summary>
     /// Provides a way to start and stop the IIS web server from within the test
@@ -16,7 +17,7 @@ namespace BoggleServiceDB
     /// subsequent tests may not work properly until the stray process is killed
     /// manually.
     /// </summary>
-    public static class BoggleWebServer
+    public static class BoggleWebServers
     {
         // Reference to the running process
         private static Process process = null;
@@ -53,18 +54,20 @@ namespace BoggleServiceDB
         /// This is automatically run prior to all the tests to start the server
         /// </summary>
         [ClassInitialize()]
-        public static void StartIIS(TestContext testContext)
+        public static void StartServer(TestContext testContext)
         {
-            BoggleWebServer.Start(@"/site:""BoggleService"" /apppool:""Clr4IntegratedAppPool"" /config:""..\..\..\.vs\config\applicationhost.config""");
+            //BoggleWebServer.Start(@"/site:""BoggleService"" /apppool:""Clr4IntegratedAppPool"" /config:""..\..\..\.vs\config\applicationhost.config""");
+            //Task t = new Task(BoggleWebServer.Main);
+            //t.Start();
         }
 
         /// <summary>
         /// This is automatically run when all tests have completed to stop the server
         /// </summary>
         [ClassCleanup()]
-        public static void StopBoggleWebServer()
+        public static void StopServer()
         {
-            BoggleWebServer.Stop();
+            //BoggleWebServer.Stop();
         }
 
         private RestTestClient client = new RestTestClient("http://localhost:60000/");

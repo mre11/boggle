@@ -74,6 +74,12 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\PS10\BoggleService\BoggleService.csproj">
+      <Project>{3d7057b8-1969-4bcd-9e26-3746629e5313}</Project>
+      <Name>BoggleService</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
