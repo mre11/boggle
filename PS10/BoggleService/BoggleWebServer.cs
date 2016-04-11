@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -29,8 +30,8 @@ namespace Boggle
         private void ConnectionRequested(IAsyncResult ar)
         {
             Socket s = server.EndAcceptSocket(ar);
-            server.BeginAcceptSocket(ConnectionRequested, null);
             new HttpRequest(new StringSocket(s, new UTF8Encoding()));
+            server.BeginAcceptSocket(ConnectionRequested, null);
         }
     }
 
@@ -43,8 +44,14 @@ namespace Boggle
         public HttpRequest(StringSocket stringSocket)
         {
             this.ss = stringSocket;
+            this.contentLength = 0;
+            this.lineCount = 0;
+
             ss.BeginReceive(LineReceived, null);
         }
+
+        private string method;
+        private string url;
 
         private void LineReceived(string s, Exception e, object payload)
         {
@@ -58,6 +65,8 @@ namespace Boggle
                     Match m = r.Match(s);
                     Console.WriteLine("Method: " + m.Groups[1].Value);
                     Console.WriteLine("URL: " + m.Groups[2].Value);
+                    method = m.Groups[1].Value;
+                    url = m.Groups[2].Value;
                 }
                 if (s.StartsWith("Content-Length:"))
                 {
@@ -78,11 +87,43 @@ namespace Boggle
         {
             if (s != null)
             {
+                // TODO: Not sure if this is what we need to do. I'm kinda lost on
+                // what we need to do at this moment. Just playing around to figure
+                // out what we need to do.
+                if(method == "POST")
+                {
+                    if (url.Contains("users"))
+                    {
+                        // CreateUser
+                    }
+                    else
+                    {
+                        // JoinGame
+                    }
+
+                }
+                else if(method == "PUT")
+                {
+                    if(url.Contains("games/"))
+                    {
+                        //PlayWord
+                    }
+                    else
+                    {
+                        // CancelJoin
+                    }
+
+                }
+                else if(method == "GET" && url.Contains("games/"))
+                {
+                    // GameStatus
+                }
+
+
                 Person p = JsonConvert.DeserializeObject<Person>(s);
                 Console.WriteLine(p.Name + " " + p.Eyes);
-
+                BoggleService n = new BoggleService();
                 // Call service method
-
                 string result =
                     JsonConvert.SerializeObject(
                             new Person { Name = "June", Eyes = "Blue" },

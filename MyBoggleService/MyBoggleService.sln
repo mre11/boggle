@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleServiceTests", "Boggl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleService", "..\PS10\BoggleService\BoggleService.csproj", "{3D7057B8-1969-4BCD-9E26-3746629E5313}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Queries", "Queries", "{440C1433-C985-4728-9125-AC6C839E2A50}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F8E505D2-CCCC-4934-A467-B6A27D36E6D0}"
 	ProjectSection(SolutionItems) = preProject
 		Net45\Newtonsoft.Json.dll = Net45\Newtonsoft.Json.dll
