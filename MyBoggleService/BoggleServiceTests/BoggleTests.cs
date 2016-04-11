@@ -57,8 +57,8 @@ namespace Boggle
         public static void StartServer(TestContext testContext)
         {
             //BoggleWebServer.Start(@"/site:""BoggleService"" /apppool:""Clr4IntegratedAppPool"" /config:""..\..\..\.vs\config\applicationhost.config""");
-            //Task t = new Task(BoggleWebServer.Main);
-            //t.Start();
+            Task t = new Task(BoggleWebServer.Main);
+            t.Start();
         }
 
         /// <summary>

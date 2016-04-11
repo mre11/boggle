@@ -46,11 +46,10 @@ namespace Boggle
 
         public HttpRequest(StringSocket stringSocket)
         {
-            this.contentLength = 0;
-            this.lineCount = 0;
-
+            contentLength = 0;
+            lineCount = 0;
             ss = stringSocket;
-            service = new BoggleService();
+            //service = new BoggleService(); // TODO I'm thinking we might not want this at all (it's a static constructor)
             ss.BeginReceive(LineReceived, null);
         }
 
