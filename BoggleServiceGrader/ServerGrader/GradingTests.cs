@@ -31,8 +31,8 @@ namespace ServerGrader
         private static HttpClient CreateClient()
         {
             HttpClient client = new HttpClient();
-            //client.BaseAddress = new Uri("http://localhost:60000");
-            client.BaseAddress = new Uri("http://bogglecs3500s16db.azurewebsites.net");
+            client.BaseAddress = new Uri("http://localhost:60000");
+            //client.BaseAddress = new Uri("http://bogglecs3500s16db.azurewebsites.net");
             return client;
         }
 
@@ -631,6 +631,7 @@ namespace ServerGrader
             JoinGame(player1, 10).Wait();
             string game2 = JoinGame(player2, 10).Result;
             int score = PlayWord(player1, game2, "be").Result;
+            // Changed 4/11/16 3:15 p.m.
             Assert.IsTrue(score == -1 || score == 0);
         }
 
@@ -644,6 +645,7 @@ namespace ServerGrader
             JoinGame(player1, 10).Wait();
             string game2 = JoinGame(player2, 10).Result;
             int score = PlayWord(player2, game2, "be").Result;
+            // Changed 4/11/16 3:15 p.m.
             Assert.IsTrue(score == -1 || score == 0);
         }
 
@@ -912,6 +914,7 @@ namespace ServerGrader
             JoinGame(player1, 6).Wait();
             string game2 = JoinGame(player2, 6).Result;
             PlayWord(player1, game2, "XYZZY").Wait();
+            // Changed 4/11/16 3:15 p.m.
             //PlayWord(player1, game2, "IS").Wait();
             string board = GetStatus(game2, "no").Result.Board;
             List<string> words = DifferentLengthWords(board);
@@ -932,6 +935,7 @@ namespace ServerGrader
             JoinGame(player1, 6).Wait();
             string game2 = JoinGame(player2, 6).Result;
             PlayWord(player2, game2, "XYZZY").Wait();
+            // Changed 4/11/16 3:15 p.m.
             //PlayWord(player2, game2, "IS").Wait();
             string board = GetStatus(game2, "no").Result.Board;
             List<string> words = DifferentLengthWords(board);
@@ -963,6 +967,7 @@ namespace ServerGrader
             List<dynamic> wordscores = new List<dynamic>(GetStatus(game2, "no").Result.Player1.WordsPlayed);
             wordscores.Sort((x, y) => x.Word.CompareTo(y.Word));
             allWords.Add("XYZZY");
+            // Changed 4/11/16 3:15 p.m.
             //allWords.Add("IS");
             allWords.Sort();
             for (int i = 0; i < allWords.Count; i++)
@@ -981,6 +986,7 @@ namespace ServerGrader
             JoinGame(player1, 6).Wait();
             string game2 = JoinGame(player2, 6).Result;
             PlayWord(player2, game2, "XYZZY").Wait();
+            // Changed 4/11/16 3:15 p.m.
             PlayWord(player2, game2, "XZYYX").Wait();
             string board = GetStatus(game2, "no").Result.Board;
             List<string> allWords = DifferentLengthWords(board);
@@ -992,6 +998,7 @@ namespace ServerGrader
             List<dynamic> wordscores = new List<dynamic>(GetStatus(game2, "no").Result.Player2.WordsPlayed);
             wordscores.Sort((x, y) => x.Word.CompareTo(y.Word));
             allWords.Add("XYZZY");
+            // Changed 4/11/16 3:15 p.m.
             allWords.Add("XZYYX");
             allWords.Sort();
             for (int i = 0; i < allWords.Count; i++)
@@ -1010,6 +1017,7 @@ namespace ServerGrader
             JoinGame(player1, 6).Wait();
             string game2 = JoinGame(player2, 6).Result;
             PlayWord(player1, game2, "XYZZY").Wait();
+            // Changed 4/11/16 3:15 p.m.
             PlayWord(player1, game2, "XZYYX").Wait();
             string board = GetStatus(game2, "no").Result.Board;
             List<string> allWords = DifferentLengthWords(board);
@@ -1021,6 +1029,7 @@ namespace ServerGrader
             List<dynamic> wordscores = new List<dynamic>(GetStatus(game2, "no").Result.Player1.WordsPlayed);
             wordscores.Sort((x, y) => x.Word.CompareTo(y.Word));
             allWords.Add("XYZZY");
+            // Changed 4/11/16 3:15 p.m.
             allWords.Add("XZYYX");
             allWords.Sort();
             for (int i = 0; i < allWords.Count; i++)
@@ -1039,6 +1048,7 @@ namespace ServerGrader
             JoinGame(player1, 6).Wait();
             string game2 = JoinGame(player2, 6).Result;
             PlayWord(player2, game2, "XYZZY").Wait();
+            // Changed 4/11/16 3:15 p.m.
             PlayWord(player2, game2, "XZYYX").Wait();
             string board = GetStatus(game2, "no").Result.Board;
             List<string> allWords = DifferentLengthWords(board);
@@ -1050,6 +1060,7 @@ namespace ServerGrader
             List<dynamic> wordscores = new List<dynamic>(GetStatus(game2, "no").Result.Player2.WordsPlayed);
             wordscores.Sort((x, y) => x.Word.CompareTo(y.Word));
             allWords.Add("XYZZY");
+            // Changed 4/11/16 3:15 p.m.
             allWords.Add("XZYYX");
             allWords.Sort();
             for (int i = 0; i < allWords.Count; i++)
@@ -1192,274 +1203,6 @@ namespace ServerGrader
             }
 
             Task.WaitAll(tasks.ToArray());
-        }
-
-
-
-
-        /// <summary>
-        /// Test getting status
-        /// </summary>
-        //[TestMethod]
-        public void TestStatus1x()
-        {
-            String player1 = MakeUser("Player 1", Created).Result;
-            String player2 = MakeUser("Player 2", Created).Result;
-            String game1 = JoinGame(player1, 10, Accepted).Result;
-            GetStatus(game1, "no", OK).Wait();
-            String game2 = JoinGame(player2, 20, Created).Result;
-            GetStatus(game1, "no", OK).Wait();
-
-            GetStatus("blank", "no", Forbidden).Wait();
-            dynamic status = GetStatus(game1, "no", OK).Result;
-            Assert.AreEqual("active", (string)status.GameState);
-            Assert.AreEqual(16, ((string)status.Board).Length);
-            Assert.AreEqual(15, (int)status.TimeLimit);
-            Assert.IsTrue((int)status.TimeLeft <= 120 && (int)status.TimeLeft > 0);
-            Assert.AreEqual("Player 1", (string)status.Player1.Nickname);
-            Assert.AreEqual(0, (int)status.Player1.Score);
-            Assert.AreEqual("Player 2", (string)status.Player2.Nickname);
-            Assert.AreEqual(0, (int)status.Player2.Score);
-        }
-
-        /// <summary>
-        /// Try to playing a word.
-        /// </summary>
-        //[TestMethod]
-        public void TestPlayWord1x()
-        {
-            String player1 = MakeUser("Player 1", Created).Result;
-            String player2 = MakeUser("Player 2", Created).Result;
-            String player3 = MakeUser("Player 3", Created).Result;
-            String game1 = JoinGame(player1, 10, Accepted).Result;
-            PlayWord(player1, game1, "a", Conflict).Wait();
-            String game2 = JoinGame(player2, 30, Created).Result;
-            Assert.AreEqual(game1, game2);
-
-            PlayWord(player1, game1, null, Forbidden).Wait();
-            PlayWord(player1, game1, "  ", Forbidden).Wait();
-            PlayWord(null, game1, "a", Forbidden).Wait();
-            PlayWord("blank", game1, "a", Forbidden).Wait();
-            PlayWord(player3, game1, "a", Forbidden).Wait();
-            PlayWord(player1, "blank", "a", Forbidden).Wait();
-
-            Assert.AreEqual(-1, PlayWord(player1, game1, "xxxxxx", OK).Result);
-            Assert.AreEqual(-1, PlayWord(player2, game1, "xxxxxx", OK).Result);
-
-            Assert.AreEqual(0, PlayWord(player1, game1, "xxxxxx", OK).Result);
-            Assert.AreEqual(0, PlayWord(player2, game1, "xxxxxx", OK).Result);
-
-            Assert.AreEqual(0, PlayWord(player1, game1, "q", OK).Result);
-            Assert.AreEqual(0, PlayWord(player2, game1, "q", OK).Result);
-        }
-
-        /// <summary>
-        /// Try to play a lot of words.
-        /// </summary>
-        //[TestMethod]
-        public void TestPlayWord2x()
-        {
-            // Time limit of game in seconds
-            int LIMIT = 30;
-
-            String player1 = MakeUser("Player 1", Created).Result;
-            String player2 = MakeUser("Player 2", Created).Result;
-            String player3 = MakeUser("Player 3", Created).Result;
-            String game1 = JoinGame(player1, LIMIT, Accepted).Result;
-            String game2 = JoinGame(player2, LIMIT, Created).Result;
-            Assert.AreEqual(game1, game2);
-
-            string board = GetStatus(game1, "no", OK).Result.Board;
-
-            // Play up to LIMIT words
-            int limit = LIMIT;
-            foreach (string word in AllValidWords(board))
-            {
-                if (limit-- == 0) break;
-                if (word.Length >= 3)
-                {
-                    Console.WriteLine(word);
-                    Assert.AreEqual(GetScore(word), PlayWord(player1, game1, word, OK).Result);
-                    Assert.AreEqual(GetScore(word), PlayWord(player2, game1, word, OK).Result);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the status and asserts that it is as described in the parameters.
-        /// </summary>
-        private void CheckStatus(string game, string state, string brief, string p1, string p2, string n1, string n2, string b,
-                                 List<string> w1, List<string> w2, List<int> s1, List<int> s2, int timeLimit)
-        {
-            dynamic status = GetStatus(game, brief, OK).Result;
-            Assert.AreEqual(state, (string)status.GameState);
-
-            if (state == "pending")
-            {
-                Assert.IsNull(status.TimeLimit);
-                Assert.IsNull(status.TimeLeft);
-                Assert.IsNull(status.Board);
-                Assert.IsNull(status.Player1);
-                Assert.IsNull(status.Player2);
-            }
-            else if (brief == "yes")
-            {
-                Assert.IsNull(status.TimeLimit);
-                Assert.IsNull(status.Board);
-                Assert.IsNull(status.Player1.WordsPlayed);
-                Assert.IsNull(status.Player1.Nickname);
-                Assert.IsNull(status.Player2.WordsPlayed);
-                Assert.IsNull(status.Player2.Nickname);
-            }
-            else if (state == "active")
-            {
-                Assert.IsNull(status.Player1.WordsPlayed);
-                Assert.IsNull(status.Player2.WordsPlayed);
-            }
-
-            if (state == "active" || state == "completed")
-            {
-                Assert.IsTrue((int)status.TimeLeft <= timeLimit);
-                if (state == "active")
-                {
-                    Assert.IsTrue((int)status.TimeLeft > 0);
-                }
-                else
-                {
-                    Assert.IsTrue((int)status.TimeLeft >= 0);
-                }
-
-                int total1 = 0;
-                for (int i = 0; i < s1.Count; i++)
-                {
-                    total1 += s1[i];
-                }
-                Assert.AreEqual(total1, (int)status.Player1.Score);
-
-                int total2 = 0;
-                for (int i = 0; i < s2.Count; i++)
-                {
-                    total2 += s2[i];
-                }
-                Assert.AreEqual(total2, (int)status.Player2.Score);
-
-                if (brief != "yes")
-                {
-                    Assert.AreEqual(b, (string)status.Board);
-                    Assert.AreEqual(timeLimit, (int)status.TimeLimit);
-                    Assert.AreEqual(n1, (string)status.Player1.Nickname);
-                    Assert.AreEqual(n2, (string)status.Player2.Nickname);
-
-                    if (state == "completed")
-                    {
-                        List<dynamic> words1 = new List<dynamic>(status.Player1.WordsPlayed);
-                        List<dynamic> words2 = new List<dynamic>(status.Player2.WordsPlayed);
-                        Assert.AreEqual(w1.Count, words1.Count);
-                        Assert.AreEqual(w2.Count, words2.Count);
-
-                        for (int i = 0; i < w1.Count; i++)
-                        {
-                            Assert.AreEqual(w1[i], (string)words1[i].Word);
-                            Assert.AreEqual(s1[i], (int)words1[i].Score);
-                        }
-
-                        for (int i = 0; i < w2.Count; i++)
-                        {
-                            Assert.AreEqual(w2[i], (string)words2[i].Word);
-                            Assert.AreEqual(s2[i], (int)words2[i].Score);
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Try to play a lot of words while checking status.
-        /// </summary>
-        //[TestMethod]
-        public void TestPlayWord3x()
-        {
-            // Play for LIMIT seconds
-            int LIMIT = 30;
-            var words1 = new List<string>();
-            var words2 = new List<string>();
-            var scores1 = new List<int>();
-            var scores2 = new List<int>();
-
-            String player1 = MakeUser("Player 1", Created).Result;
-            String player2 = MakeUser("Player 2", Created).Result;
-            String game1 = JoinGame(player1, LIMIT, Accepted).Result;
-            CheckStatus(game1, "pending", "no", player1, "", "", "", "", words1, words2, scores1, scores2, 0);
-            String game2 = JoinGame(player2, LIMIT, Created).Result;
-            Assert.AreEqual(game1, game2);
-
-            DateTime startTime = DateTime.Now;
-
-            string board = GetStatus(game1, "no", OK).Result.Board;
-
-            CheckStatus(game1, "active", "no", player1, player2, "Player 1", "Player 2", board, words1, words2, scores1, scores2, 30);
-
-            int limit = LIMIT;
-            PlayWord(player1, game1, "xyzzy", OK).Wait();
-            words1.Add("xyzzy");
-            scores1.Add(-1);
-            foreach (string word in AllValidWords(board))
-            {
-                if (limit-- == 0) break;
-                Assert.AreEqual(GetScore(word), PlayWord(player1, game1, word, OK).Result);
-                words1.Add(word);
-                scores1.Add(GetScore(word));
-                Assert.AreEqual(GetScore(word), PlayWord(player2, game1, word, OK).Result);
-                words2.Add(word);
-                scores2.Add(GetScore(word));
-                CheckStatus(game1, "active", "no", player1, player2, "Player 1", "Player 2", board, words1, words2, scores1, scores2, 30);
-                CheckStatus(game1, "active", "yes", player1, player2, "Player 1", "Player 2", board, words1, words2, scores1, scores2, 30);
-            }
-
-            // Wait until the game is over before checking the final status.
-            int timeRemaining = LIMIT - (int)Math.Ceiling(DateTime.Now.Subtract(startTime).TotalSeconds);
-            Thread.Sleep((timeRemaining + 2) * 1000);
-
-            CheckStatus(game1, "completed", "no", player1, player2, "Player 1", "Player 2", board, words1, words2, scores1, scores2, 30);
-            CheckStatus(game1, "completed", "yes", player1, player2, "Player 1", "Player 2", board, words1, words2, scores1, scores2, 30);
-            PlayWord(player1, game1, "a", Conflict).Wait();
-            PlayWord(player1, game1, "b", Conflict).Wait();
-        }
-
-        /// <summary>
-        /// Test game timing
-        /// </summary>
-        //[TestMethod]
-        public void TestTiming()
-        {
-            String player1 = MakeUser("Player 1", Created).Result;
-            String player2 = MakeUser("Player 2", Created).Result;
-            String game1 = JoinGame(player1, 10, Accepted).Result;
-            String game2 = JoinGame(player2, 10, Created).Result;
-            string board = GetStatus(game1, "no", OK).Result.Board;
-
-            Task t = new Task(() => TimerTester(game1, 10));
-            t.Start();
-            t.Wait();
-
-            CheckStatus(game1, "completed", "yes", player1, player2, "Player 1", "Player 2", null, null, null, new List<int>(), new List<int>(), 10);
-            CheckStatus(game1, "completed", "no", player1, player2, "Player 1", "Player 2", board, new List<string>(), new List<string>(), new List<int>(), new List<int>(), 10);
-
-        }
-
-        /// <summary>
-        /// Helper for checking that times are reported semi-accurately.
-        /// </summary>
-        private void TimerTester(string game1, int limit)
-        {
-            while (limit >= 0)
-            {
-                int timeRemaining = GetStatus(game1, "yes", OK).Result.TimeLeft;
-                Assert.IsTrue(timeRemaining <= limit + 1 && timeRemaining >= limit - 1);
-                limit--;
-                Thread.Sleep(1000);
-            }
-            Thread.Sleep(1000);
         }
     }
 }
