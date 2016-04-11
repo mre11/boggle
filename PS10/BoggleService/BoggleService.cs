@@ -30,10 +30,9 @@ namespace Boggle
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
         /// </summary>
-        /// <param name="status"></param>
         private static void SetStatus(HttpStatusCode status)
         {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = status;
+            BoggleWebServer.StatusCode = status;
         }
 
         /// <summary>
@@ -42,7 +41,7 @@ namespace Boggle
         public Stream API()
         {
             SetStatus(OK);
-            WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
+            //WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
             return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
         }
 

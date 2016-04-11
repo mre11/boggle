@@ -19,6 +19,7 @@ namespace Boggle
         }
 
         private TcpListener server;
+        public static HttpStatusCode StatusCode { get; set; }
 
         public BoggleWebServer()
         {
@@ -110,7 +111,7 @@ namespace Boggle
                     {
                         // CreateUser
                     }
-                    else
+                    else if (url.Contains("games"))
                     {
                         // JoinGame
                     }
@@ -118,18 +119,18 @@ namespace Boggle
                 }
                 else if(method == "PUT")
                 {
-                    if(url.Contains("games/"))
+                    if(url.Contains("/games/")) // maybe instead check if it matches a regex pattern?
                     {
                         //PlayWord
                     }
-                    else
+                    else if (url == "/games")
                     {
                         // CancelJoin
                     }
 
                 }
 
-
+                // Joe's example below
                 Person p = JsonConvert.DeserializeObject<Person>(s);
                 Console.WriteLine(p.Name + " " + p.Eyes);
                 BoggleService n = new BoggleService();
@@ -150,10 +151,9 @@ namespace Boggle
         private void SendAPI()
         {
             var stream = service.API();
-
-            // TODO we need a mechanism for passing the status code through from the service to here
-            ss.BeginSend("HTTP/1.1 200 OK\n", Ignore, null);
-            ss.BeginSend("Content-Type: text/html\n", Ignore, null);
+            
+            ss.BeginSend("HTTP/1.1" + BoggleWebServer.StatusCode.ToString() + "\n", Ignore, null);
+            ss.BeginSend("Content-Type: text/html\n", Ignore, null); // TODO make content type a property of the server like status code?
             ss.BeginSend("Content-Length: " + stream.ToString().Length + "\n", (ex, py) => { ss.Shutdown(); }, null);
         }
 
