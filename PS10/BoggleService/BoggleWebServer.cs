@@ -12,6 +12,8 @@ namespace Boggle
 {
     public class BoggleWebServer
     {
+        public static BoggleService service = new BoggleService();
+
         public static void Main()
         {
             new BoggleWebServer();
@@ -47,14 +49,13 @@ namespace Boggle
         private StringSocket ss;
         private int lineCount;
         private int contentLength;
-        private BoggleService service;
         private string method;
         private string url;
-        private Regex finder = new Regex(@"(.games|.users)$|(.games.)([1-9]+[0-9]*)$|(.games.)([1-9]+[0-9]*)(.Brief.)(yes|no)$");
+        private Regex finder = new Regex(@"(.games|.users)$|(.games.)([1-9]+[0-9]*)$|(.games.)([1-9]+[0-9]*)(.Brief.)(yes)$");
 
         public HttpRequest(StringSocket stringSocket)
         {
-            service = new BoggleService(); // TODO TypeInitializationException gets thrown here when we call a test method...
+            /*service = new BoggleService();*/ // TODO TypeInitializationException gets thrown here when we call a test method...
             contentLength = 0;
             lineCount = 0;
             ss = stringSocket;
@@ -151,15 +152,14 @@ namespace Boggle
                     {
                         // CancelJoin
                         User user = JsonConvert.DeserializeObject<User>(contentBody);
-                        service.CancelJoin(user);
+                        BoggleWebServer.service.CancelJoin(user);
                         // TODO: Only return the status.
                     }
 
                 }
-
-                // TODO: StatusCode is not properly being returned. Always returns 200
+                // TODO: StatusCode is not properly being returned. Need to include the HttpStatusCode Number like so.
                 //ss.BeginSend("HTTP/1.1", Ignore, HttpStatusCode.Forbidden);
-                ss.BeginSend("HTTP/1.1" + BoggleWebServer.StatusCode + "\n", Ignore, null);
+                ss.BeginSend("HTTP/1.1 " + "201" + BoggleWebServer.StatusCode.ToString() + "\n", Ignore, null);
                 ss.BeginSend("Content-Type: application/json\n", Ignore, null);
                 ss.BeginSend("Content-Length: " + result.Length + "\n", Ignore, null);
                 ss.BeginSend("\r\n", Ignore, null);
@@ -176,21 +176,21 @@ namespace Boggle
             if (type == "users")
             {
                 User requestedUser = JsonConvert.DeserializeObject<User>(content);
-                UserResponse response = service.CreateUser(requestedUser);
+                UserResponse response = BoggleWebServer.service.CreateUser(requestedUser);
 
                 return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             }
             else if (type == "games")
             {
                 JoinGameRequest requestBody = JsonConvert.DeserializeObject<JoinGameRequest>(content);
-                BoggleGameResponse response = service.JoinGame(requestBody);
+                BoggleGameResponse response = BoggleWebServer.service.JoinGame(requestBody);
 
                 return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             }
             else
             {
                 BoggleWord word = JsonConvert.DeserializeObject<BoggleWord>(content);
-                BoggleWordResponse response = service.PlayWord(gameID, word);
+                BoggleWordResponse response = BoggleWebServer.service.PlayWord(gameID, word);
 
                 return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             }
@@ -198,7 +198,7 @@ namespace Boggle
 
         private void SendAPI()
         {
-            var stream = service.API();
+            var stream = BoggleWebServer.service.API();
             
             ss.BeginSend("HTTP/1.1" + BoggleWebServer.StatusCode.ToString() + "\n", Ignore, null);
             ss.BeginSend("Content-Type: text/html\n", Ignore, null); // TODO make content type a property of the server like status code?
@@ -207,7 +207,7 @@ namespace Boggle
 
         private void SendGameStatus(string gameID, string brief)
         {
-            BoggleGameResponse response = service.GameStatus(gameID, brief);
+            BoggleGameResponse response = BoggleWebServer.service.GameStatus(gameID, brief);
             string result = JsonConvert.SerializeObject( response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             ss.BeginSend("HTTP/1.1" + BoggleWebServer.StatusCode.ToString() + "\n", Ignore, null);
             ss.BeginSend("Content-Type: application/json\n", Ignore, null);
