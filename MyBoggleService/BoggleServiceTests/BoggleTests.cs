@@ -56,9 +56,9 @@ namespace Boggle
         [ClassInitialize()]
         public static void StartServer(TestContext testContext)
         {
+            // TODO need to figure out how to start and stop correctly.  Should just be able to call Main method???
             //BoggleWebServer.Start(@"/site:""BoggleService"" /apppool:""Clr4IntegratedAppPool"" /config:""..\..\..\.vs\config\applicationhost.config""");
-            Task t = new Task(BoggleWebServer.Main);
-            t.Start();
+            //BoggleWebServer.Main();
         }
 
         /// <summary>
@@ -100,6 +100,8 @@ namespace Boggle
         [TestMethod]
         public void TestCreateUser1()
         {
+            //BoggleWebServer.Main();
+
             dynamic data = new ExpandoObject();
             data.Nickname = "Test";
             Response r = client.DoPostAsync("/users", data).Result;

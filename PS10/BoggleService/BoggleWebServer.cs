@@ -19,6 +19,7 @@ namespace Boggle
         }
 
         private TcpListener server;
+
         public static HttpStatusCode StatusCode { get; set; }
 
         public BoggleWebServer()
@@ -48,10 +49,10 @@ namespace Boggle
 
         public HttpRequest(StringSocket stringSocket)
         {
+            service = new BoggleService(); // TODO TypeInitializationException gets thrown here when we call a test method...
             contentLength = 0;
             lineCount = 0;
             ss = stringSocket;
-            //service = new BoggleService(); // TODO I'm thinking we might not want this at all (it's a static constructor)
             ss.BeginReceive(LineReceived, null);
             
         }
@@ -74,7 +75,7 @@ namespace Boggle
                 // Do GET requests here since they have no content
                 if (method == "GET")
                 {
-                    if (url == "/api")
+                    if (url == "/BoggleService.svc/api")
                     {
                         SendAPI();
                     }
