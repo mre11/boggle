@@ -35,6 +35,11 @@ namespace Boggle
             new HttpRequest(new StringSocket(s, new UTF8Encoding()));
             server.BeginAcceptSocket(ConnectionRequested, null);
         }
+
+        public void Stop()
+        {
+            server.Stop();
+        }
     }
 
     class HttpRequest
@@ -79,13 +84,19 @@ namespace Boggle
                     {
                         SendAPI();
                     }
-                    else if (finder.Match(url).Groups[0].Value == "/games") // TODO maybe check a regex here for the gameID?
+                    else if (url.Contains("games")) // TODO maybe check a regex here for the gameID?
                     {
                         Regex r = new Regex("([1-9]+[0-9]*)");
                         Match m = r.Match(url);
 
-                        if (!url.Contains("Brief")) { SendGameStatus(m.Value, null); }
-                        else { SendGameStatus(m.Value, "yes"); }
+                        if (!url.Contains("Brief"))
+                        {
+                            SendGameStatus(m.Groups[0].Value, null);
+                        }
+                        else
+                        {
+                            SendGameStatus(m.Groups[0].Value, "yes");
+                        }
                     }
                 }
 
@@ -107,65 +118,81 @@ namespace Boggle
 
         private void ContentReceived(string contentBody, Exception e, object payload)
         {
+
             if (contentBody != null)
             {
-                // TODO: Not sure if this is what we need to do. I'm kinda lost on
-                // what we need to do at this moment. Just playing around to figure
-                // out what we need to do.
-                // TODO looks good to me.  we may need to refine the logic to be finer that url.Contains.
                 string result = "";
 
-                if(method == "POST")
+                if (method == "POST")
                 {
                     if (url.Contains("users"))
                     {
                         // CreateUser
-                        User requestedUser = JsonConvert.DeserializeObject<User>(contentBody);
-                        Console.WriteLine(requestedUser.Nickname);
-                        UserResponse response = service.CreateUser(requestedUser);
-                        if (BoggleWebServer.StatusCode == Created)
-                        {
-                            result = JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
-                        }
+                        result = GetSerializedContent("users", contentBody, null);
                     }
                     else if (url.Contains("games"))
                     {
                         // JoinGame
-                        JoinGameRequest requestBody = JsonConvert.DeserializeObject<JoinGameRequest>(contentBody);
-                        Console.WriteLine("UserToken: " + requestBody.UserToken + " TimeLimit: " + requestBody.TimeLimit);
-                        BoggleGameResponse response = service.JoinGame(requestBody);
-                        result = JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                        result = GetSerializedContent("games", contentBody, null);
                     }
 
                 }
-                else if(method == "PUT")
+                else if (method == "PUT")
                 {
-                    if(url.Contains("/games/")) // maybe instead check if it matches a regex pattern?
+                    if (url.Contains("/games/")) // maybe instead check if it matches a regex pattern?
                     {
                         //PlayWord
+                        Regex r = new Regex("([1-9]+[0-9]*)");
+                        Match m = r.Match(url);
+
+                        result = GetSerializedContent(null, contentBody, m.Groups[0].Value);
                     }
                     else if (url == "/games")
                     {
                         // CancelJoin
+                        User user = JsonConvert.DeserializeObject<User>(contentBody);
+                        service.CancelJoin(user);
+                        // TODO: Only return the status.
                     }
 
                 }
 
-                //Person p = JsonConvert.DeserializeObject<Person>(s);
-                //Console.WriteLine(p.Name + " " + p.Eyes);
-                //BoggleService n = new BoggleService();
-                // Call service method
-                //string result =
-                //    JsonConvert.SerializeObject(
-                //            new Person { Name = "June", Eyes = "Blue" },
-                //            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
-
+                // TODO: StatusCode is not properly being returned. Always returns 200
                 //ss.BeginSend("HTTP/1.1", Ignore, HttpStatusCode.Forbidden);
                 ss.BeginSend("HTTP/1.1" + BoggleWebServer.StatusCode + "\n", Ignore, null);
                 ss.BeginSend("Content-Type: application/json\n", Ignore, null);
                 ss.BeginSend("Content-Length: " + result.Length + "\n", Ignore, null);
                 ss.BeginSend("\r\n", Ignore, null);
                 ss.BeginSend(result, (ex, py) => { ss.Shutdown(); }, null);
+            }
+        }
+
+        /// <summary>
+        /// Derserializes the content and then processes the content through the boggleservice and
+        /// returns the json serialized string.
+        /// </summary>
+        private string GetSerializedContent(string type, string content, string gameID)
+        {
+            if (type == "users")
+            {
+                User requestedUser = JsonConvert.DeserializeObject<User>(content);
+                UserResponse response = service.CreateUser(requestedUser);
+
+                return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+            }
+            else if (type == "games")
+            {
+                JoinGameRequest requestBody = JsonConvert.DeserializeObject<JoinGameRequest>(content);
+                BoggleGameResponse response = service.JoinGame(requestBody);
+
+                return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+            }
+            else
+            {
+                BoggleWord word = JsonConvert.DeserializeObject<BoggleWord>(content);
+                BoggleWordResponse response = service.PlayWord(gameID, word);
+
+                return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             }
         }
 
@@ -192,15 +219,6 @@ namespace Boggle
 
         private void Ignore(Exception e, object payload)
         {
-        }
-    }
-    
-    // TODO: Maybe we need to create an HttpResponse class? 
-    class HttpResponse
-    {
-        public HttpResponse(StringSocket socket)
-        {
-
         }
     }
 }
