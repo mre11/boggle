@@ -58,7 +58,7 @@ namespace Boggle
         private int contentLength;
         private string method;
         private string url;
-        private Regex finder = new Regex(@"(.games|.users)$|(.games.)([1-9]+[0-9]*)$|(.games.)([1-9]+[0-9]*)(.Brief.)(yes)$");
+        //private Regex finder = new Regex(@"(.games|.users)$|(.games.)([1-9]+[0-9]*)$|(.games.)([1-9]+[0-9]*)(.Brief.)(yes)$");
 
         public HttpRequest(StringSocket stringSocket, BoggleWebServer server)
         {
@@ -82,7 +82,7 @@ namespace Boggle
                     Match m = r.Match(s);
                     method = m.Groups[1].Value;
                     url = m.Groups[2].Value;
-                    string[] matches = finder.GetGroupNames();
+                    //[] matches = finder.GetGroupNames();
                 }
 
                 // Do GET requests here since they have no content
@@ -94,6 +94,7 @@ namespace Boggle
                     }
                     else if (url.Contains("/BoggleService.svc/games/")) // GameStatus
                     {
+                        // Find the gameID number.
                         Regex r = new Regex("([1-9]+[0-9]*)");
                         Match m = r.Match(url);
 
@@ -174,27 +175,26 @@ namespace Boggle
         /// </summary>
         private string GetSerializedContent(string type, string content, string gameID)
         {
+            object response = null;
+
             if (type == "users")
             {
                 User requestedUser = JsonConvert.DeserializeObject<User>(content);
-                UserResponse response = server.Service.CreateUser(requestedUser);
-
-                return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                response = server.Service.CreateUser(requestedUser);
             }
             else if (type == "games")
             {
                 JoinGameRequest requestBody = JsonConvert.DeserializeObject<JoinGameRequest>(content);
-                BoggleGameResponse response = server.Service.JoinGame(requestBody);
-
-                return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                response = server.Service.JoinGame(requestBody);
             }
             else
             {
                 BoggleWord word = JsonConvert.DeserializeObject<BoggleWord>(content);
-                BoggleWordResponse response = server.Service.PlayWord(gameID, word);
-
-                return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                response = server.Service.PlayWord(gameID, word);
             }
+
+            return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+
         }
 
         private void SendAPI()
@@ -211,6 +211,7 @@ namespace Boggle
         {
             BoggleGameResponse response = server.Service.GameStatus(gameID, brief);
             string result = JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+
             ss.BeginSend("HTTP/1.1 " + (int)BoggleWebServer.StatusCode + " " + BoggleWebServer.StatusCode.ToString() + "\r\n", Ignore, null);
             ss.BeginSend("Content-Type: application/json\r\n", Ignore, null);
             ss.BeginSend("Content-Length: " + result.Length + "\r\n", Ignore, null);
