@@ -31,8 +31,8 @@ namespace ServerGrader
         private static HttpClient CreateClient()
         {
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("http://localhost:60000");
-            //client.BaseAddress = new Uri("http://bogglecs3500s16db.azurewebsites.net");
+            //client.BaseAddress = new Uri("http://localhost:60000");
+            client.BaseAddress = new Uri("http://bogglecs3500s16db.azurewebsites.net");
             return client;
         }
 
@@ -1153,7 +1153,7 @@ namespace ServerGrader
             List<dynamic> wordscores1 = new List<dynamic>(GetStatus(game, "no").Result.Player1.WordsPlayed);
             List<dynamic> wordscores2 = new List<dynamic>(GetStatus(game, "no").Result.Player2.WordsPlayed);
             wordscores1.Sort((x, y) => x.Word.CompareTo(y.Word));
-            wordscores1.Sort((x, y) => x.Word.CompareTo(y.Word));
+            wordscores2.Sort((x, y) => x.Word.CompareTo(y.Word));
             p1Words.Sort();
             p2Words.Sort();
             Assert.AreEqual(p1Words.Count, wordscores1.Count);
