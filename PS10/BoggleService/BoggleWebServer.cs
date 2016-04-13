@@ -1,17 +1,21 @@
-﻿using CustomNetworking;
+﻿// Braden Klunker, Morgan Empey, CS3500
+
+using CustomNetworking;
 using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
-using static System.Net.HttpStatusCode;
+
+// TODO we could probably refactor this a lot to reduce code duplication
+// TODO add comments everywhere (after refactor?)
+// TODO when I tried Joe's tests, we failed some due to weird exceptions.  we'll need to investigate.
 
 namespace Boggle
 {
     public class BoggleWebServer
-    {       
+    {
 
         public static void Main()
         {
@@ -63,7 +67,7 @@ namespace Boggle
             lineCount = 0;
             ss = stringSocket;
             ss.BeginReceive(LineReceived, null);
-            
+
         }
 
         private void LineReceived(string s, Exception e, object payload)
@@ -84,11 +88,11 @@ namespace Boggle
                 // Do GET requests here since they have no content
                 if (method == "GET")
                 {
-                    if (url == "/BoggleService.svc/api")
+                    if (url == "/BoggleService.svc/api") // API
                     {
-                        SendAPI();
+                        // SendAPI(); // TODO api not working because index.html isn't in the unit test project, decide whether to fix or just not support it
                     }
-                    else if (url.Contains("games")) // TODO maybe check a regex here for the gameID?
+                    else if (url.Contains("/BoggleService.svc/games/")) // GameStatus
                     {
                         Regex r = new Regex("([1-9]+[0-9]*)");
                         Match m = r.Match(url);
@@ -129,39 +133,33 @@ namespace Boggle
 
                 if (method == "POST")
                 {
-                    if (url.Contains("users"))
+                    if (url == "/BoggleService.svc/users") // CreateUser
                     {
-                        // CreateUser
                         result = GetSerializedContent("users", contentBody, null);
                     }
-                    else if (url.Contains("games"))
+                    else if (url == "/BoggleService.svc/games") // JoinGame
                     {
-                        // JoinGame
                         result = GetSerializedContent("games", contentBody, null);
                     }
 
                 }
                 else if (method == "PUT")
                 {
-                    if (url.Contains("/games/")) // maybe instead check if it matches a regex pattern?
+                    if (url.Contains("/BoggleService.svc/games/")) // PlayWord
                     {
-                        // PlayWord
                         Regex r = new Regex("([1-9]+[0-9]*)");
                         Match m = r.Match(url);
 
                         result = GetSerializedContent(null, contentBody, m.Groups[0].Value);
                     }
-                    else if (url == "/BoggleService.svc/games")
+                    else if (url == "/BoggleService.svc/games") // CancelJoin
                     {
-                        // CancelJoin
                         User user = JsonConvert.DeserializeObject<User>(contentBody);
                         server.Service.CancelJoin(user);
-                        // TODO: Only return the status.
                     }
 
                 }
-                // TODO I think status code number and string are output correctly now
-                //ss.BeginSend("HTTP/1.1", Ignore, HttpStatusCode.Forbidden);
+
                 ss.BeginSend("HTTP/1.1 " + (int)BoggleWebServer.StatusCode + " " + BoggleWebServer.StatusCode.ToString() + "\r\n", Ignore, null);
                 ss.BeginSend("Content-Type: application/json\r\n", Ignore, null);
                 ss.BeginSend("Content-Length: " + result.Length + "\r\n", Ignore, null);
@@ -202,16 +200,17 @@ namespace Boggle
         private void SendAPI()
         {
             var stream = server.Service.API();
-            
+
             ss.BeginSend("HTTP/1.1 " + (int)BoggleWebServer.StatusCode + " " + BoggleWebServer.StatusCode.ToString() + "\r\n", Ignore, null);
-            ss.BeginSend("Content-Type: text/html\r\n", Ignore, null); // TODO make content type a property of the server like status code?
+            ss.BeginSend("Content-Type: text/html\r\n", Ignore, null);
             ss.BeginSend("Content-Length: " + stream.ToString().Length + "\r\n", (ex, py) => { ss.Shutdown(); }, null);
+            // TODO send stream?
         }
 
         private void SendGameStatus(string gameID, string brief)
         {
             BoggleGameResponse response = server.Service.GameStatus(gameID, brief);
-            string result = JsonConvert.SerializeObject( response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+            string result = JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             ss.BeginSend("HTTP/1.1 " + (int)BoggleWebServer.StatusCode + " " + BoggleWebServer.StatusCode.ToString() + "\r\n", Ignore, null);
             ss.BeginSend("Content-Type: application/json\r\n", Ignore, null);
             ss.BeginSend("Content-Length: " + result.Length + "\r\n", Ignore, null);

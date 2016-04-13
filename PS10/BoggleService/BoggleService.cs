@@ -23,7 +23,6 @@ namespace Boggle
 
         static BoggleService()
         {
-            // TODO ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString = 'ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString' threw an exception of type 'System.NullReferenceException'
             BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
         }
 

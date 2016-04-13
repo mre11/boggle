@@ -4,10 +4,8 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Dynamic;
 using static System.Net.HttpStatusCode;
-using System.Diagnostics;
 using System.Threading;
 using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace Boggle
 {
@@ -17,36 +15,6 @@ namespace Boggle
     /// subsequent tests may not work properly until the stray process is killed
     /// manually.
     /// </summary>
-    //public static class BoggleWebServers
-    //{
-    //    // Reference to the running process
-    //    private static Process process = null;
-
-    //    /// <summary>
-    //    /// Starts IIS
-    //    /// </summary>
-    //    public static void Start(string arguments)
-    //    {
-    //        if (process == null)
-    //        {
-    //            ProcessStartInfo info = new ProcessStartInfo("C:/Users/Braden/Source/Repos/boggle/PS10/BoggleService/BoggleWebServer.cs", arguments);
-    //            info.WindowStyle = ProcessWindowStyle.Minimized;
-    //            info.UseShellExecute = false;
-    //            process = Process.Start(info);
-    //        }
-    //    }
-
-    //    /// <summary>
-    //    ///  Stops IIS
-    //    /// </summary>
-    //    public static void Stop()
-    //    {
-    //        if (process != null)
-    //        {
-    //            process.Kill();
-    //        }
-    //    }
-    //}
     [TestClass]
     public class BoggleTests
     {
@@ -56,8 +24,6 @@ namespace Boggle
         [ClassInitialize()]
         public static void StartServer(TestContext testContext)
         {
-            // TODO need to figure out how to start and stop correctly.  Should just be able to call Main method???
-            //BoggleWebServer.Start(@"/site:""BoggleService"" /apppool:""Clr4IntegratedAppPool"" /config:""..\..\..\.vs\config\applicationhost.config""");
             BoggleWebServer.Main();
         }
 
