@@ -23,6 +23,7 @@ namespace Boggle
 
         static BoggleService()
         {
+            // TODO ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString = 'ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString' threw an exception of type 'System.NullReferenceException'
             BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
         }
 
@@ -474,6 +475,7 @@ namespace Boggle
             // Go no further if game is pending or it doesn't have two players
             if (currentGame.GameState == null || currentGame.GameState == "pending" || (currentGame.Player1 == null || currentGame.Player2 == null))
             {
+                SetStatus(OK);
                 return new BoggleGameResponse { GameState = "pending" };
             }
 

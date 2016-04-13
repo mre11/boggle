@@ -58,7 +58,6 @@ namespace Boggle
         {
             // TODO need to figure out how to start and stop correctly.  Should just be able to call Main method???
             //BoggleWebServer.Start(@"/site:""BoggleService"" /apppool:""Clr4IntegratedAppPool"" /config:""..\..\..\.vs\config\applicationhost.config""");
-            //BoggleWebServer.Main();
             BoggleWebServer.Main();
         }
 
@@ -68,7 +67,7 @@ namespace Boggle
         [ClassCleanup()]
         public static void StopServer()
         {
-            //BoggleWebServer.Stop();
+            // BoggleWebServer.Stop();
         }
 
         private RestTestClient client = new RestTestClient("http://localhost:60000/");
@@ -79,7 +78,7 @@ namespace Boggle
         /// <summary>
         /// Test the API request
         /// </summary>
-        [TestMethod]
+        //[TestMethod]
         public void TestAPI1()
         {
             HttpClient httpClient = new HttpClient();

@@ -76,7 +76,7 @@ namespace Boggle
 
             using (HttpClient client = CreateClient())
             {
-                url = String.Format("BoggleService.svc/" + url, parameterValues);
+                url = String.Format("BoggleService.svc" + url, parameterValues);
                 HttpResponseMessage response = await client.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
@@ -100,7 +100,7 @@ namespace Boggle
             using (HttpClient client = CreateClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await client.PostAsync("BoggleService.svc/" + url, content);
+                HttpResponseMessage response = await client.PostAsync("BoggleService.svc" + url, content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -124,7 +124,7 @@ namespace Boggle
             using (HttpClient client = CreateClient())
             {
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await client.PutAsync("BoggleService.svc/" + url, content);
+                HttpResponseMessage response = await client.PutAsync("BoggleService.svc" + url, content);
 
                 if (response.IsSuccessStatusCode)
                 {
