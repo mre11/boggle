@@ -98,14 +98,7 @@ namespace Boggle
                         Regex r = new Regex("([1-9]+[0-9]*)");
                         Match m = r.Match(url);
 
-                        if (!url.Contains("Brief"))
-                        {
-                            SendGameStatus(m.Groups[0].Value, null);
-                        }
-                        else
-                        {
-                            SendGameStatus(m.Groups[0].Value, "yes");
-                        }
+                        SendGameStatus(m.Groups[0].Value, url.ToLower().Contains("brief=yes"));
                     }
                 }
 
@@ -207,9 +200,9 @@ namespace Boggle
             // TODO send stream?
         }
 
-        private void SendGameStatus(string gameID, string brief)
+        private void SendGameStatus(string gameID, bool brief)
         {
-            BoggleGameResponse response = server.Service.GameStatus(gameID, brief);
+            BoggleGameResponse response = server.Service.GameStatus(gameID, brief ? "yes" : "");
             string result = JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
 
             ss.BeginSend("HTTP/1.1 " + (int)BoggleWebServer.StatusCode + " " + BoggleWebServer.StatusCode.ToString() + "\r\n", Ignore, null);
@@ -217,7 +210,6 @@ namespace Boggle
             ss.BeginSend("Content-Length: " + result.Length + "\r\n", Ignore, null);
             ss.BeginSend("\r\n", Ignore, null);
             ss.BeginSend(result, (ex, py) => { ss.Shutdown(); }, null);
-
         }
 
         private void Ignore(Exception e, object payload)
