@@ -60,14 +60,6 @@ namespace Boggle
             // Server then begins looking for another connection request to the server.
             server.BeginAcceptSocket(ConnectionRequested, null);
         }
-
-        ///// <summary>
-        ///// Stops the BoggleWebServer
-        ///// </summary>
-        //public void Stop()
-        //{
-        //    server.Stop();
-        //}
     }
 
     /// <summary>
@@ -210,6 +202,8 @@ namespace Boggle
             // Deserialize the content then send to the boggle service to be processed.
             if (type == "users")
             {
+                //TODO: maybe change into dynamic object and only pull out the information we need so we don't 
+                // have exceptions.
                 User requestedUser = JsonConvert.DeserializeObject<User>(content);
                 response = server.Service.CreateUser(requestedUser);
             }
@@ -259,8 +253,6 @@ namespace Boggle
         /// <summary>
         /// Callback method that does nothing.
         /// </summary>
-        /// <param name="e"></param>
-        /// <param name="payload"></param>
         private void Ignore(Exception e, object payload)
         {
         }
