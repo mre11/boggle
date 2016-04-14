@@ -3,7 +3,6 @@
 using System;
 using System.Data.SqlClient;
 using System.IO;
-using System.ServiceModel.Web;
 using System.Net;
 using System.Configuration;
 using static System.Net.HttpStatusCode;
@@ -377,7 +376,7 @@ namespace Boggle
                 else if (playedWord.Length > 2)
                     wordScore = 1;
             }
-            else if (playedWord.Length < 2) //(!gameBoard.CanBeFormed(playedWord) && playedWord.Length < 2)
+            else if (playedWord.Length < 2)
             {
                 wordScore = 0;
             }

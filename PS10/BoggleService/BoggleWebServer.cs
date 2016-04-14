@@ -8,9 +8,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
-// TODO we could probably refactor this a lot to reduce code duplication
-// TODO add comments everywhere (after refactor?)
-// TODO when I tried Joe's tests, we failed some due to weird exceptions.  we'll need to investigate.
+// TODO add comments everywhere
 
 namespace Boggle
 {
@@ -58,7 +56,6 @@ namespace Boggle
         private int contentLength;
         private string method;
         private string url;
-        //private Regex finder = new Regex(@"(.games|.users)$|(.games.)([1-9]+[0-9]*)$|(.games.)([1-9]+[0-9]*)(.Brief.)(yes)$");
 
         public HttpRequest(StringSocket stringSocket, BoggleWebServer server)
         {
@@ -73,7 +70,7 @@ namespace Boggle
         private void LineReceived(string s, Exception e, object payload)
         {
             lineCount++;
-            Console.WriteLine(s);
+
             if (s != null)
             {
                 if (lineCount == 1)
@@ -82,7 +79,6 @@ namespace Boggle
                     Match m = r.Match(s);
                     method = m.Groups[1].Value;
                     url = m.Groups[2].Value;
-                    //[] matches = finder.GetGroupNames();
                 }
 
                 // Do GET requests here since they have no content
@@ -90,7 +86,7 @@ namespace Boggle
                 {
                     if (url == "/BoggleService.svc/api") // API
                     {
-                        // SendAPI(); // TODO api not working because index.html isn't in the unit test project, decide whether to fix or just not support it
+                        // SendAPI();
                     }
                     else if (url.Contains("/BoggleService.svc/games/")) // GameStatus
                     {
@@ -144,7 +140,7 @@ namespace Boggle
                         Regex r = new Regex("([1-9]+[0-9]*)");
                         Match m = r.Match(url);
 
-                        result = GetSerializedContent(null, contentBody, m.Groups[0].Value);
+                        result = GetSerializedContent("", contentBody, m.Groups[0].Value);
                     }
                     else if (url == "/BoggleService.svc/games") // CancelJoin
                     {
@@ -187,7 +183,6 @@ namespace Boggle
             }
 
             return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
-
         }
 
         private void SendAPI()
@@ -196,8 +191,9 @@ namespace Boggle
 
             ss.BeginSend("HTTP/1.1 " + (int)BoggleWebServer.StatusCode + " " + BoggleWebServer.StatusCode.ToString() + "\r\n", Ignore, null);
             ss.BeginSend("Content-Type: text/html\r\n", Ignore, null);
-            ss.BeginSend("Content-Length: " + stream.ToString().Length + "\r\n", (ex, py) => { ss.Shutdown(); }, null);
-            // TODO send stream?
+            ss.BeginSend("Content-Length: " + stream.ToString().Length + "\r\n", Ignore, null);
+            ss.BeginSend("\r\n", Ignore, null);
+            ss.BeginSend(stream.ToString(), (ex, py) => { ss.Shutdown(); }, null);
         }
 
         private void SendGameStatus(string gameID, bool brief)
