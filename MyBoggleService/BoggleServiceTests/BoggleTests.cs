@@ -44,7 +44,7 @@ namespace Boggle
         /// <summary>
         /// Test the API request
         /// </summary>
-        //[TestMethod]
+        [TestMethod]
         public void TestAPI1()
         {
             HttpClient httpClient = new HttpClient();

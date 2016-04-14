@@ -3,6 +3,7 @@
 using CustomNetworking;
 using Newtonsoft.Json;
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -107,6 +108,7 @@ namespace Boggle
             {
                 if (lineCount == 1)
                 {
+                    // Get the request type (method) and the query url.
                     Regex r = new Regex(@"^(\S+)\s+(\S+)");
                     Match m = r.Match(s);
                     method = m.Groups[1].Value;
@@ -118,7 +120,7 @@ namespace Boggle
                 {
                     if (url == "/BoggleService.svc/api") // API
                     {
-                        // SendAPI();
+                        SendAPI();
                     }
                     else if (url.Contains("/BoggleService.svc/games/")) // GameStatus
                     {
@@ -159,10 +161,12 @@ namespace Boggle
 
                 if (method == "POST")
                 {
+                    // Handle POST request to create a new user.
                     if (url == "/BoggleService.svc/users") // CreateUser
                     {
                         result = GetSerializedContent("users", contentBody, null);
                     }
+                    // Handle POST request to join a game.
                     else if (url == "/BoggleService.svc/games") // JoinGame
                     {
                         result = GetSerializedContent("games", contentBody, null);
@@ -170,6 +174,7 @@ namespace Boggle
                 }
                 else if (method == "PUT")
                 {
+                    // Handle PUT request to play a word.
                     if (url.Contains("/BoggleService.svc/games/")) // PlayWord
                     {
                         Regex r = new Regex("([1-9]+[0-9]*)");
@@ -177,6 +182,7 @@ namespace Boggle
 
                         result = GetSerializedContent("", contentBody, m.Groups[0].Value);
                     }
+                    // Handle PUT request to cancel joining a game.
                     else if (url == "/BoggleService.svc/games") // CancelJoin
                     {
                         User user = JsonConvert.DeserializeObject<User>(contentBody);
@@ -222,16 +228,18 @@ namespace Boggle
             return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
         }
 
-        //private void SendAPI()
-        //{
-        //    var stream = server.Service.API();
-
-        //    ss.BeginSend("HTTP/1.1 " + (int)BoggleWebServer.StatusCode + " " + BoggleWebServer.StatusCode.ToString() + "\r\n", Ignore, null);
-        //    ss.BeginSend("Content-Type: text/html\r\n", Ignore, null);
-        //    ss.BeginSend("Content-Length: " + stream.ToString().Length + "\r\n", Ignore, null);
-        //    ss.BeginSend("\r\n", Ignore, null);
-        //    ss.BeginSend(stream.ToString(), (ex, py) => { ss.Shutdown(); }, null);
-        //}
+        /// <summary>
+        /// Returns the API.
+        /// </summary>
+        private void SendAPI()
+        {
+            string fs = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + @"..\index.html");
+            ss.BeginSend("HTTP/1.1 200 OK\r\n", Ignore, null);
+            ss.BeginSend("Content-Type: text/html\r\n", Ignore, null);
+            ss.BeginSend("Content-Length: " + fs.Length + "\r\n", Ignore, null);
+            ss.BeginSend("\r\n", Ignore, null);
+            ss.BeginSend(fs, (ex, py) => { ss.Shutdown(); }, null);
+        }
 
         /// <summary>
         /// Sends the GameStatus back to the client.
@@ -248,6 +256,11 @@ namespace Boggle
             ss.BeginSend(result, (ex, py) => { ss.Shutdown(); }, null);
         }
 
+        /// <summary>
+        /// Callback method that does nothing.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="payload"></param>
         private void Ignore(Exception e, object payload)
         {
         }
