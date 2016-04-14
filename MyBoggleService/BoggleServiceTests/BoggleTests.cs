@@ -10,7 +10,7 @@ using System.Net.Http;
 namespace Boggle
 {
     /// <summary>
-    /// Provides a way to start and stop the IIS web server from within the test
+    /// Provides a way to start and stop the Boggle web server from within the test
     /// cases.  If something prevents the test cases from stopping the web server,
     /// subsequent tests may not work properly until the stray process is killed
     /// manually.
@@ -31,10 +31,7 @@ namespace Boggle
         /// This is automatically run when all tests have completed to stop the server
         /// </summary>
         [ClassCleanup()]
-        public static void StopServer()
-        {
-            // BoggleWebServer.Stop();
-        }
+        public static void StopServer() { }
 
         private RestTestClient client = new RestTestClient("http://localhost:60000/");
 
@@ -66,8 +63,6 @@ namespace Boggle
         [TestMethod]
         public void TestCreateUser1()
         {
-            //BoggleWebServer.Main();
-
             dynamic data = new ExpandoObject();
             data.Nickname = "Test";
             Response r = client.DoPostAsync("/users", data).Result;

@@ -40,6 +40,7 @@ namespace Boggle
         /// </summary>
         public Stream API()
         {
+            // TOOD: Since API is implemented in the Server we may be able to delete this method from BoggleService and IBoggleService.
             SetStatus(OK);
             //System.ServiceModel.Web.WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
             return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + @"..\index.html");
