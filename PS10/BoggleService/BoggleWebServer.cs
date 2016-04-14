@@ -14,19 +14,26 @@ namespace Boggle
 {
     public class BoggleWebServer
     {
-
+        /// <summary>
+        /// Starts the BoggleWebServer
+        /// </summary>
         public static void Main()
         {
             new BoggleWebServer();
             Console.Read();
         }
 
+        // Listens for http requests to the server.
         private TcpListener server;
 
         public BoggleService Service;
 
         public static HttpStatusCode StatusCode { get; set; }
 
+        /// <summary>
+        /// Contructs a new BoggleWebServer initialized to port 60000 and
+        /// begins listening for socket requests.
+        /// </summary>
         public BoggleWebServer()
         {
             server = new TcpListener(IPAddress.Any, 60000);
@@ -35,19 +42,36 @@ namespace Boggle
             server.BeginAcceptSocket(ConnectionRequested, null);
         }
 
+        /// <summary>
+        /// Callback method for when a connection to the server is requested.
+        /// </summary>
+        /// <param name="ar"></param>
         private void ConnectionRequested(IAsyncResult ar)
         {
+            // Momentarily stops the server from listening for socket connections and creates 
+            // the current socket.
             Socket s = server.EndAcceptSocket(ar);
+
+            // Sends a new HttpRequest by encoding the current socket into a string socket, and sending
+            // along the server.
             new HttpRequest(new StringSocket(s, new UTF8Encoding()), this);
+
+            // Server then begins looking for another connection request to the server.
             server.BeginAcceptSocket(ConnectionRequested, null);
         }
 
-        public void Stop()
-        {
-            server.Stop();
-        }
+        ///// <summary>
+        ///// Stops the BoggleWebServer
+        ///// </summary>
+        //public void Stop()
+        //{
+        //    server.Stop();
+        //}
     }
 
+    /// <summary>
+    /// Processes HttpRequests appropriately with the BoggleService.
+    /// </summary>
     class HttpRequest
     {
         private StringSocket ss;
@@ -57,6 +81,11 @@ namespace Boggle
         private string method;
         private string url;
 
+        /// <summary>
+        /// Constructs a new HttpRequest 
+        /// </summary>
+        /// <param name="stringSocket"></param>
+        /// <param name="server"></param>
         public HttpRequest(StringSocket stringSocket, BoggleWebServer server)
         {
             this.server = server;
@@ -67,6 +96,9 @@ namespace Boggle
 
         }
 
+        /// <summary>
+        /// Callback method for when a line of information is received.
+        /// </summary>
         private void LineReceived(string s, Exception e, object payload)
         {
             lineCount++;
@@ -114,6 +146,10 @@ namespace Boggle
             }
         }
 
+        /// <summary>
+        /// Callback method for when content is received. Uses the boggle service to properly
+        /// handle the data in the content body of the http request.
+        /// </summary>
         private void ContentReceived(string contentBody, Exception e, object payload)
         {
 
@@ -131,7 +167,6 @@ namespace Boggle
                     {
                         result = GetSerializedContent("games", contentBody, null);
                     }
-
                 }
                 else if (method == "PUT")
                 {
@@ -166,6 +201,7 @@ namespace Boggle
         {
             object response = null;
 
+            // Deserialize the content then send to the boggle service to be processed.
             if (type == "users")
             {
                 User requestedUser = JsonConvert.DeserializeObject<User>(content);
@@ -182,20 +218,24 @@ namespace Boggle
                 response = server.Service.PlayWord(gameID, word);
             }
 
+            // Return the Json serialized object information.
             return JsonConvert.SerializeObject(response, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
         }
 
-        private void SendAPI()
-        {
-            var stream = server.Service.API();
+        //private void SendAPI()
+        //{
+        //    var stream = server.Service.API();
 
-            ss.BeginSend("HTTP/1.1 " + (int)BoggleWebServer.StatusCode + " " + BoggleWebServer.StatusCode.ToString() + "\r\n", Ignore, null);
-            ss.BeginSend("Content-Type: text/html\r\n", Ignore, null);
-            ss.BeginSend("Content-Length: " + stream.ToString().Length + "\r\n", Ignore, null);
-            ss.BeginSend("\r\n", Ignore, null);
-            ss.BeginSend(stream.ToString(), (ex, py) => { ss.Shutdown(); }, null);
-        }
+        //    ss.BeginSend("HTTP/1.1 " + (int)BoggleWebServer.StatusCode + " " + BoggleWebServer.StatusCode.ToString() + "\r\n", Ignore, null);
+        //    ss.BeginSend("Content-Type: text/html\r\n", Ignore, null);
+        //    ss.BeginSend("Content-Length: " + stream.ToString().Length + "\r\n", Ignore, null);
+        //    ss.BeginSend("\r\n", Ignore, null);
+        //    ss.BeginSend(stream.ToString(), (ex, py) => { ss.Shutdown(); }, null);
+        //}
 
+        /// <summary>
+        /// Sends the GameStatus back to the client.
+        /// </summary>
         private void SendGameStatus(string gameID, bool brief)
         {
             BoggleGameResponse response = server.Service.GameStatus(gameID, brief ? "yes" : "");
