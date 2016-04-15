@@ -13,6 +13,9 @@ using System.Text.RegularExpressions;
 
 namespace Boggle
 {
+    /// <summary>
+    /// Provides a simple web server for running the Boggle game
+    /// </summary>
     public class BoggleWebServer
     {
         /// <summary>
@@ -24,11 +27,19 @@ namespace Boggle
             Console.Read();
         }
 
-        // Listens for http requests to the server.
+        /// <summary>
+        /// Listens for http requests to the server.
+        /// </summary>
         private TcpListener server;
 
+        /// <summary>
+        /// Provides access to the Boggle game service
+        /// </summary>
         public BoggleService Service;
 
+        /// <summary>
+        /// Represents the status code of the outgoing HTTP response
+        /// </summary>
         public static HttpStatusCode StatusCode { get; set; }
 
         /// <summary>
