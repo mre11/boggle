@@ -117,8 +117,9 @@ namespace CustomNetworking
         /// string arriving via a BeginSend method call must be sent (in its entirety) before
         /// a later arriving string can be sent.
         /// </summary>
-        public void BeginSend(String s, SendCallback callback, object payload)
+        public void BeginSend(string s, SendCallback callback, object payload)
         {
+            // TODO implement BeginSend
         }
 
         /// <summary>
@@ -154,6 +155,7 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
+            // TODO implement BeginReceive
         }
     }
 }
