@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading;
+using System.Dynamic;
 
 namespace CustomNetworking
 {
@@ -178,19 +179,22 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
-            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, callback);
+            var state = new RecieveState(callback, payload);
+
+            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
         }
 
         private void DataReceived(IAsyncResult result)
         {
             int bytesRead = socket.EndReceive(result);
 
-            // Get the callback from BeginReceive
-            ReceiveCallback callback = (ReceiveCallback)result.AsyncState;
+            RecieveState state = (RecieveState)result.AsyncState;
+            var callback = state.Callback;
+            var payload = state.Payload;
 
             if (bytesRead == 0)
             {
-                //socket.Close();
+                socket.Close();
             }
             else
             {
@@ -205,14 +209,26 @@ namespace CustomNetworking
                     {
                         var lines = incoming.ToString(0, i);
                         incoming.Remove(0, i);
-                        callback(lines, null, null); // TODO what about the payload from BeginReceive?  how to get callback and payload into this method?
+                        callback(lines, null, payload);
                         break;
                     }
                 }
 
                 // Get more data
-                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, callback);
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
             }            
         }
-    }
+
+        private class RecieveState
+        {
+            public ReceiveCallback Callback { get; set; }
+            public object Payload { get; set; }
+
+            public RecieveState(ReceiveCallback cb, object py)
+            {
+                Callback = cb;
+                Payload = py;
+            }
+        }
+    }    
 }
