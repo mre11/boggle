@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading;
-using System.Dynamic;
 
 namespace CustomNetworking
 {
@@ -144,6 +143,7 @@ namespace CustomNetworking
         public void BeginSend(string s, SendCallback callback, object payload)
         {
             // TODO implement BeginSend
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -180,17 +180,24 @@ namespace CustomNetworking
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
             var state = new RecieveState(callback, payload);
-
             socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
         }
 
+        /// <summary>
+        /// Called when some bytes have been recieved on the socket.
+        /// </summary>
         private void DataReceived(IAsyncResult result)
         {
-            int bytesRead = socket.EndReceive(result);
-
-            RecieveState state = (RecieveState)result.AsyncState;
-            var callback = state.Callback;
-            var payload = state.Payload;
+            // TODO this try-catch might not be the best way to handle the issue
+            int bytesRead;
+            try
+            {
+                bytesRead = socket.EndReceive(result);
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
 
             if (bytesRead == 0)
             {
@@ -198,6 +205,11 @@ namespace CustomNetworking
             }
             else
             {
+                // Get the state from the result
+                RecieveState state = (RecieveState)result.AsyncState;
+                var callback = state.Callback;
+                var payload = state.Payload;
+
                 // Decode the bytes and add them to incoming
                 int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
                 incoming.Append(incomingChars, 0, charsRead);
@@ -219,11 +231,25 @@ namespace CustomNetworking
             }            
         }
 
+        /// <summary>
+        /// Provides an object to hold the state of a receive operation.  Specifically, it holds the callback to be used
+        /// and the payload of the Receive.
+        /// </summary>
         private class RecieveState
         {
+            /// <summary>
+            /// The callback to be used.
+            /// </summary>
             public ReceiveCallback Callback { get; set; }
+
+            /// <summary>
+            /// The payload to be passed through.
+            /// </summary>
             public object Payload { get; set; }
 
+            /// <summary>
+            /// Creates a new ReceiveState with the given callback and payload.
+            /// </summary>
             public RecieveState(ReceiveCallback cb, object py)
             {
                 Callback = cb;
