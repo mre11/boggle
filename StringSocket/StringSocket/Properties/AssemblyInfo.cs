@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ServerGrader")]
+[assembly: AssemblyTitle("StringSocket")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Hewlett-Packard Company")]
-[assembly: AssemblyProduct("ServerGrader")]
-[assembly: AssemblyCopyright("Copyright © Hewlett-Packard Company 2016")]
+[assembly: AssemblyCompany("Hewlett-Packard")]
+[assembly: AssemblyProduct("StringSocket")]
+[assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("bb5ec1b9-2aa7-4af6-b745-dd9356d2b7e0")]
+[assembly: Guid("4bb71097-58ca-4822-b45f-0d81b048fb84")]
 
 // Version information for an assembly consists of the following four values:
 //
