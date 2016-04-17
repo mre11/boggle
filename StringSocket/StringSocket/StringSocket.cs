@@ -105,7 +105,7 @@ namespace CustomNetworking
         /// <summary>
         /// Shuts down and closes the socket.  No need to change this.
         /// </summary>
-        public void Shutdown  ()
+        public void Shutdown()
         {
             try
             {
@@ -183,8 +183,6 @@ namespace CustomNetworking
 
         private void DataReceived(IAsyncResult result)
         {
-            // TODO implement DataReceived
-
             int bytesRead = socket.EndReceive(result);
 
             // Get the callback from BeginReceive
@@ -192,13 +190,29 @@ namespace CustomNetworking
 
             if (bytesRead == 0)
             {
-                socket.Close();
+                //socket.Close();
             }
             else
             {
+                // Decode the bytes and add them to incoming
+                int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
+                incoming.Append(incomingChars, 0, charsRead);
 
-            }
+                // Use callback for any complete lines
+                for (int i = incoming.Length - 1; i >= 0; i--)
+                {
+                    if (incomingChars[i] == '\n')
+                    {
+                        var lines = incoming.ToString(0, i);
+                        incoming.Remove(0, i);
+                        callback(lines, null, null); // TODO what about the payload from BeginReceive?  how to get callback and payload into this method?
+                        break;
+                    }
+                }
 
+                // Get more data
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, callback);
+            }            
         }
     }
 }
