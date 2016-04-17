@@ -63,10 +63,29 @@ namespace CustomNetworking
         /// <summary>
         /// The type of delegate that is called when a receive has completed.
         /// </summary>
-        public delegate void ReceiveCallback(String s, Exception e, object payload);
+        public delegate void ReceiveCallback(string s, Exception e, object payload);
 
         // Underlying socket
         private Socket socket;
+
+        // The character encoding used by this StringSocket
+        private Encoding encoding;
+
+        // Buffer size for reading incoming bytes
+        private const int BUFFER_SIZE = 1024;
+
+        // Text that has been received from the client but not yet dealt with
+        private StringBuilder incoming;
+
+        // Text that needs to be sent to the client but which we have not yet started sending
+        private StringBuilder outgoing;
+
+        // For decoding incoming byte streams.
+        private Decoder decoder;
+
+        // Buffers that will contain incoming bytes and characters
+        private byte[] incomingBytes = new byte[BUFFER_SIZE];
+        private char[] incomingChars = new char[BUFFER_SIZE];
 
         /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
@@ -77,6 +96,10 @@ namespace CustomNetworking
         public StringSocket(Socket s, Encoding e)
         {
             socket = s;
+            encoding = e;
+            decoder = encoding.GetDecoder();
+            incoming = new StringBuilder();
+            outgoing = new StringBuilder();
         }
 
         /// <summary>
@@ -132,7 +155,7 @@ namespace CustomNetworking
         /// string of text terminated by a newline character from the underlying Socket, or
         /// failed in the attempt, it invokes the callback.  The parameters to the callback are
         /// a (possibly null) string, a (possibly null) Exception, and the payload.  Either the
-        /// string or the Exception will be null, or possibly boh.  If the string is non-null, 
+        /// string or the Exception will be null, or possibly both.  If the string is non-null, 
         /// it is the requested string (with the newline removed).  If the Exception is non-null, 
         /// it is the Exception that caused the send attempt to fail.  If both are null, this
         /// indicates that the sending end of the remote socket has been shut down.
@@ -155,7 +178,27 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
-            // TODO implement BeginReceive
+            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, callback);
+        }
+
+        private void DataReceived(IAsyncResult result)
+        {
+            // TODO implement DataReceived
+
+            int bytesRead = socket.EndReceive(result);
+
+            // Get the callback from BeginReceive
+            ReceiveCallback callback = (ReceiveCallback)result.AsyncState;
+
+            if (bytesRead == 0)
+            {
+                socket.Close();
+            }
+            else
+            {
+
+            }
+
         }
     }
 }
