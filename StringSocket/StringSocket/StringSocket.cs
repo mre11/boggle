@@ -87,6 +87,9 @@ namespace CustomNetworking
         private byte[] incomingBytes = new byte[BUFFER_SIZE];
         private char[] incomingChars = new char[BUFFER_SIZE];
 
+        // Object using for locking the representation during receiving
+        private object syncReceive = new object();
+
         /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
         /// The read and write methods of the regular Socket must not be called after the
@@ -143,7 +146,6 @@ namespace CustomNetworking
         public void BeginSend(string s, SendCallback callback, object payload)
         {
             // TODO implement BeginSend
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -188,7 +190,6 @@ namespace CustomNetworking
         /// </summary>
         private void DataReceived(IAsyncResult result)
         {
-            // TODO this try-catch might not be the best way to handle the issue
             int bytesRead;
             try
             {
@@ -210,18 +211,24 @@ namespace CustomNetworking
                 var callback = state.Callback;
                 var payload = state.Payload;
 
-                // Decode the bytes and add them to incoming
-                int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
-                incoming.Append(incomingChars, 0, charsRead);
+                // Decode the bytes and add them to incoming                
+                lock(syncReceive)
+                {
+                    int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
+                    incoming.Append(incomingChars, 0, charsRead);
+                }                
 
                 // Use callback for any complete lines
-                for (int i = incoming.Length - 1; i >= 0; i--)
+                for (int i = 0; i < incoming.Length; i++)
                 {
                     if (incoming[i] == '\n')
                     {
-                        var lines = incoming.ToString(0, i);
-                        incoming.Remove(0, i);
-                        callback(lines, null, payload);
+                        lock (syncReceive)
+                        {
+                            var line = incoming.ToString(0, i);
+                            incoming.Remove(0, i + 1);
+                            callback(line, null, payload);
+                        }                        
                         break;
                     }
                 }
