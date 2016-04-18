@@ -217,7 +217,7 @@ namespace CustomNetworking
                 // Use callback for any complete lines
                 for (int i = incoming.Length - 1; i >= 0; i--)
                 {
-                    if (incomingChars[i] == '\n')
+                    if (incoming[i] == '\n')
                     {
                         var lines = incoming.ToString(0, i);
                         incoming.Remove(0, i);
