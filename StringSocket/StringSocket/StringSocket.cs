@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace CustomNetworking
 {
@@ -87,7 +88,7 @@ namespace CustomNetworking
         private byte[] incomingBytes = new byte[BUFFER_SIZE];
         private char[] incomingChars = new char[BUFFER_SIZE];
 
-        // Object using for locking the representation during receiving
+        // Object used for locking the representation during receiving
         private object syncReceive = new object();
 
         /// <summary>
@@ -190,6 +191,8 @@ namespace CustomNetworking
         /// </summary>
         private void DataReceived(IAsyncResult result)
         {
+            // TODO there definitely seem to be multi-threading problems somewhere in here...
+
             int bytesRead;
             try
             {
@@ -212,30 +215,27 @@ namespace CustomNetworking
                 var payload = state.Payload;
 
                 // Decode the bytes and add them to incoming                
-                lock(syncReceive)
+                lock (syncReceive)
                 {
                     int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
                     incoming.Append(incomingChars, 0, charsRead);
-                }                
 
-                // Use callback for any complete lines
-                for (int i = 0; i < incoming.Length; i++)
-                {
-                    if (incoming[i] == '\n')
+                    // Use callback for any complete lines
+                    for (int i = 0; i < incoming.Length; i++)
                     {
-                        lock (syncReceive)
+                        if (incoming[i] == '\n')
                         {
                             var line = incoming.ToString(0, i);
                             incoming.Remove(0, i + 1);
-                            callback(line, null, payload);
-                        }                        
-                        break;
+                            Task.Run(() => callback(line, null, payload)); // fire off callback on another thread
+                            break;
+                        }
                     }
                 }
 
                 // Get more data
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
-            }            
+            }
         }
 
         /// <summary>
@@ -263,5 +263,5 @@ namespace CustomNetworking
                 Payload = py;
             }
         }
-    }    
+    }
 }
