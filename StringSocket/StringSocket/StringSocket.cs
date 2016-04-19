@@ -157,7 +157,20 @@ namespace CustomNetworking
         {
             // TODO implement BeginSend
             var state = new SendState(callback, payload);
+            socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, SendData, state);
 
+        }
+
+        public void SendData(IAsyncResult result)
+        {
+            if(pendingIndex < pendingBytes.Length)
+            {
+                socket.BeginSend(pendingBytes, 0, pendingBytes.Length - pendingIndex, SocketFlags.None, SendData, result.AsyncState);
+            }
+            else if(outgoing.Length > 0)
+            {
+                pendingBytes = encoding.GetBytes(outgoing.ToString());
+            }
         }
 
         /// <summary>
