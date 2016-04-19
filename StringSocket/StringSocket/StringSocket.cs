@@ -160,11 +160,15 @@ namespace CustomNetworking
         {
             // TODO implement BeginSend
             var state = new SendState(s, callback, payload);
-            Task.Run(() => SendMessage(s));        
+            Task.Run(() => SendMessage(s));
             socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, state);
 
         }
 
+        /// <summary>
+        /// Sends a string to the client.
+        /// </summary>
+        /// <param name="lines"></param>
         private void SendMessage(string lines)
         {
             lock (syncSend)
@@ -179,6 +183,12 @@ namespace CustomNetworking
             }
 
         }
+
+        // TODO: Modify summary of SendBytes to be different than JOEs
+        /// <summary>
+        /// Attempts to send the entire outgoing string.
+        /// This method should not be called unless sendSync has been acquired.
+        /// </summary>
         private void SendBytes()
         {
             if(pendingIndex < pendingBytes.Length)
@@ -199,6 +209,10 @@ namespace CustomNetworking
             }
         }
 
+        /// <summary>
+        /// Called when a message has been successfully sent.
+        /// </summary>
+        /// <param name="result"></param>
         private void MessageSent(IAsyncResult result)
         {
             int byteSent = socket.EndSend(result);
