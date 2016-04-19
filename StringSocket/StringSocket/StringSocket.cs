@@ -165,10 +165,14 @@ namespace CustomNetworking
         {
             // TODO Figure out how to keep track of the callbacks with the callbackQueue.
 
-            var state = new SendState(s, callback, payload);
-            callbackQueue.Enqueue(state);
-            Task.Run(() => SendMessage(s));
-            socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, state);
+            lock (syncSend)
+            {
+                var state = new SendState(s, callback, payload);
+                callbackQueue.Enqueue(state);
+                Task.Run(() => SendMessage(s));
+                socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, state);
+
+            }
 
         }
 
@@ -231,7 +235,6 @@ namespace CustomNetworking
                     SendState state = (SendState)result.AsyncState;
                     var callback = state.Callback;
                     var payload = state.Payload;
-
                     Task.Run(() => state.Callback(null , state.Payload));
                 }
                 else
