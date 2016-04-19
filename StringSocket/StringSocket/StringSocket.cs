@@ -284,19 +284,12 @@ namespace CustomNetworking
         {
             // TODO there definitely seem to be multi-threading problems somewhere in here...
 
-            int bytesRead;
-            try
-            {
-                bytesRead = socket.EndReceive(result);
-            }
-            catch (ObjectDisposedException)
-            {
-                return;
-            }
+            int bytesRead = socket.EndReceive(result);
+
 
             if (bytesRead == 0)
             {
-                socket.Close();
+                socket.EndReceive(result);
             }
             else
             {
