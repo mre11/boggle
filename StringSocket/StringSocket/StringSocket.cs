@@ -104,8 +104,11 @@ namespace CustomNetworking
         // The index where pendingBytes is currently at
         private int pendingIndex = 0;
 
-        // Thread safe queue to process the callbacks in the correct order.
-        private ConcurrentQueue<SendState> callbackQueue = new ConcurrentQueue<SendState>();
+        // Thread safe queue to process the send callbacks in the correct order.
+        private ConcurrentQueue<SendState> sendCallbackQueue = new ConcurrentQueue<SendState>();
+
+        // Thread safe queue to process the recieve callbacks in the correct order.
+        private ConcurrentQueue<RecieveState> recieveCallbackQueue = new ConcurrentQueue<RecieveState>();
 
 
         /// <summary>
@@ -168,7 +171,7 @@ namespace CustomNetworking
             lock (syncSend)
             {
                 var state = new SendState(s, callback, payload);
-                callbackQueue.Enqueue(state);
+                sendCallbackQueue.Enqueue(state);
                 Task.Run(() => SendMessage(s));
                 socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, state);
 
@@ -278,8 +281,11 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
+
             var state = new RecieveState(callback, payload);
-            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
+            recieveCallbackQueue.Enqueue(state);
+            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state); 
+
         }
 
         /// <summary>
