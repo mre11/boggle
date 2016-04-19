@@ -91,6 +91,15 @@ namespace CustomNetworking
         // Object used for locking the representation during receiving
         private object syncReceive = new object();
 
+        // Indicates that a async send is currently going on
+        private bool sendIsOngoing = false;
+
+        // An array of bytes we are going to send
+        private byte[] pendingBytes = new byte[0];
+
+        // The index where pendingBytes is currently at
+        private int pendingIndex = 0;
+
         /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
         /// The read and write methods of the regular Socket must not be called after the
@@ -147,6 +156,8 @@ namespace CustomNetworking
         public void BeginSend(string s, SendCallback callback, object payload)
         {
             // TODO implement BeginSend
+            var state = new SendState(callback, payload);
+
         }
 
         /// <summary>
@@ -258,6 +269,19 @@ namespace CustomNetworking
             /// Creates a new ReceiveState with the given callback and payload.
             /// </summary>
             public RecieveState(ReceiveCallback cb, object py)
+            {
+                Callback = cb;
+                Payload = py;
+            }
+        }
+
+        private class SendState
+        {
+            public SendCallback Callback { get; set; }
+
+            public object Payload { get; set; }
+
+            public SendState(SendCallback cb, object py)
             {
                 Callback = cb;
                 Payload = py;
