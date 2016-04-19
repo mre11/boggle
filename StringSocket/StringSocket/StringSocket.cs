@@ -9,6 +9,7 @@ using System.Text;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace CustomNetworking
 {
@@ -102,6 +103,10 @@ namespace CustomNetworking
 
         // The index where pendingBytes is currently at
         private int pendingIndex = 0;
+
+        // Thread safe queue to process the callbacks in the correct order.
+        private ConcurrentQueue<SendState> callbackQueue = new ConcurrentQueue<SendState>();
+
 
         /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
@@ -226,7 +231,6 @@ namespace CustomNetworking
                     var payload = state.Payload;
 
                     Task.Run(() => state.Callback(null , state.Payload));
-                    socket.Close();
                 }
                 else
                 {
