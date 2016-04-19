@@ -163,8 +163,10 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(string s, SendCallback callback, object payload)
         {
-            // TODO implement BeginSend
+            // TODO Figure out how to keep track of the callbacks with the callbackQueue.
+
             var state = new SendState(s, callback, payload);
+            callbackQueue.Enqueue(state);
             Task.Run(() => SendMessage(s));
             socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, state);
 
