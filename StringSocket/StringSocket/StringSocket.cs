@@ -91,6 +91,9 @@ namespace CustomNetworking
         // Object used for locking the representation during receiving
         private object syncReceive = new object();
 
+        // Object used for locking the representation during sending
+        private object syncSend = new object();
+
         // Indicates that a async send is currently going on
         private bool sendIsOngoing = false;
 
@@ -156,20 +159,66 @@ namespace CustomNetworking
         public void BeginSend(string s, SendCallback callback, object payload)
         {
             // TODO implement BeginSend
-            var state = new SendState(callback, payload);
-            socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, SendData, state);
+            var state = new SendState(s, callback, payload);
+            Task.Run(() => SendMessage(s));        
+            socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, state);
 
         }
 
-        public void SendData(IAsyncResult result)
+        private void SendMessage(string lines)
+        {
+            lock (syncSend)
+            {
+                outgoing.Append(lines);
+
+                if (!sendIsOngoing)
+                {
+                    sendIsOngoing = true;
+                    SendBytes();
+                } 
+            }
+
+        }
+        private void SendBytes()
         {
             if(pendingIndex < pendingBytes.Length)
             {
-                socket.BeginSend(pendingBytes, 0, pendingBytes.Length - pendingIndex, SocketFlags.None, SendData, result.AsyncState);
+                socket.BeginSend(pendingBytes, 0, pendingBytes.Length - pendingIndex, SocketFlags.None, MessageSent, null);
             }
             else if(outgoing.Length > 0)
             {
                 pendingBytes = encoding.GetBytes(outgoing.ToString());
+                pendingIndex = 0;
+                outgoing.Clear();
+                socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, null);
+
+            }
+            else
+            {
+                sendIsOngoing = false;
+            }
+        }
+
+        private void MessageSent(IAsyncResult result)
+        {
+            int byteSent = socket.EndSend(result);
+
+            lock (syncSend)
+            {
+                if (byteSent == 0)
+                {
+                    SendState state = (SendState)result.AsyncState;
+                    var callback = state.Callback;
+                    var payload = state.Payload;
+
+                    Task.Run(() => state.Callback(null , state.Payload));
+                    socket.Close();
+                }
+                else
+                {
+                    pendingIndex += byteSent;
+                    SendBytes();
+                } 
             }
         }
 
@@ -294,10 +343,13 @@ namespace CustomNetworking
 
             public object Payload { get; set; }
 
-            public SendState(SendCallback cb, object py)
+            public string Line { get; set; }
+
+            public SendState(string line, SendCallback cb, object py)
             {
                 Callback = cb;
                 Payload = py;
+                Line = line;
             }
         }
     }
