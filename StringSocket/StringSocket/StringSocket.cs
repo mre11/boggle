@@ -261,6 +261,14 @@ namespace CustomNetworking
         /// it is the requested string (with the newline removed).  If the Exception is non-null, 
         /// it is the Exception that caused the send attempt to fail.  If both are null, this
         /// indicates that the sending end of the remote socket has been shut down.
+        ///  
+        /// Alternatively, we can read a string from the StringSocket by doing
+        /// 
+        ///     ss.BeginReceive(callback, payload, length)
+        ///     
+        /// If length is negative or zero, this behaves identically to the first case.  If length
+        /// is length, then instead of sending the next complete line in the callback, it sends
+        /// the next length characters.  In other respects, it behaves analogously to the first case.
         /// 
         /// This method is non-blocking.  This means that it does not wait until a line of text
         /// has been received before returning.  Instead, it arranges for a line to be received
