@@ -185,6 +185,8 @@ namespace CustomNetworking
             {
                 outgoing.Append(lines);
 
+                // If we have a thread in SendBytes, then sendOngoing is true and the next thread waiting here will fall through and call
+                // the callback? Then we loose data.
                 if (!sendIsOngoing)
                 {
                     sendIsOngoing = true;
@@ -201,6 +203,7 @@ namespace CustomNetworking
         /// </summary>
         private void SendBytes()
         {
+            // If pending index is less than the length of pendingBytes use the underlying socket and call begin send.
             if (pendingIndex < pendingBytes.Length)
             {
                 socket.BeginSend(pendingBytes, 0, pendingBytes.Length - pendingIndex, SocketFlags.None, MessageSent, null);
@@ -371,5 +374,6 @@ namespace CustomNetworking
                 Line = line;
             }
         }
+
     }
 }
