@@ -73,17 +73,17 @@ namespace CustomNetworking
         // The character encoding used by this StringSocket
         private Encoding encoding;
 
+        // For decoding incoming byte streams.
+        private Decoder decoder;
+
         // Buffer size for reading incoming bytes
         private const int BUFFER_SIZE = 1024;
 
         // Text that has been received from the client but not yet dealt with
-        private StringBuilder incoming;
+        private StringBuilder incoming = new StringBuilder();
 
         // Text that needs to be sent to the client but which we have not yet started sending
-        private StringBuilder outgoing;
-
-        // For decoding incoming byte streams.
-        private Decoder decoder;
+        private StringBuilder outgoing = new StringBuilder();
 
         // Buffers that will contain incoming bytes and characters
         private byte[] incomingBytes = new byte[BUFFER_SIZE];
@@ -108,7 +108,7 @@ namespace CustomNetworking
         private ConcurrentQueue<SendState> sendCallbackQueue = new ConcurrentQueue<SendState>();
 
         // Thread safe queue to process the recieve callbacks in the correct order.
-        private ConcurrentQueue<RecieveState> recieveCallbackQueue = new ConcurrentQueue<RecieveState>();
+        private ConcurrentQueue<ReceiveState> receiveStateQueue = new ConcurrentQueue<ReceiveState>();
 
 
         /// <summary>
@@ -122,8 +122,6 @@ namespace CustomNetworking
             socket = s;
             encoding = e;
             decoder = encoding.GetDecoder();
-            incoming = new StringBuilder();
-            outgoing = new StringBuilder();
         }
 
         /// <summary>
@@ -136,9 +134,7 @@ namespace CustomNetworking
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
             }
-            catch (Exception)
-            {
-            }
+            catch (Exception) { }
         }
 
         /// <summary>
@@ -193,7 +189,7 @@ namespace CustomNetworking
                 {
                     sendIsOngoing = true;
                     SendBytes();
-                } 
+                }
             }
 
         }
@@ -205,11 +201,11 @@ namespace CustomNetworking
         /// </summary>
         private void SendBytes()
         {
-            if(pendingIndex < pendingBytes.Length)
+            if (pendingIndex < pendingBytes.Length)
             {
                 socket.BeginSend(pendingBytes, 0, pendingBytes.Length - pendingIndex, SocketFlags.None, MessageSent, null);
             }
-            else if(outgoing.Length > 0)
+            else if (outgoing.Length > 0)
             {
                 pendingBytes = encoding.GetBytes(outgoing.ToString());
                 pendingIndex = 0;
@@ -238,13 +234,13 @@ namespace CustomNetworking
                     SendState state = (SendState)result.AsyncState;
                     var callback = state.Callback;
                     var payload = state.Payload;
-                    Task.Run(() => state.Callback(null , state.Payload));
+                    Task.Run(() => state.Callback(null, state.Payload));
                 }
                 else
                 {
                     pendingIndex += byteSent;
                     SendBytes();
-                } 
+                }
             }
         }
 
@@ -281,11 +277,9 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
-
-            var state = new RecieveState(callback, payload);
-            recieveCallbackQueue.Enqueue(state);
-            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state); 
-
+            var state = new ReceiveState(callback, payload);
+            receiveStateQueue.Enqueue(state);
+            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, null);
         }
 
         /// <summary>
@@ -293,43 +287,48 @@ namespace CustomNetworking
         /// </summary>
         private void DataReceived(IAsyncResult result)
         {
-            // TODO there definitely seem to be multi-threading problems somewhere in here...
-
-            int bytesRead = socket.EndReceive(result);
-
-
-            if (bytesRead == 0)
+            lock (syncReceive)
             {
-                socket.EndReceive(result);
-            }
-            else
-            {
-                // Get the state from the result
-                RecieveState state = (RecieveState)result.AsyncState;
+                // Get the state
+                ReceiveState state = (ReceiveState)result.AsyncState;
+                if (state == null)
+                {
+                    receiveStateQueue.TryDequeue(out state);
+                }
                 var callback = state.Callback;
                 var payload = state.Payload;
 
-                // Decode the bytes and add them to incoming                
-                lock (syncReceive)
+                // Read the data
+                int bytesRead = 0;
+                try
                 {
-                    int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
-                    incoming.Append(incomingChars, 0, charsRead);
-
-                    // Use callback for any complete lines
-                    for (int i = 0; i < incoming.Length; i++)
-                    {
-                        if (incoming[i] == '\n')
-                        {
-                            var line = incoming.ToString(0, i);
-                            incoming.Remove(0, i + 1);
-                            Task.Run(() => callback(line, null, payload)); // fire off callback on another thread
-                            break;
-                        }
-                    }
+                    bytesRead = socket.EndReceive(result);
                 }
+                catch (ObjectDisposedException) { return; }
 
-                // Get more data
-                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
+                if (bytesRead > 0)
+                {
+                    // Decode the bytes and add them to incoming                
+                    //lock (syncReceive)
+                    {
+                        int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
+                        incoming.Append(incomingChars, 0, charsRead);
+
+                        // Use callback for any complete lines
+                        for (int i = 0; i < incoming.Length; i++)
+                        {
+                            if (incoming[i] == '\n')
+                            {
+                                var line = incoming.ToString(0, i);
+                                incoming.Remove(0, i + 1);
+                                Task.Run(() => callback(line, null, payload)); // fire off callback on another thread
+                            }
+                        }
+
+                        // Get more data
+                        socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
+                    }
+                } 
             }
         }
 
@@ -337,7 +336,7 @@ namespace CustomNetworking
         /// Provides an object to hold the state of a receive operation.  Specifically, it holds the callback to be used
         /// and the payload of the Receive.
         /// </summary>
-        private class RecieveState
+        private class ReceiveState
         {
             /// <summary>
             /// The callback to be used.
@@ -352,7 +351,7 @@ namespace CustomNetworking
             /// <summary>
             /// Creates a new ReceiveState with the given callback and payload.
             /// </summary>
-            public RecieveState(ReceiveCallback cb, object py)
+            public ReceiveState(ReceiveCallback cb, object py)
             {
                 Callback = cb;
                 Payload = py;
