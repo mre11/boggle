@@ -300,15 +300,6 @@ namespace CustomNetworking
         {
             lock (syncReceive)
             {
-                // Get the state
-                ReceiveState state = (ReceiveState)result.AsyncState;
-                if (state == null)
-                {
-                    receiveStateQueue.TryDequeue(out state);
-                }
-                var callback = state.Callback;
-                var payload = state.Payload;
-
                 // Read the data
                 int bytesRead = 0;
                 try
@@ -331,12 +322,19 @@ namespace CustomNetworking
                         {
                             var line = incoming.ToString(0, i);
                             incoming.Remove(0, i + 1);
+
+                            // Dequeue the state
+                            ReceiveState state;
+                            receiveStateQueue.TryDequeue(out state);
+                            var callback = state.Callback;
+                            var payload = state.Payload;
+
                             Task.Run(() => callback(line, null, payload)); // fire off callback on another thread
                         }
                     }
 
                     // Get more data
-                    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
+                    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, null);
                 }
             }
         }
