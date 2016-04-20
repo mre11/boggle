@@ -309,26 +309,24 @@ namespace CustomNetworking
                 if (bytesRead > 0)
                 {
                     // Decode the bytes and add them to incoming                
-                    //lock (syncReceive)
+
+                    int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
+                    incoming.Append(incomingChars, 0, charsRead);
+
+                    // Use callback for any complete lines
+                    for (int i = 0; i < incoming.Length; i++)
                     {
-                        int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
-                        incoming.Append(incomingChars, 0, charsRead);
-
-                        // Use callback for any complete lines
-                        for (int i = 0; i < incoming.Length; i++)
+                        if (incoming[i] == '\n')
                         {
-                            if (incoming[i] == '\n')
-                            {
-                                var line = incoming.ToString(0, i);
-                                incoming.Remove(0, i + 1);
-                                Task.Run(() => callback(line, null, payload)); // fire off callback on another thread
-                            }
+                            var line = incoming.ToString(0, i);
+                            incoming.Remove(0, i + 1);
+                            Task.Run(() => callback(line, null, payload)); // fire off callback on another thread
                         }
-
-                        // Get more data
-                        socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
                     }
-                } 
+
+                    // Get more data
+                    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
+                }
             }
         }
 
