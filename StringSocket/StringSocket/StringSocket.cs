@@ -90,10 +90,10 @@ namespace CustomNetworking
         private char[] incomingChars = new char[BUFFER_SIZE];
 
         // Object used for locking the representation during receiving
-        private object syncReceive = new object();
+        private readonly object syncReceive = new object();
 
         // Object used for locking the representation during sending
-        private object syncSend = new object();
+        private readonly object syncSend = new object();
 
         // Indicates that a async send is currently going on
         private bool sendIsOngoing = false;
