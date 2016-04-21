@@ -168,7 +168,7 @@ namespace CustomNetworking
             {
                 var state = new SendState(s, callback, payload);
                 sendCallbackQueue.Enqueue(state);
-                Task.Run(() => SendMessage(s));
+                SendMessage(s);
 
             }
 
@@ -227,6 +227,7 @@ namespace CustomNetworking
                 sendCallbackQueue.TryDequeue(out temp);
 
                 Task.Run(() => temp.Callback(null, temp.Payload));
+
             }
         }
 
@@ -240,33 +241,12 @@ namespace CustomNetworking
 
             lock (syncSend)
             {
-                // Call the callback.
                 if (byteSent == 0)
                 {
-                    //socket.Close();
-                    // Current tasks state
-                    //SendState state = (SendState)result.AsyncState;
-
-                    //// The sendState first in the sendCallBackQueue
-                    //SendState firstInQueue;
-
-                    //// Peek at the first item in the queue
-                    //if(sendCallbackQueue.TryPeek(out firstInQueue))
-                    //{
-                    //    // If the first item in the queue equals the current tasks queue
-                    //    // pull the state out of the queue and running the states callback on another thread.
-                    //    if(firstInQueue == state)
-                    //    {
-                    //        sendCallbackQueue.TryDequeue(out firstInQueue);
-
-                    //        Task.Run(() => firstInQueue.Callback(null, firstInQueue.Payload));
-                    //    }
-
-                    //}
+                    socket.Close();
                 }
                 else
-                {
-                    
+                {                    
                     pendingIndex += byteSent;
                     SendBytes();
                 }
