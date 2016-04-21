@@ -246,7 +246,7 @@ namespace CustomNetworking
                     socket.Close();
                 }
                 else
-                {                    
+                {
                     pendingIndex += byteSent;
                     SendBytes();
                 }
@@ -298,10 +298,10 @@ namespace CustomNetworking
             {
                 var state = new ReceiveState(callback, payload);
                 receiveStateQueue.Enqueue(state);
-                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, null); 
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, null);
             }
         }
-        
+
         /// <summary>
         /// Called when some bytes have been recieved on the socket.
         /// </summary>
@@ -311,11 +311,8 @@ namespace CustomNetworking
             {
                 // Read the data
                 int bytesRead = 0;
-                //try
-                //{
-                    bytesRead = socket.EndReceive(result);
-                //}
-                //catch (ObjectDisposedException) { return; }
+
+                bytesRead = socket.EndReceive(result);
 
                 if (bytesRead > 0)
                 {
@@ -335,12 +332,10 @@ namespace CustomNetworking
                             // Dequeue the state
                             ReceiveState state;
                             receiveStateQueue.TryDequeue(out state);
-                            var callback = state.Callback;
-                            var payload = state.Payload;
 
                             //System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + payload);
 
-                            Task.Run(() => callback(line, null, payload)); // fire off callback on another thread
+                            Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
                         }
                     }
 
