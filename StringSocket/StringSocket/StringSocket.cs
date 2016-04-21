@@ -296,8 +296,7 @@ namespace CustomNetworking
         {
             lock (syncReceive)
             {
-                var state = new ReceiveState(callback, payload);
-                receiveStateQueue.Enqueue(state);
+                receiveStateQueue.Enqueue(new ReceiveState(callback, payload));
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, null);
             }
         }
@@ -310,9 +309,9 @@ namespace CustomNetworking
             lock (syncReceive)
             {
                 // Read the data
-                int bytesRead = 0;
+                
 
-                bytesRead = socket.EndReceive(result);
+                int bytesRead = socket.EndReceive(result);
 
                 if (bytesRead > 0)
                 {
@@ -328,19 +327,42 @@ namespace CustomNetworking
                         {
                             var line = incoming.ToString(0, i);
                             incoming.Remove(0, i + 1);
-
+                            //singleChar = false;
                             // Dequeue the state
+                            //ReceiveState state;
+                            //receiveStateQueue.TryDequeue(out state);
+
+                            ////System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + payload);
+
                             ReceiveState state;
-                            receiveStateQueue.TryDequeue(out state);
+                            bool calledback = false;
+                            while(!calledback && receiveStateQueue.TryDequeue(out state))
+                            {
+                                calledback = true;
+                                Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+
+                            }
 
                             //System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + payload);
 
-                            Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+
+                            //Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
                         }
                     }
 
                     // Get more data
                     socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, null);
+
+                    //ReceiveState state;
+                    //receiveStateQueue.TryDequeue(out state);
+
+                    ////System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + payload);
+
+                    //Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+                }
+                else
+                {
+                    socket.Close();
                 }
             }
         }
