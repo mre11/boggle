@@ -169,7 +169,6 @@ namespace CustomNetworking
                 var state = new SendState(s, callback, payload);
                 sendCallbackQueue.Enqueue(state);
                 Task.Run(() => SendMessage(s));
-                socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, state);
 
             }
 
@@ -185,8 +184,6 @@ namespace CustomNetworking
             {
                 outgoing.Append(lines);
 
-                // If we have a thread in SendBytes, then sendOngoing is true and the next thread waiting here will fall through and call
-                // the callback? Then we loose data.
                 if (!sendIsOngoing)
                 {
                     sendIsOngoing = true;
@@ -215,10 +212,21 @@ namespace CustomNetworking
                 outgoing.Clear();
                 socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, null);
 
+                SendState temp;
+
+                sendCallbackQueue.TryDequeue(out temp);
+
+                Task.Run(() => temp.Callback(null, temp.Payload));
             }
             else
             {
                 sendIsOngoing = false;
+
+                SendState temp;
+
+                sendCallbackQueue.TryDequeue(out temp);
+
+                Task.Run(() => temp.Callback(null, temp.Payload));
             }
         }
 
@@ -232,15 +240,33 @@ namespace CustomNetworking
 
             lock (syncSend)
             {
+                // Call the callback.
                 if (byteSent == 0)
                 {
-                    SendState state = (SendState)result.AsyncState;
-                    var callback = state.Callback;
-                    var payload = state.Payload;
-                    Task.Run(() => state.Callback(null, state.Payload));
+                    //socket.Close();
+                    // Current tasks state
+                    //SendState state = (SendState)result.AsyncState;
+
+                    //// The sendState first in the sendCallBackQueue
+                    //SendState firstInQueue;
+
+                    //// Peek at the first item in the queue
+                    //if(sendCallbackQueue.TryPeek(out firstInQueue))
+                    //{
+                    //    // If the first item in the queue equals the current tasks queue
+                    //    // pull the state out of the queue and running the states callback on another thread.
+                    //    if(firstInQueue == state)
+                    //    {
+                    //        sendCallbackQueue.TryDequeue(out firstInQueue);
+
+                    //        Task.Run(() => firstInQueue.Callback(null, firstInQueue.Payload));
+                    //    }
+
+                    //}
                 }
                 else
                 {
+                    
                     pendingIndex += byteSent;
                     SendBytes();
                 }
