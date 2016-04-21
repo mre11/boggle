@@ -294,9 +294,12 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
-            var state = new ReceiveState(callback, payload);
-            receiveStateQueue.Enqueue(state);
-            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, null);
+            lock (syncReceive)
+            {
+                var state = new ReceiveState(callback, payload);
+                receiveStateQueue.Enqueue(state);
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, null); 
+            }
         }
         
         /// <summary>
@@ -308,11 +311,11 @@ namespace CustomNetworking
             {
                 // Read the data
                 int bytesRead = 0;
-                try
-                {
+                //try
+                //{
                     bytesRead = socket.EndReceive(result);
-                }
-                catch (ObjectDisposedException) { return; }
+                //}
+                //catch (ObjectDisposedException) { return; }
 
                 if (bytesRead > 0)
                 {
