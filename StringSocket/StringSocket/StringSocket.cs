@@ -109,7 +109,7 @@ namespace CustomNetworking
 
         // Thread safe queue to process the recieve callbacks in the correct order.
         private ConcurrentQueue<ReceiveState> receiveStateQueue = new ConcurrentQueue<ReceiveState>();
-
+        int tempCount = 1; // TODO remove this (for debugging receive only)
 
         /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
@@ -292,7 +292,7 @@ namespace CustomNetworking
             receiveStateQueue.Enqueue(state);
             socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, null);
         }
-
+        
         /// <summary>
         /// Called when some bytes have been recieved on the socket.
         /// </summary>
@@ -310,12 +310,12 @@ namespace CustomNetworking
 
                 if (bytesRead > 0)
                 {
-                    // Decode the bytes and add them to incoming                
-
-                    int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
+                    // Decode the bytes and add them to incoming
+                    int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, true);
                     incoming.Append(incomingChars, 0, charsRead);
 
-                    // Use callback for any complete lines
+                    //System.Diagnostics.Debug.Write(tempCount++ + ". Incoming Chars: " + new string(incomingChars));
+
                     for (int i = 0; i < incoming.Length; i++)
                     {
                         if (incoming[i] == '\n')
@@ -328,6 +328,8 @@ namespace CustomNetworking
                             receiveStateQueue.TryDequeue(out state);
                             var callback = state.Callback;
                             var payload = state.Payload;
+
+                            //System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + payload);
 
                             Task.Run(() => callback(line, null, payload)); // fire off callback on another thread
                         }
