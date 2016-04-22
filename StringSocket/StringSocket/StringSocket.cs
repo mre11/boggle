@@ -163,21 +163,17 @@ namespace CustomNetworking
         public void BeginSend(string s, SendCallback callback, object payload)
         {
             // TODO Figure out how to keep track of the callbacks with the callbackQueue.
-
             lock (syncSend)
             {
                 var state = new SendState(s, callback, payload);
                 sendCallbackQueue.Enqueue(state);
                 SendMessage(s);
-
             }
-
         }
 
         /// <summary>
         /// Sends a string to the client.
         /// </summary>
-        /// <param name="lines"></param>
         private void SendMessage(string lines)
         {
             lock (syncSend)
@@ -234,7 +230,6 @@ namespace CustomNetworking
         /// <summary>
         /// Called when a message has been successfully sent.
         /// </summary>
-        /// <param name="result"></param>
         private void MessageSent(IAsyncResult result)
         {
             int byteSent = socket.EndSend(result);
@@ -296,8 +291,8 @@ namespace CustomNetworking
         {
             lock (syncReceive)
             {
-                receiveStateQueue.Enqueue(new ReceiveState(callback, payload));
-                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, null);
+                //receiveStateQueue.Enqueue(new ReceiveState(callback, payload));
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, new ReceiveState(callback, payload));
             }
         }
 
@@ -309,16 +304,19 @@ namespace CustomNetworking
             lock (syncReceive)
             {
                 // Read the data
-                
-
-                int bytesRead = socket.EndReceive(result);
+                int bytesRead = 0;
+                try // need a try-catch here because sometimes the socket is disposed in the tests when we get here
+                {
+                    bytesRead = socket.EndReceive(result);
+                }
+                catch (ObjectDisposedException) { }
 
                 if (bytesRead > 0)
                 {
                     // Decode the bytes and add them to incoming
                     int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, true);
+                    Array.Clear(incomingBytes, 0, incomingBytes.Length);
                     incoming.Append(incomingChars, 0, charsRead);
-
                     //System.Diagnostics.Debug.Write(tempCount++ + ". Incoming Chars: " + new string(incomingChars));
 
                     for (int i = 0; i < incoming.Length; i++)
@@ -327,38 +325,15 @@ namespace CustomNetworking
                         {
                             var line = incoming.ToString(0, i);
                             incoming.Remove(0, i + 1);
-                            //singleChar = false;
-                            // Dequeue the state
-                            //ReceiveState state;
-                            //receiveStateQueue.TryDequeue(out state);
 
-                            ////System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + payload);
-
-                            ReceiveState state;
-                            bool calledback = false;
-                            while(!calledback && receiveStateQueue.TryDequeue(out state))
-                            {
-                                calledback = true;
-                                Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
-
-                            }
-
-                            //System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + payload);
-
-
-                            //Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+                            ReceiveState state = (ReceiveState)result.AsyncState;
+                            Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+                            //System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + state.Payload);                            
                         }
                     }
 
                     // Get more data
-                    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, null);
-
-                    //ReceiveState state;
-                    //receiveStateQueue.TryDequeue(out state);
-
-                    ////System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + payload);
-
-                    //Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+                    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, result.AsyncState);
                 }
                 else
                 {
