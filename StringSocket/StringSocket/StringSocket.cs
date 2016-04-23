@@ -285,7 +285,7 @@ namespace CustomNetworking
         {
             lock (syncReceive)
             {
-                receiveStateQueue.Enqueue(new ReceiveState(callback, payload));
+                //receiveStateQueue.Enqueue(new ReceiveState(callback, payload));
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, new ReceiveState(callback, payload));
             }
         }
@@ -362,12 +362,25 @@ namespace CustomNetworking
             }
         }
 
+        /// <summary>
+        /// Provides an object to hold the state of a send operation.  Specifically, it holds the callback to be used
+        /// and the payload of the send.
+        /// </summary>
         private class SendState
         {
+            /// <summary>
+            /// The callback to be used.
+            /// </summary>
             public SendCallback Callback { get; set; }
 
+            /// <summary>
+            /// The payload to be passed through.
+            /// </summary>
             public object Payload { get; set; }
 
+            /// <summary>
+            /// Creates a new SendState with the given callback and payload.
+            /// </summary>
             public SendState(SendCallback cb, object py)
             {
                 Callback = cb;
