@@ -162,11 +162,10 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(string s, SendCallback callback, object payload)
         {
-            // TODO Figure out how to keep track of the callbacks with the callbackQueue.
             lock (syncSend)
             {
-                var state = new SendState(s, callback, payload);
-                sendCallbackQueue.Enqueue(state);
+                // Enqueue the current callback and payload in a thread safe queue. 
+                sendCallbackQueue.Enqueue(new SendState(callback, payload));
                 SendMessage(s);
             }
         }
@@ -207,24 +206,19 @@ namespace CustomNetworking
                 pendingIndex = 0;
                 outgoing.Clear();
                 socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, null);
-
-                SendState temp;
-
-                sendCallbackQueue.TryDequeue(out temp);
-
-                Task.Run(() => temp.Callback(null, temp.Payload));
             }
             else
             {
                 sendIsOngoing = false;
-
-                SendState temp;
-
-                sendCallbackQueue.TryDequeue(out temp);
-
-                Task.Run(() => temp.Callback(null, temp.Payload));
-
             }
+
+            SendState temp;
+
+            // Dequeue the first SendState object from the thread safe queue
+            sendCallbackQueue.TryDequeue(out temp);
+
+            // Run the callback on a new thread
+            Task.Run(() => temp.Callback(null, temp.Payload));
         }
 
         /// <summary>
@@ -291,7 +285,7 @@ namespace CustomNetworking
         {
             lock (syncReceive)
             {
-                //receiveStateQueue.Enqueue(new ReceiveState(callback, payload));
+                receiveStateQueue.Enqueue(new ReceiveState(callback, payload));
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, new ReceiveState(callback, payload));
             }
         }
@@ -374,13 +368,10 @@ namespace CustomNetworking
 
             public object Payload { get; set; }
 
-            public string Line { get; set; }
-
-            public SendState(string line, SendCallback cb, object py)
+            public SendState(SendCallback cb, object py)
             {
                 Callback = cb;
                 Payload = py;
-                Line = line;
             }
         }
 
