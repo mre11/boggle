@@ -402,6 +402,7 @@ namespace GradingTester
                     {
                         sender.BeginSend(i.ToString() + "\n", (e, p) => { }, null);
                     }
+                    string value = lines.ToString();
                     if (!SpinWait.SpinUntil(() => count == LIMIT, 5000))
                     {
                         Assert.Fail();

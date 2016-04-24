@@ -206,19 +206,45 @@ namespace CustomNetworking
                 pendingIndex = 0;
                 outgoing.Clear();
                 socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, null);
+
+                SendState temp;
+
+                // Dequeue the first SendState object from the thread safe queue
+                //sendCallbackQueue.TryDequeue(out temp);
+
+                do
+                {
+
+                } while (!sendCallbackQueue.TryDequeue(out temp));
+
+                // Run the callback on a new thread
+                Task.Run(() => temp.Callback(null, temp.Payload));
             }
             else
             {
                 sendIsOngoing = false;
+
+                SendState temp;
+
+                // Dequeue the first SendState object from the thread safe queue
+                //sendCallbackQueue.TryDequeue(out temp);
+
+                do
+                {
+
+                } while (!sendCallbackQueue.TryDequeue(out temp));
+
+                // Run the callback on a new thread
+                Task.Run(() => temp.Callback(null, temp.Payload));
             }
 
-            SendState temp;
+            //SendState temp;
 
-            // Dequeue the first SendState object from the thread safe queue
-            sendCallbackQueue.TryDequeue(out temp);
+            //// Dequeue the first SendState object from the thread safe queue
+            //sendCallbackQueue.TryDequeue(out temp);
 
-            // Run the callback on a new thread
-            Task.Run(() => temp.Callback(null, temp.Payload));
+            //// Run the callback on a new thread
+            //Task.Run(() => temp.Callback(null, temp.Payload));
         }
 
         /// <summary>
@@ -309,25 +335,63 @@ namespace CustomNetworking
                 {
                     // Decode the bytes and add them to incoming
                     int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, true);
+
+                    // Clear the incoming bytes everytime.
                     Array.Clear(incomingBytes, 0, incomingBytes.Length);
+
+                    // Append the incoming chars to incoming.
                     incoming.Append(incomingChars, 0, charsRead);
+
+                    ReceiveState state = (ReceiveState)result.AsyncState;
+
+                    var line = "";
+
+                    int incomingLength = incoming.ToString().Length;
+
+
                     //System.Diagnostics.Debug.Write(tempCount++ + ". Incoming Chars: " + new string(incomingChars));
 
-                    for (int i = 0; i < incoming.Length; i++)
+                    if (incoming.ToString().Contains("\n"))
                     {
-                        if (incoming[i] == '\n')
-                        {
-                            var line = incoming.ToString(0, i);
-                            incoming.Remove(0, i + 1);
+                        // The length of the incoming string.
+                        //int incomingLength = incoming.ToString().Length;
 
-                            ReceiveState state = (ReceiveState)result.AsyncState;
-                            Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
-                            //System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + state.Payload);                            
-                        }
+                        // The incoming string of text from 0 to incoming length.
+                        line = incoming.ToString(0, incomingLength - 1);
+
+                        // Clear incoming for the socket.
+                        incoming.Clear();
+
+                        // TODO Clear incomingChars?
+                        //ReceiveState state = (ReceiveState)result.AsyncState;
+
+                        Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
                     }
+                    else
+                    {
+    
+                        line = incoming.ToString();
+
+                        socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
+
+                        //Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+
+                    }
+                    //for (int i = 0; i < incoming.Length; i++)
+                    //{
+                    //    if (incoming[i] == '\n')
+                    //    {
+                    //        var line = incoming.ToString(0, i);
+                    //        incoming.Remove(0, i + 1);
+
+                    //        ReceiveState state = (ReceiveState)result.AsyncState;
+                    //        Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+                    //        //System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + state.Payload);                            
+                    //    }
+                    //}
 
                     // Get more data
-                    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, result.AsyncState);
+                    //socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, result.AsyncState);
                 }
                 else
                 {
