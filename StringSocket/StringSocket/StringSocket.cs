@@ -311,6 +311,7 @@ namespace CustomNetworking
                     int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, true);
                     Array.Clear(incomingBytes, 0, incomingBytes.Length);
                     incoming.Append(incomingChars, 0, charsRead);
+                    Array.Clear(incomingChars, 0, incomingChars.Length);
                     //System.Diagnostics.Debug.Write(tempCount++ + ". Incoming Chars: " + new string(incomingChars));
 
                     for (int i = 0; i < incoming.Length; i++)
@@ -322,12 +323,15 @@ namespace CustomNetworking
 
                             ReceiveState state = (ReceiveState)result.AsyncState;
                             Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
-                            //System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + state.Payload);                            
+                            //System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + state.Payload);
                         }
                     }
 
-                    // Get more data
-                    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, result.AsyncState);
+                    // Get more data if incoming is not empty
+                    if (incoming.Length > 0)
+                    {
+                        socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, result.AsyncState);
+                    }
                 }
                 else
                 {
