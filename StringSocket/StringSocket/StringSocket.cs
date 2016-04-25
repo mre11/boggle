@@ -203,48 +203,28 @@ namespace CustomNetworking
             else if (outgoing.Length > 0)
             {
                 pendingBytes = encoding.GetBytes(outgoing.ToString());
+
+                // Reset the pending index to 0.
                 pendingIndex = 0;
+
+                // Clear the outgoing string.
                 outgoing.Clear();
+
+                // Begin to send the pending bytes
                 socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, null);
-
-                SendState temp;
-
-                // Dequeue the first SendState object from the thread safe queue
-                //sendCallbackQueue.TryDequeue(out temp);
-
-                do
-                {
-
-                } while (!sendCallbackQueue.TryDequeue(out temp));
-
-                // Run the callback on a new thread
-                Task.Run(() => temp.Callback(null, temp.Payload));
             }
             else
             {
-                sendIsOngoing = false;
-
-                SendState temp;
-
-                // Dequeue the first SendState object from the thread safe queue
-                //sendCallbackQueue.TryDequeue(out temp);
-
-                do
-                {
-
-                } while (!sendCallbackQueue.TryDequeue(out temp));
-
-                // Run the callback on a new thread
-                Task.Run(() => temp.Callback(null, temp.Payload));
+                sendIsOngoing = false;;
             }
 
-            //SendState temp;
+            SendState temp;
 
-            //// Dequeue the first SendState object from the thread safe queue
-            //sendCallbackQueue.TryDequeue(out temp);
+            // Dequeue the first SendState object from the thread safe queue
+            sendCallbackQueue.TryDequeue(out temp);
 
-            //// Run the callback on a new thread
-            //Task.Run(() => temp.Callback(null, temp.Payload));
+            // Run the callback on a new thread
+            Task.Run(() => temp.Callback(null, temp.Payload));
         }
 
         /// <summary>
@@ -316,6 +296,8 @@ namespace CustomNetworking
             }
         }
 
+        private int PI = 0;
+
         /// <summary>
         /// Called when some bytes have been recieved on the socket.
         /// </summary>
@@ -339,13 +321,22 @@ namespace CustomNetworking
                     // Clear the incoming bytes everytime.
                     Array.Clear(incomingBytes, 0, incomingBytes.Length);
 
-                    // Append the incoming chars to incoming.
-                    incoming.Append(incomingChars, 0, charsRead);
+                    if (PI == 0)
+                    {
+                        // Append the incoming chars to incoming.
+                        incoming.Append(incomingChars, 0, charsRead);
+                        PI = charsRead;
+                    }
+                    else
+                    {
+                        incoming.Append(incomingChars, PI, charsRead);
+                    }
 
                     ReceiveState state = (ReceiveState)result.AsyncState;
 
                     var line = "";
 
+                    // The length of the incoming string.
                     int incomingLength = incoming.ToString().Length;
 
 
@@ -353,29 +344,21 @@ namespace CustomNetworking
 
                     if (incoming.ToString().Contains("\n"))
                     {
-                        // The length of the incoming string.
-                        //int incomingLength = incoming.ToString().Length;
-
                         // The incoming string of text from 0 to incoming length.
                         line = incoming.ToString(0, incomingLength - 1);
 
                         // Clear incoming for the socket.
                         incoming.Clear();
 
-                        // TODO Clear incomingChars?
-                        //ReceiveState state = (ReceiveState)result.AsyncState;
+                        PI = 0;
 
                         Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
                     }
                     else
                     {
-    
-                        line = incoming.ToString();
+                        incoming.Remove(PI - 1, PI);
 
                         socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, state);
-
-                        //Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
-
                     }
                     //for (int i = 0; i < incoming.Length; i++)
                     //{
