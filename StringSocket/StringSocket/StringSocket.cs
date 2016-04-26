@@ -283,11 +283,8 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
-            lock (syncReceive)
-            {
-                var state = new ReceiveState(callback, payload);
-                socket.BeginReceive(state.Buffer, 0, state.Buffer.Length, SocketFlags.None, DataReceived, state);
-            }
+            var state = new ReceiveState(callback, payload);
+            socket.BeginReceive(state.Buffer, 0, state.Buffer.Length, SocketFlags.None, DataReceived, state);
         }
 
         /// <summary>
@@ -310,7 +307,7 @@ namespace CustomNetworking
                 {
                     // Decode the bytes and add them to incoming
                     var state = (ReceiveState)result.AsyncState;
-                    int charsRead = decoder.GetChars(state.Buffer, 0, bytesRead, incomingChars, 0, true);                    
+                    int charsRead = decoder.GetChars(state.Buffer, 0, bytesRead, incomingChars, 0, true);
                     incoming.Append(incomingChars, 0, charsRead);
                     //System.Diagnostics.Debug.Write(tempCount++ + ". Incoming Chars: " + new string(incomingChars));                    
                     Array.Clear(incomingChars, 0, incomingChars.Length);
@@ -322,7 +319,7 @@ namespace CustomNetworking
                             receiveComplete = true;
                             var line = incoming.ToString(0, i);
                             incoming.Remove(0, i + 1);
-                            
+
                             Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
                             //System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + state.Payload);
                             break;
