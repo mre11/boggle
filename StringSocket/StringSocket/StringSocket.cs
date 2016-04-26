@@ -170,7 +170,7 @@ namespace CustomNetworking
             }
 
         }
-        
+
         /// <summary>
         /// Attempts to send the entire outgoing string.
         /// This method should not be called unless sendSync has been acquired.
@@ -197,12 +197,12 @@ namespace CustomNetworking
             SendState temp;
             bool calledBack = false;
 
-            while(!calledBack && sendCallbackQueue.TryDequeue(out temp))
+            while (!calledBack && sendCallbackQueue.TryDequeue(out temp))
             {
                 calledBack = true;
                 // Run the callback on a new thread
                 Task.Run(() => temp.Callback(null, temp.Payload));
-            }  
+            }
 
         }
 
@@ -283,32 +283,48 @@ namespace CustomNetworking
 
                 if (bytesRead > 0)
                 {
-                    // Decode the bytes and add them to incoming
-                    var state = (ReceiveState)result.AsyncState;
-                    var incomingChars = new char[BUFFER_SIZE];
-                    int charsRead = decoder.GetChars(state.buffer, 0, bytesRead, incomingChars, 0, true);
-                    state.incoming.Append(incomingChars, 0, charsRead);
-
-                    bool receiveComplete = false;
-
-                    for (int i = 0; i < state.incoming.Length; i++)
+                    lock (socket)
                     {
-                        if (state.incoming[i] == '\n')
+                        // Decode the bytes and add them to incoming
+                        var state = (ReceiveState)result.AsyncState;
+                        var incomingChars = new char[BUFFER_SIZE];
+                        int charsRead = decoder.GetChars(state.buffer, 0, bytesRead, incomingChars, 0, true);
+                        state.incoming.Append(incomingChars, 0, charsRead);
+
+                        bool receiveComplete = false;
+
+                        if (state.incoming.ToString().Contains("\n"))
                         {
-                            receiveComplete = true;
-                            var line = state.incoming.ToString(0, i);
-                            state.incoming.Remove(0, i + 1);
-                            i = 0; // HACK makes Test15 pass because we get "Hello\nHello\n" in one DataReceived for some reason
+                            for (int i = 0; i < state.incoming.Length; i++)
+                            {
+                                if (state.incoming[i] == '\n')
+                                {
+                                    receiveComplete = true;
+                                    var line = state.incoming.ToString(0, i);
+                                    state.incoming.Remove(0, i + 1);
+                                    i = 0; // HACK makes Test15 pass because we get "Hello\nHello\n" in one DataReceived for some reason
 
-                            Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+                                    Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+                                }
+                            }
                         }
-                    }
 
-                    // Get more data if a newline wasn't found
-                    if (!receiveComplete)
-                    {
-                        state.ClearBuffer();
-                        socket.BeginReceive(state.buffer, 0, state.buffer.Length, SocketFlags.None, DataReceived, state);
+                        // TODO: Test 15 finishes calling 1 less callback than it should everytime. Regardless of whether you increase the timeout.
+
+                        //if (state.incoming.ToString().Contains("\n"))
+                        //{
+                        //    receiveComplete = true;
+                        //    var line = state.incoming.ToString(0, state.incoming.Length - 1);
+
+                        //    Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+                        //}
+
+                        // Get more data if a newline wasn't found
+                        if (!receiveComplete)
+                        {
+                            state.ClearBuffer();
+                            socket.BeginReceive(state.buffer, 0, state.buffer.Length, SocketFlags.None, DataReceived, state);
+                        }
                     }
                 }
                 else
@@ -316,7 +332,7 @@ namespace CustomNetworking
                     socket.Close();
                 }
             }
-            catch (Exception){}
+            catch (Exception) { }
         }
 
         /// <summary>
