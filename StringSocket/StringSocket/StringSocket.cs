@@ -195,12 +195,15 @@ namespace CustomNetworking
             }
 
             SendState temp;
+            bool calledBack = false;
 
-            // Dequeue the first SendState object from the thread safe queue
-            sendCallbackQueue.TryDequeue(out temp);
+            while(!calledBack && sendCallbackQueue.TryDequeue(out temp))
+            {
+                calledBack = true;
+                // Run the callback on a new thread
+                Task.Run(() => temp.Callback(null, temp.Payload));
+            }  
 
-            // Run the callback on a new thread
-            Task.Run(() => temp.Callback(null, temp.Payload));
         }
 
         /// <summary>
