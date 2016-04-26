@@ -358,8 +358,7 @@ namespace CustomNetworking
                     }
                     if (receiveStateQueue.Count > 0)
                     {
-                        byte[] buffer = new byte[1024];
-                        socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, buffer);
+                        socket.BeginReceive(new byte[1024], 0, incomingBytes.Length, SocketFlags.None, DataReceived, result);
                     }
 
                     // Clear the incoming bytes everytime.
