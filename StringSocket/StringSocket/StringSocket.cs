@@ -86,7 +86,7 @@ namespace CustomNetworking
         private StringBuilder outgoing = new StringBuilder();
 
         // Buffers that will contain incoming bytes and characters
-        private byte[] incomingBytes = new byte[BUFFER_SIZE];
+        //private byte[] incomingBytes = new byte[BUFFER_SIZE];
         private char[] incomingChars = new char[BUFFER_SIZE];
 
         // Object used for locking the representation during receiving
@@ -285,8 +285,8 @@ namespace CustomNetworking
         {
             lock (syncReceive)
             {
-                //receiveStateQueue.Enqueue(new ReceiveState(callback, payload));
-                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, new ReceiveState(callback, payload));
+                var state = new ReceiveState(callback, payload);
+                socket.BeginReceive(state.Buffer, 0, state.Buffer.Length, SocketFlags.None, DataReceived, state);
             }
         }
 
@@ -297,6 +297,7 @@ namespace CustomNetworking
         {
             lock (syncReceive)
             {
+                bool receiveComplete = false;
                 // Read the data
                 int bytesRead = 0;
                 try // need a try-catch here because sometimes the socket is disposed in the tests when we get here
@@ -308,29 +309,31 @@ namespace CustomNetworking
                 if (bytesRead > 0)
                 {
                     // Decode the bytes and add them to incoming
-                    int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, true);
-                    Array.Clear(incomingBytes, 0, incomingBytes.Length);
+                    var state = (ReceiveState)result.AsyncState;
+                    int charsRead = decoder.GetChars(state.Buffer, 0, bytesRead, incomingChars, 0, true);                    
                     incoming.Append(incomingChars, 0, charsRead);
+                    //System.Diagnostics.Debug.Write(tempCount++ + ". Incoming Chars: " + new string(incomingChars));                    
                     Array.Clear(incomingChars, 0, incomingChars.Length);
-                    //System.Diagnostics.Debug.Write(tempCount++ + ". Incoming Chars: " + new string(incomingChars));
 
                     for (int i = 0; i < incoming.Length; i++)
                     {
                         if (incoming[i] == '\n')
                         {
+                            receiveComplete = true;
                             var line = incoming.ToString(0, i);
                             incoming.Remove(0, i + 1);
-
-                            ReceiveState state = (ReceiveState)result.AsyncState;
+                            
                             Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
                             //System.Diagnostics.Debug.WriteLine("Line: " + line + " Payload: " + state.Payload);
+                            break;
                         }
                     }
 
                     // Get more data if incoming is not empty
-                    if (incoming.Length > 0)
+                    if (!receiveComplete)
                     {
-                        socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, DataReceived, result.AsyncState);
+                        Array.Clear(state.Buffer, 0, state.Buffer.Length);
+                        socket.BeginReceive(state.Buffer, 0, state.Buffer.Length, SocketFlags.None, DataReceived, state);
                     }
                 }
                 else
@@ -346,6 +349,8 @@ namespace CustomNetworking
         /// </summary>
         private class ReceiveState
         {
+            public byte[] Buffer = new byte[BUFFER_SIZE];
+
             /// <summary>
             /// The callback to be used.
             /// </summary>
