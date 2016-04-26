@@ -76,14 +76,8 @@ namespace CustomNetworking
         // Buffer size for reading incoming bytes
         private const int BUFFER_SIZE = 1024;
 
-        // Text that has been received from the client but not yet dealt with
-        private StringBuilder incoming = new StringBuilder();
-
         // Text that needs to be sent to the client but which we have not yet started sending
         private StringBuilder outgoing = new StringBuilder();
-
-        // Object used for locking the representation during receiving
-        private readonly object syncReceive = new object();
 
         // Object used for locking the representation during sending
         private readonly object syncSend = new object();
@@ -281,50 +275,41 @@ namespace CustomNetworking
         /// </summary>
         private void DataReceived(IAsyncResult result)
         {
-            lock (syncReceive)
-            {                
-                // Read the data
-                int bytesRead = 0;
-                try // need a try-catch here because sometimes the socket is disposed in the tests when we get here
+            int bytesRead = socket.EndReceive(result);
+
+            if (bytesRead > 0)
+            {
+                // Decode the bytes and add them to incoming
+                var state = (ReceiveState)result.AsyncState;
+                var incomingChars = new char[BUFFER_SIZE];
+                int charsRead = decoder.GetChars(state.buffer, 0, bytesRead, incomingChars, 0, true);
+                state.incoming.Append(incomingChars, 0, charsRead);
+
+                bool receiveComplete = false;
+
+                for (int i = 0; i < state.incoming.Length; i++)
                 {
-                    bytesRead = socket.EndReceive(result);
-                }
-                catch (ObjectDisposedException) { }
-
-                if (bytesRead > 0)
-                {
-                    // Decode the bytes and add them to incoming
-                    var state = (ReceiveState)result.AsyncState;
-                    var incomingChars = new char[BUFFER_SIZE];
-                    int charsRead = decoder.GetChars(state.buffer, 0, bytesRead, incomingChars, 0, true);
-                    incoming.Append(incomingChars, 0, charsRead);
-
-                    bool receiveComplete = false;
-
-                    for (int i = 0; i < incoming.Length; i++)
+                    if (state.incoming[i] == '\n')
                     {
-                        if (incoming[i] == '\n')
-                        {
-                            receiveComplete = true;
-                            var line = incoming.ToString(0, i);
-                            incoming.Remove(0, i + 1);
+                        receiveComplete = true;
+                        var line = state.incoming.ToString(0, i);
+                        state.incoming.Remove(0, i + 1);
 
-                            Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
-                            break;
-                        }
-                    }
-
-                    // Get more data if a newline wasn't found
-                    if (!receiveComplete)
-                    {
-                        state.ClearBuffer();
-                        socket.BeginReceive(state.buffer, 0, state.buffer.Length, SocketFlags.None, DataReceived, state);
+                        Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
+                        break;
                     }
                 }
-                else
+
+                // Get more data if a newline wasn't found
+                if (!receiveComplete)
                 {
-                    socket.Close();
+                    state.ClearBuffer();
+                    socket.BeginReceive(state.buffer, 0, state.buffer.Length, SocketFlags.None, DataReceived, state);
                 }
+            }
+            else
+            {
+                socket.Close();
             }
         }
 
@@ -338,6 +323,11 @@ namespace CustomNetworking
             /// Represents a buffer to hold incoming data
             /// </summary>
             public byte[] buffer = new byte[BUFFER_SIZE];
+
+            /// <summary>
+            /// Stores the pending incoming data that hasn't been dealt with
+            /// </summary>
+            public StringBuilder incoming = new StringBuilder();
 
             /// <summary>
             /// The callback to be used.
