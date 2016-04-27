@@ -168,7 +168,6 @@ namespace CustomNetworking
                     SendBytes();
                 }
             }
-
         }
 
         /// <summary>
@@ -203,7 +202,6 @@ namespace CustomNetworking
                 // Run the callback on a new thread
                 Task.Run(() => temp.Callback(null, temp.Payload));
             }
-
         }
 
         /// <summary>
@@ -309,15 +307,7 @@ namespace CustomNetworking
                             }
                         }
 
-                        // TODO: Test 15 finishes calling 1 less callback than it should everytime. Regardless of whether you increase the timeout.
-
-                        //if (state.incoming.ToString().Contains("\n"))
-                        //{
-                        //    receiveComplete = true;
-                        //    var line = state.incoming.ToString(0, state.incoming.Length - 1);
-
-                        //    Task.Run(() => state.Callback(line, null, state.Payload)); // fire off callback on another thread
-                        //}
+                        // TODO Test 15 finishes calling 1 less callback than it should everytime. Regardless of whether you increase the timeout.
 
                         // Get more data if a newline wasn't found
                         if (!receiveComplete)
