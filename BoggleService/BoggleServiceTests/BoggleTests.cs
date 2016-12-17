@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Net.Http;
 
-namespace Boggle
+namespace BoggleServiceDB
 {
     /// <summary>
     /// Provides a way to start and stop the IIS web server from within the test
@@ -28,7 +28,7 @@ namespace Boggle
         {
             if (process == null)
             {
-                ProcessStartInfo info = new ProcessStartInfo(Properties.Resources.IIS_EXECUTABLE, arguments);
+                ProcessStartInfo info = new ProcessStartInfo(Boggle.Properties.Resources.IIS_EXECUTABLE, arguments);
                 info.WindowStyle = ProcessWindowStyle.Minimized;
                 info.UseShellExecute = false;
                 process = Process.Start(info);
@@ -189,6 +189,8 @@ namespace Boggle
         [TestMethod]
         public void TestJoinGame4()
         {
+            ClearPendingGame();
+
             // First create a user
             dynamic data = new ExpandoObject();
             data.Nickname = "Test";
@@ -208,7 +210,7 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Test for a UserToken conflict
+        /// Test when UserToken is not a created user
         /// </summary>
         [TestMethod]
         public void TestJoinGame5()
@@ -217,7 +219,7 @@ namespace Boggle
             data.UserToken = Guid.NewGuid();
             data.TimeLimit = 10;
             Response r = client.DoPostAsync("/games", data).Result;
-            Assert.AreEqual(Conflict, r.Status);
+            Assert.AreEqual(Forbidden, r.Status);
         }
 
         /// <summary>
@@ -414,8 +416,6 @@ namespace Boggle
 
             Assert.AreEqual(Forbidden, playWordResponse.Status);
         }
-
-        // TODO need more PlayWord tests to test scoring
 
         /// <summary>
         /// Test when GameID is invalid
